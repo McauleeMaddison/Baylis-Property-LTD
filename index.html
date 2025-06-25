@@ -1,33 +1,44 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baylis-Property-LTD</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Baylis Property LTD</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+
+  <!-- Navbar -->
   <header class="navbar">
-    <h1>Baylis-Property-LTD</h1>
+    <h1>Baylis Property LTD</h1>
     <nav>
       <ul>
-        <li><a href="#landlord-login">Landlord Login</a></li>
-        <li><a href="#resident-login">Resident Login</a></li>
+        <li><a href="#home">Home</a></li>
+        <li class="dropdown">
+          <a href="#">Login ▼</a>
+          <ul class="dropdown-content">
+            <li><a href="#landlord-login">Landlord Login</a></li>
+            <li><a href="#resident-login">Resident Login</a></li>
+          </ul>
+        </li>
         <li><a href="#community">Community Arena</a></li>
       </ul>
     </nav>
   </header>
 
+  <!-- Sections -->
   <main>
-    <!-- Hero Section -->
-    <section class="hero">
-      <h2>Smart Property Management</h2>
-      <p>Organise repairs, schedule cleaning, and build your resident community—all in one place.</p>
+    <!-- Home Section -->
+    <section id="home" class="spa-section">
+      <div class="hero">
+        <h2>Welcome to Baylis Property LTD</h2>
+        <p>Manage properties, repairs, and resident engagement with ease.</p>
+      </div>
     </section>
 
-    <!-- Login Section -->
-    <section id="login">
-      <div class="login-box" id="landlord-login">
+    <!-- Landlord Login -->
+    <section id="landlord-login" class="spa-section">
+      <div class="login-box">
         <h3>Landlord Login</h3>
         <form>
           <input type="email" placeholder="Email" required />
@@ -35,8 +46,11 @@
           <button type="submit">Login</button>
         </form>
       </div>
+    </section>
 
-      <div class="login-box" id="resident-login">
+    <!-- Resident Login -->
+    <section id="resident-login" class="spa-section">
+      <div class="login-box">
         <h3>Resident Login</h3>
         <form>
           <input type="email" placeholder="Email" required />
@@ -46,16 +60,23 @@
       </div>
     </section>
 
-    <!-- Community Arena Preview -->
-    <section id="community">
-      <h2>Resident Community Arena</h2>
-      <p>Join the conversation and stay connected with your neighbours.</p>
-      <button onclick="alert('Feature coming soon!')">Explore Arena</button>
+    <!-- Community Arena -->
+    <section id="community" class="spa-section">
+      <h2>Community Arena</h2>
+      <form id="post-form">
+        <input type="text" id="post-name" placeholder="Your name" required />
+        <textarea id="post-message" rows="3" placeholder="What's on your mind? 😊" required></textarea>
+        <input type="file" id="post-image" accept="image/*" />
+        <button type="submit">Post</button>
+      </form>
+      <ul id="post-list" class="post-feed"></ul>
     </section>
   </main>
 
   <footer>
-    <p>&copy; 2025 Baylis-Property-LTD. All rights reserved.</p>
+    <p>&copy; 2025 Baylis Property LTD. All rights reserved.</p>
   </footer>
+
+  <script src="js/script.js"></script>
 </body>
 </html>

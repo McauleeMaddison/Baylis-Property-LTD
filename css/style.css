@@ -1,3 +1,11 @@
+.spa-section {
+  display: none;
+  padding: 2rem;
+}
+
+.spa-section.active {
+  display: block;
+}
 * {
   margin: 0;
   padding: 0;
