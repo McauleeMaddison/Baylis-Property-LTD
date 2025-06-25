@@ -1,3 +1,25 @@
+/* Full page layout */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make main content expand to fill available space */
+main {
+  flex: 1;
+}
+
+/* Sticky Footer */
+footer {
+  background-color: #1e2a38;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+}
+
 .spa-section {
   display: none;
   padding: 2rem;
@@ -144,4 +166,275 @@ footer {
   text-align: center;
   padding: 1rem;
   margin-top: 2rem;
+}
+/* Hamburger Button */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+/* Navbar Layout */
+.navbar {
+  background-color: #1e2a38;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nav-links {
+  flex-grow: 1;
+}
+
+.navbar nav ul {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Responsive Dropdown */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #1e2a38;
+  padding: 0.5rem 0;
+  min-width: 180px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  transform: translateY(-10px);
+  z-index: 1000;
+}
+
+.dropdown-content li {
+  padding: 0.5rem 1rem;
+}
+
+.dropdown-content li a {
+  color: white;
+  display: block;
+}
+
+.dropdown:hover .dropdown-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ====================
+   MOBILE RESPONSIVE 
+   ==================== */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    width: 100%;
+  }
+
+  .nav-links.open {
+    display: block;
+  }
+
+  .navbar nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .navbar nav ul li {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #2c3e50;
+  }
+
+  .dropdown-content {
+    position: relative;
+    transform: translateY(0);
+    background-color: #2a3b4d;
+    margin-left: 1rem;
+    opacity: 1;
+    visibility: visible;
+    display: none;
+  }
+
+  .dropdown.open .dropdown-content {
+    display: block;
+  }
+
+  .dropdown > a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+}
+/* Community Arena Layout */
+#community {
+  padding: 3rem 2rem;
+  background: #f4f8fc;
+  min-height: 80vh;
+}
+
+#community h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.post-form {
+  max-width: 600px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+.post-form input,
+.post-form textarea {
+  padding: 0.9rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.post-form button {
+  padding: 0.8rem;
+  background-color: #0077ff;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.post-form button:hover {
+  background-color: #005fd1;
+}
+
+.image-preview img {
+  max-width: 100%;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+}
+
+/* Posts */
+.post-feed {
+  list-style: none;
+  margin-top: 3rem;
+  padding: 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.post {
+  background: white;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  animation: fadeIn 0.4s ease;
+  position: relative;
+}
+
+.post strong {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.post .timestamp {
+  font-size: 0.8rem;
+  color: #777;
+  display: block;
+  margin-top: 0.3rem;
+}
+
+.post p {
+  margin-top: 0.7rem;
+  font-size: 1rem;
+  color: #444;
+}
+
+.post img {
+  margin-top: 0.7rem;
+  max-width: 100%;
+  border-radius: 6px;
+}
+
+.upvote-btn {
+  margin-top: 0.7rem;
+  background: #ffce00;
+  border: none;
+  padding: 0.4rem 0.7rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #000;
+  transition: transform 0.2s ease;
+}
+
+.upvote-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dashboard-container {
+  padding: 2rem;
+  background: #f0f4f8;
+  border-radius: 10px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  padding: 1.2rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+}
+
+.dashboard-card h3 {
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
 }

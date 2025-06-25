@@ -10,31 +10,51 @@
 
   <!-- Navbar -->
   <header class="navbar">
-    <h1>Baylis Property LTD</h1>
-    <nav>
-      <ul>
-        <li><a href="#home">Home</a></li>
-        <li class="dropdown">
-          <a href="#">Login ▼</a>
-          <ul class="dropdown-content">
-            <li><a href="#landlord-login">Landlord Login</a></li>
-            <li><a href="#resident-login">Resident Login</a></li>
-          </ul>
-        </li>
-        <li><a href="#community">Community Arena</a></li>
-      </ul>
-    </nav>
-  </header>
+  <h1>Baylis Property LTD</h1>
+  <button class="hamburger" aria-label="Toggle Menu">☰</button>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li class="dropdown">
+        <a href="#">Login ▼</a>
+        <ul class="dropdown-content">
+          <li><a href="#landlord-login">Landlord Login</a></li>
+          <li><a href="#resident-login">Resident Login</a></li>
+        </ul>
+      </li>
+      <li><a href="#community">Community Arena</a></li>
+    </ul>
+  </nav>
+</header>
+
 
   <!-- Sections -->
   <main>
     <!-- Home Section -->
-    <section id="home" class="spa-section">
-      <div class="hero">
-        <h2>Welcome to Baylis Property LTD</h2>
-        <p>Manage properties, repairs, and resident engagement with ease.</p>
+    <section id="home" class="spa-section active">
+  <div class="dashboard-container">
+    <h2>Dashboard Overview</h2>
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <h3>🔧 Repairs</h3>
+        <p>3 active repair requests</p>
       </div>
-    </section>
+      <div class="dashboard-card">
+        <h3>🧹 Cleaning</h3>
+        <p>2 scheduled cleanings this week</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>📬 Messages</h3>
+        <p>5 unread messages</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>👋 Welcome</h3>
+        <p>Logged in as: <strong>Guest</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
 
     <!-- Landlord Login -->
     <section id="landlord-login" class="spa-section">
@@ -62,21 +82,57 @@
 
     <!-- Community Arena -->
     <section id="community" class="spa-section">
-      <h2>Community Arena</h2>
-      <form id="post-form">
-        <input type="text" id="post-name" placeholder="Your name" required />
-        <textarea id="post-message" rows="3" placeholder="What's on your mind? 😊" required></textarea>
-        <input type="file" id="post-image" accept="image/*" />
-        <button type="submit">Post</button>
-      </form>
-      <ul id="post-list" class="post-feed"></ul>
-    </section>
+  <h2>Community Arena 🧑‍🤝‍🧑</h2>
+  <p>Chat, share, and connect with your neighbours!</p>
+
+  <form id="post-form" class="post-form">
+    <input type="text" id="post-name" placeholder="Your name" required />
+    <textarea id="post-message" rows="3" placeholder="What's on your mind? 😊" required></textarea>
+    <input type="file" id="post-image" accept="image/*" />
+    <div id="image-preview" class="image-preview"></div>
+    <button type="submit">Post</button>
+  </form>
+
+  <ul id="post-list" class="post-feed"></ul>
+</section>
+
   </main>
 
   <footer>
-    <p>&copy; 2025 Baylis Property LTD. All rights reserved.</p>
+    <p>2025 Baylis Property LTD. All rights reserved.By-MAC</p>
   </footer>
 
   <script src="js/script.js"></script>
+
+  <!-- Firebase -->
+<script type="module">
+  // Import Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "your-app.firebaseapp.com",
+    projectId: "your-app",
+    storageBucket: "your-app.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abcdefg12345"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Optional: Test saving a sample post
+  try {
+    await addDoc(collection(db, "testData"), {
+      sample: "Hello from Baylis Property LTD!",
+      timestamp: new Date()
+    });
+    console.log("Test document saved!");
+  } catch (error) {
+    console.error("Error adding document:", error);
+  }
+</script>
+
 </body>
 </html>
