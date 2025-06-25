@@ -133,3 +133,108 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderPosts(); // Initial render
 });
+// Show selected form, hide others
+function openForm(formId) {
+  const allForms = document.querySelectorAll(".task-form");
+  const targetForm = document.getElementById(formId);
+
+  // If already open, close it
+  if (!targetForm.classList.contains("hidden")) {
+    targetForm.classList.add("hidden");
+    return;
+  }
+
+  // Close others, show this one
+  allForms.forEach(form => form.classList.add("hidden"));
+  targetForm.classList.remove("hidden");
+  targetForm.scrollIntoView({ behavior: "smooth" });
+}
+
+
+// Handle submission (placeholder for now)
+function handleTaskSubmit(e, type) {
+  e.preventDefault();
+  alert(`${type} request submitted! (Replace this with Firebase integration)`);
+  e.target.reset();
+}
+// Auto-resize any textarea
+document.addEventListener("input", (e) => {
+  if (e.target.tagName.toLowerCase() === "textarea") {
+    e.target.style.height = "auto";
+    e.target.style.height = `${e.target.scrollHeight}px`;
+  }
+});
+// Toggle Login Dropdown
+// Login dropdown toggle
+const loginToggle = document.getElementById("loginToggle");
+const loginDropdownContainer = document.getElementById("loginDropdownContainer");
+
+if (loginToggle && loginDropdownContainer) {
+  loginToggle.addEventListener("click", (e) => {
+    e.stopPropagation(); // Prevent bubbling to document
+    loginDropdownContainer.classList.toggle("open");
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!loginDropdownContainer.contains(e.target)) {
+      loginDropdownContainer.classList.remove("open");
+    }
+  });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const loginDropdown = document.getElementById("loginDropdown");
+  const dropdown = loginDropdown?.closest(".dropdown");
+
+  if (loginDropdown && dropdown) {
+    loginDropdown.addEventListener("click", (e) => {
+      e.preventDefault();
+      dropdown.classList.toggle("open");
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  const navLinks = document.getElementById("navLinks");
+  const loginToggle = document.getElementById("loginToggle");
+  const loginDropdown = document.getElementById("loginDropdown");
+
+  // Toggle hamburger menu
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener("click", () => {
+      navLinks.classList.toggle("open");
+    });
+  }
+
+  // Toggle login dropdown menu
+  if (loginToggle && loginDropdown) {
+    loginToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      loginDropdown.classList.toggle("open");
+    });
+
+    // Close login dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!loginDropdown.contains(e.target)) {
+        loginDropdown.classList.remove("open");
+      }
+    });
+  }
+});
+
+
+    // close dropdown if you click outside
+    document.addEventListener("click", (e) => {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove("open");
+      }
+    });
+  }
+});
+// Hamburger menu toggle for mobile
+const hamburgerBtn = document.getElementById("hamburgerBtn");
+const navLinks = document.getElementById("navLinks");
+
+if (hamburgerBtn) {
+  hamburgerBtn.addEventListener("click", () => {
+    navLinks.classList.toggle("open");
+  });
+}
