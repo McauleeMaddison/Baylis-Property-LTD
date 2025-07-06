@@ -101,6 +101,7 @@ main {
   padding: 0.5rem 0;
   min-width: 160px;
   list-style: none;
+  z-index: 1000;
 }
 
 .dropdown.open .dropdown-menu {
@@ -248,12 +249,14 @@ footer {
   .hamburger {
     display: block;
   }
+
   .nav-links {
     flex-direction: column;
     display: none;
     background-color: var(--nav-bg);
     width: 100%;
   }
+
   .nav-links.open {
     display: flex;
   }

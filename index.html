@@ -15,7 +15,7 @@
       <div class="logo">Baylis Property LTD</div>
       <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Menu">☰</button>
       <button id="logoutBtn">Logout</button>
-      <label class="dark-mode-toggle">
+      <label class="dark-mode-toggle" for="darkToggle">
         🌙
         <input type="checkbox" id="darkToggle" />
       </label>
@@ -37,51 +37,54 @@
   <main>
 
     <!-- Dashboard Section -->
-    <section id="home" class="spa-section active">
-      <div class="dashboard-container">
-        <h2>Dashboard Overview</h2>
-        <div class="dashboard-grid">
-          <button class="dashboard-card" onclick="openForm('repair-form')">
-            <h3>🔧 Repairs</h3>
-            <p>Request a repair</p>
-          </button>
-          <button class="dashboard-card" onclick="openForm('cleaning-form')">
-            <h3>🧹 Cleaning</h3>
-            <p>Schedule a cleaner</p>
-          </button>
-          <button class="dashboard-card" onclick="openForm('message-form')">
-            <h3>📬 Message</h3>
-            <p>Contact your landlord</p>
-          </button>
-        </div>
-      </div>
+<section id="home" class="spa-section active">
+  <div class="dashboard-container">
+    <h2>Dashboard Overview</h2>
+    <div class="dashboard-grid">
+      <button class="dashboard-card" onclick="openForm('repair-form')">
+        <h3>🔧 Repairs</h3>
+        <p>Request a repair</p>
+      </button>
+      <button class="dashboard-card" onclick="openForm('cleaning-form')">
+        <h3>🧹 Cleaning</h3>
+        <p>Schedule a cleaner</p>
+      </button>
+      <button class="dashboard-card" onclick="openForm('message-form')">
+        <h3>📬 Message</h3>
+        <p>Contact your landlord</p>
+      </button>
+    </div>
+  </div>
 
-      <div class="dashboard-forms">
-        <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')">
-          <h3>Repair Request</h3>
-          <input type="text" placeholder="Your name" required />
-          <input type="text" placeholder="Property address" required />
-          <textarea placeholder="Describe the issue..." required></textarea>
-          <button type="submit">Submit Repair</button>
-        </form>
+  <div class="dashboard-forms">
+    <!-- Repair Form -->
+    <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')">
+      <h3>Repair Request</h3>
+      <input type="text" placeholder="Your name" required />
+      <input type="text" placeholder="Property address" required />
+      <textarea placeholder="Describe the issue..." required></textarea>
+      <button type="submit">Submit Repair</button>
+    </form>
 
-        <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')">
-          <h3>Schedule Cleaning</h3>
-          <input type="text" placeholder="Your name" required />
-          <input type="text" placeholder="Property address" required />
-          <input type="date" required />
-          <button type="submit">Book Cleaner</button>
-        </form>
+    <!-- Cleaning Form -->
+    <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')">
+      <h3>Schedule Cleaning</h3>
+      <input type="text" placeholder="Your name" required />
+      <input type="text" placeholder="Property address" required />
+      <input type="date" required />
+      <button type="submit">Book Cleaner</button>
+    </form>
 
-        <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')">
-          <h3>Contact Landlord</h3>
-          <input type="text" placeholder="Your name" required />
-          <input type="email" placeholder="Your email" required />
-          <textarea placeholder="Write your message..." required></textarea>
-          <button type="submit">Send Message</button>
-        </form>
-      </div>
-    </section>
+    <!-- Message Form -->
+    <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')">
+      <h3>Contact Landlord</h3>
+      <input type="text" placeholder="Your name" required />
+      <input type="email" placeholder="Your email" required />
+      <textarea placeholder="Write your message..." required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
 
     <!-- Registration Section -->
     <section id="register" class="spa-section">
@@ -137,6 +140,7 @@
       </form>
       <ul id="post-list" class="post-feed"></ul>
     </section>
+
   </main>
 
   <!-- Footer -->
