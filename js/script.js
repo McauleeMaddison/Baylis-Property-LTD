@@ -5,13 +5,22 @@ function showSection(sectionId) {
   document.querySelectorAll(".spa-section").forEach((section) => {
     section.classList.remove("active");
   });
-
   const target = document.getElementById(sectionId);
   if (target) target.classList.add("active");
 }
 
 function handleHashChange() {
   const hash = location.hash.replace("#", "") || "home";
+  if (hash === "home" && window.currentUserRole !== "landlord") {
+    alert("Only landlords can access the dashboard.");
+    location.hash = "#community";
+    return;
+  }
+  if (hash === "resident-dashboard" && window.currentUserRole !== "resident") {
+    alert("Only residents can access this page.");
+    location.hash = "#community";
+    return;
+  }
   showSection(hash);
 }
 
@@ -30,67 +39,48 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================
-// Mobile Hamburger Nav
+// Mobile Nav + Dropdown
 // ==========================
 function initMobileNav() {
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  const navLinks = document.getElementById("navLinks");
-
-  if (hamburgerBtn && navLinks) {
-    hamburgerBtn.addEventListener("click", () => {
-      navLinks.classList.toggle("open");
-    });
-  }
+  const btn = document.getElementById("hamburgerBtn");
+  const nav = document.getElementById("navLinks");
+  if (btn && nav) btn.addEventListener("click", () => nav.classList.toggle("open"));
 }
 
-// ==========================
-// Login Dropdown Toggle
-// ==========================
 function initLoginDropdown() {
-  const loginToggle = document.getElementById("loginToggle");
-  const loginDropdown = document.getElementById("loginDropdown");
-
-  if (loginToggle && loginDropdown) {
-    loginToggle.addEventListener("click", (e) => {
+  const toggle = document.getElementById("loginToggle");
+  const dropdown = document.getElementById("loginDropdown");
+  if (toggle && dropdown) {
+    toggle.addEventListener("click", (e) => {
       e.stopPropagation();
-      loginDropdown.classList.toggle("open");
+      dropdown.classList.toggle("open");
     });
-
     document.addEventListener("click", (e) => {
-      if (!loginDropdown.contains(e.target)) {
-        loginDropdown.classList.remove("open");
-      }
+      if (!dropdown.contains(e.target)) dropdown.classList.remove("open");
     });
   }
 }
 
 // ==========================
-// Dashboard Forms Logic
+// Dashboard Form Handling
 // ==========================
 function openForm(formId) {
-  const allForms = document.querySelectorAll(".task-form");
-  const targetForm = document.getElementById(formId);
-
-  if (!targetForm) return;
-
-  if (!targetForm.classList.contains("hidden")) {
-    targetForm.classList.add("hidden");
-    return;
+  document.querySelectorAll(".task-form").forEach(f => f.classList.add("hidden"));
+  const target = document.getElementById(formId);
+  if (target) {
+    target.classList.remove("hidden");
+    target.scrollIntoView({ behavior: "smooth" });
   }
-
-  allForms.forEach((form) => form.classList.add("hidden"));
-  targetForm.classList.remove("hidden");
-  targetForm.scrollIntoView({ behavior: "smooth" });
 }
 
 function handleTaskSubmit(e, type) {
   e.preventDefault();
-  alert(`${type} request submitted! (Replace this with Firebase integration)`);
+  alert(`${type} submitted!`);
   e.target.reset();
 }
 
 function initDashboardForms() {
-  // nothing to attach yet — forms are HTML-triggered
+  // Hooked into HTML already
 }
 
 // ==========================
@@ -115,12 +105,12 @@ function initCommunityArena() {
         const li = document.createElement("li");
         li.className = "post";
         li.innerHTML = `
-          <strong>${post.name}</strong>
-          <span class="timestamp">${post.time}</span>
-          <p>${post.message}</p>
-          ${post.image ? `<img src="${post.image}" alt="Post image" />` : ""}
-          <button class="upvote-btn" data-index="${posts.length - 1 - index}">👍 ${post.upvotes}</button>
-        `;
+            <strong>${post.name}</strong>
+            <span class="timestamp">${post.time}</span>
+            <p>${post.message}</p>
+            ${post.image ? `<img src="${post.image}" alt="Post image" />` : ""}
+            <button class="upvote-btn" data-index="${posts.length - 1 - index}">👍 ${post.upvotes}</button>
+          `;
         postList.appendChild(li);
       });
   };
@@ -190,7 +180,7 @@ function initCommunityArena() {
 }
 
 // ==========================
-// Auto-resize Textareas
+// Auto Resize Textareas
 // ==========================
 function initTextareaAutoResize() {
   document.addEventListener("input", (e) => {
@@ -200,4 +190,3 @@ function initTextareaAutoResize() {
     }
   });
 }
-
