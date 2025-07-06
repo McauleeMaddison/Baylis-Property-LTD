@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baylis Property LTD</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo">Baylis Property LTD</div>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Menu">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">🏠 Dashboard</a></li>
+
+        <li class="dropdown" id="loginDropdown">
+          <button class="dropdown-toggle" id="loginToggle">🔐 Login</button>
+          <ul class="dropdown-menu" id="loginMenu">
+            <li><a href="#landlord-login">👔 Landlord Login</a></li>
+            <li><a href="#resident-login">🏡 Resident Login</a></li>
+          </ul>
+        </li>
+
+        <li><a href="#community">💬 Community</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Home Dashboard -->
+    <section id="home" class="spa-section active">
+      <div class="dashboard-container">
+        <h2>Dashboard Overview</h2>
+        <div class="dashboard-grid">
+          <button class="dashboard-card" onclick="openForm('repair-form')">
+            <h3>🔧 Repairs</h3>
+            <p>Request a repair</p>
+          </button>
+          <button class="dashboard-card" onclick="openForm('cleaning-form')">
+            <h3>🧹 Cleaning</h3>
+            <p>Schedule a cleaner</p>
+          </button>
+          <button class="dashboard-card" onclick="openForm('message-form')">
+            <h3>📬 Message</h3>
+            <p>Contact your landlord</p>
+          </button>
+        </div>
+      </div>
+
+      <div class="dashboard-forms">
+        <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')">
+          <h3>Repair Request</h3>
+          <input type="text" placeholder="Your name" required />
+          <input type="text" placeholder="Property address" required />
+          <textarea placeholder="Describe the issue..." required></textarea>
+          <button type="submit">Submit Repair</button>
+        </form>
+
+        <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')">
+          <h3>Schedule Cleaning</h3>
+          <input type="text" placeholder="Your name" required />
+          <input type="text" placeholder="Property address" required />
+          <input type="date" required />
+          <button type="submit">Book Cleaner</button>
+        </form>
+
+        <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')">
+          <h3>Contact Landlord</h3>
+          <input type="text" placeholder="Your name" required />
+          <input type="email" placeholder="Your email" required />
+          <textarea placeholder="Write your message..." required></textarea>
+          <button type="submit">Send Message</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Landlord Login -->
+    <section id="landlord-login" class="spa-section">
+      <div class="login-box">
+        <h3>Landlord Login</h3>
+        <form>
+          <input type="email" placeholder="Email" required />
+          <input type="password" placeholder="Password" required />
+          <button type="submit">Login</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Resident Login -->
+    <section id="resident-login" class="spa-section">
+      <div class="login-box">
+        <h3>Resident Login</h3>
+        <form>
+          <input type="email" placeholder="Email" required />
+          <input type="password" placeholder="Password" required />
+          <button type="submit">Login</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Community Arena -->
+    <section id="community" class="spa-section">
+      <h2>Community Arena 🧑‍🤝‍🧑</h2>
+      <p>Chat, share, and connect with your neighbours!</p>
+
+      <form id="post-form" class="post-form">
+        <input type="text" id="post-name" placeholder="Your name" required />
+        <textarea id="post-message" rows="3" placeholder="What's on your mind? 😊" required></textarea>
+        <input type="file" id="post-image" accept="image/*" />
+        <div id="image-preview" class="image-preview"></div>
+        <button type="submit">Post</button>
+      </form>
+
+      <ul id="post-list" class="post-feed"></ul>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Baylis Property LTD. All rights reserved. Built by Mac</p>
+  </footer>
+
+  <!-- Script -->
+  <script src="js/script.js"></script>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "your-app.firebaseapp.com",
+      projectId: "your-app",
+      storageBucket: "your-app.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdefg12345"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    try {
+      await addDoc(collection(db, "testData"), {
+        sample: "Hello from Baylis Property LTD!",
+        timestamp: new Date()
+      });
+      console.log("Test Firestore write successful");
+    } catch (error) {
+      console.error("Firestore write failed:", error);
+    }
+  </script>
+</body>
+
+</html>
