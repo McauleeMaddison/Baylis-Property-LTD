@@ -15,7 +15,10 @@
       <div class="logo">Baylis Property LTD</div>
       <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Menu">☰</button>
       <button id="logoutBtn">Logout</button>
-
+      <label class="dark-mode-toggle">
+        🌙
+        <input type="checkbox" id="darkToggle" />
+      </label>
       <ul class="nav-links" id="navLinks">
         <li><a href="#home">🏠 Dashboard</a></li>
         <li class="dropdown" id="loginDropdown">
@@ -32,7 +35,8 @@
 
   <!-- Main -->
   <main>
-    <!-- Home Dashboard -->
+
+    <!-- Dashboard Section -->
     <section id="home" class="spa-section active">
       <div class="dashboard-container">
         <h2>Dashboard Overview</h2>
@@ -60,6 +64,7 @@
           <textarea placeholder="Describe the issue..." required></textarea>
           <button type="submit">Submit Repair</button>
         </form>
+
         <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')">
           <h3>Schedule Cleaning</h3>
           <input type="text" placeholder="Your name" required />
@@ -67,6 +72,7 @@
           <input type="date" required />
           <button type="submit">Book Cleaner</button>
         </form>
+
         <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')">
           <h3>Contact Landlord</h3>
           <input type="text" placeholder="Your name" required />
@@ -77,7 +83,7 @@
       </div>
     </section>
 
-    <!-- Registration -->
+    <!-- Registration Section -->
     <section id="register" class="spa-section">
       <div class="login-box">
         <h3>Register Account</h3>
@@ -118,7 +124,7 @@
       </div>
     </section>
 
-    <!-- Community -->
+    <!-- Community Section -->
     <section id="community" class="spa-section">
       <h2>Community Arena 🧑‍🤝‍🧑</h2>
       <p>Chat, share, and connect with your neighbours!</p>
@@ -133,6 +139,7 @@
     </section>
   </main>
 
+  <!-- Footer -->
   <footer>
     <p>&copy; 2025 Baylis Property LTD. All rights reserved. Built by Mac</p>
   </footer>
@@ -143,9 +150,3 @@
 </body>
 
 </html>
-"""
-
-# Save to HTML file
-html_path = "/mnt/data/index.html"
-Path(html_path).write_text(clean_html)
-html_path

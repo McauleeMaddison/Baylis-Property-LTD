@@ -190,3 +190,15 @@ function initTextareaAutoResize() {
     }
   });
 }
+// Dark Mode Toggle
+document.getElementById("darkToggle")?.addEventListener("change", (e) => {
+  document.body.classList.toggle("dark-mode", e.target.checked);
+  localStorage.setItem("darkMode", e.target.checked);
+});
+
+// Load mode on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("darkMode") === "true";
+  document.getElementById("darkToggle").checked = saved;
+  document.body.classList.toggle("dark-mode", saved);
+});

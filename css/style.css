@@ -1,15 +1,42 @@
-/* ===== Base Styles ===== */
+/* ==============================
+   Base Variables and Theme
+============================== */
+:root {
+  --bg-color: #f5f7fa;
+  --text-color: #333;
+  --card-bg: #ffffff;
+  --nav-bg: #1e2a38;
+  --nav-text: white;
+  --btn-bg: #007bff;
+  --btn-hover: #0056b3;
+  --upvote-bg: #ffc107;
+}
+
+body.dark-mode {
+  --bg-color: #1c1f26;
+  --text-color: #eee;
+  --card-bg: #2b2f38;
+  --nav-bg: #14181e;
+  --nav-text: #eee;
+  --btn-bg: #3399ff;
+  --btn-hover: #227acc;
+  --upvote-bg: #ffca28;
+}
+
+/* ==============================
+   Reset + Base Styles
+============================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f7fa;
-  color: #333;
-  line-height: 1.6;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -19,10 +46,12 @@ main {
   flex: 1;
 }
 
-/* ===== Navbar ===== */
+/* ==============================
+   Navbar
+============================== */
 .navbar {
-  background-color: #1e2a38;
-  color: white;
+  background-color: var(--nav-bg);
+  color: var(--nav-text);
   padding: 1rem 2rem;
 }
 
@@ -42,7 +71,7 @@ main {
   display: none;
   background: none;
   border: none;
-  color: white;
+  color: var(--nav-text);
   font-size: 1.5rem;
   cursor: pointer;
 }
@@ -54,7 +83,7 @@ main {
 }
 
 .nav-links a {
-  color: white;
+  color: var(--nav-text);
   text-decoration: none;
   font-weight: 500;
 }
@@ -66,12 +95,12 @@ main {
 .dropdown-menu {
   display: none;
   position: absolute;
-  background-color: #2a3b4d;
+  background-color: var(--nav-bg);
   margin-top: 0.5rem;
-  list-style: none;
   border-radius: 6px;
   padding: 0.5rem 0;
   min-width: 160px;
+  list-style: none;
 }
 
 .dropdown.open .dropdown-menu {
@@ -79,12 +108,14 @@ main {
 }
 
 .dropdown-menu li a {
-  color: white;
+  color: var(--nav-text);
   padding: 0.5rem 1rem;
   display: block;
 }
 
-/* ===== Dashboard ===== */
+/* ==============================
+   Dashboard Cards
+============================== */
 .dashboard-container {
   padding: 2rem;
   max-width: 1000px;
@@ -98,24 +129,27 @@ main {
 }
 
 .dashboard-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   padding: 1.2rem;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .dashboard-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
 
-/* ===== Forms ===== */
+/* ==============================
+   Forms
+============================== */
 .task-form,
 .login-box form,
 .post-form {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   max-width: 500px;
@@ -131,23 +165,36 @@ input, textarea, select {
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
+  background: #fff;
+  color: #000;
+}
+
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background: #333;
+  color: #fff;
+  border-color: #666;
 }
 
 button {
-  background-color: #007bff;
+  background-color: var(--btn-bg);
   color: white;
   border: none;
   padding: 0.75rem;
   font-size: 1rem;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: var(--btn-hover);
 }
 
-/* ===== Community Section ===== */
+/* ==============================
+   Community Arena
+============================== */
 #community {
   padding: 2rem;
   text-align: center;
@@ -166,7 +213,7 @@ button:hover {
 }
 
 .post {
-  background: white;
+  background: var(--card-bg);
   padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 6px;
@@ -174,7 +221,7 @@ button:hover {
 }
 
 .upvote-btn {
-  background-color: #ffc107;
+  background-color: var(--upvote-bg);
   color: #333;
   border: none;
   padding: 0.4rem 0.8rem;
@@ -183,16 +230,20 @@ button:hover {
   cursor: pointer;
 }
 
-/* ===== Footer ===== */
+/* ==============================
+   Footer
+============================== */
 footer {
-  background-color: #1e2a38;
-  color: white;
+  background-color: var(--nav-bg);
+  color: var(--nav-text);
   text-align: center;
   padding: 1rem;
   font-size: 0.9rem;
 }
 
-/* ===== Responsive Nav ===== */
+/* ==============================
+   Responsive Nav
+============================== */
 @media (max-width: 768px) {
   .hamburger {
     display: block;
@@ -200,7 +251,7 @@ footer {
   .nav-links {
     flex-direction: column;
     display: none;
-    background-color: #1e2a38;
+    background-color: var(--nav-bg);
     width: 100%;
   }
   .nav-links.open {
