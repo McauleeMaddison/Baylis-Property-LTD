@@ -152,7 +152,29 @@
 
   <!-- Scripts -->
   <script src="js/script.js"></script>
-  <script type="module" src="js/firebase-auth.js"></script>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBc2xWdvMNDtrmCFSG1zHL1lV-OxJx1uiE",
+    authDomain: "baylis-property-ltd.firebaseapp.com",
+    projectId: "baylis-property-ltd",
+    storageBucket: "baylis-property-ltd.firebasestorage.app",
+    messagingSenderId: "288885561422",
+    appId: "1:288885561422:web:bd2a50f4727d782a260b1f",
+    measurementId: "G-4VT24D0H09"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body>
 
 </html>
