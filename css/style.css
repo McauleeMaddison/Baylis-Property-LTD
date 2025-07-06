@@ -1,5 +1,5 @@
 /* ==============================
-   Base Variables and Theme
+   Theme Variables
 ============================== */
 :root {
   --bg-color: #f5f7fa;
@@ -24,7 +24,7 @@ body.dark-mode {
 }
 
 /* ==============================
-   Reset + Base Styles
+   Base Reset
 ============================== */
 * {
   margin: 0;
@@ -115,7 +115,7 @@ main {
 }
 
 /* ==============================
-   Dashboard Cards
+   Dashboard
 ============================== */
 .dashboard-container {
   padding: 2rem;
@@ -134,15 +134,29 @@ main {
   border-radius: 8px;
   padding: 1.2rem;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .dashboard-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
+
+.task-form.hidden {
+  display: none;
+}
+
+.dashboard-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
 
 /* ==============================
    Forms
@@ -155,13 +169,19 @@ main {
   border-radius: 8px;
   max-width: 500px;
   margin: 2rem auto;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-input, textarea, select {
+.task-form.hidden {
+  display: none;
+}
+
+input,
+textarea,
+select {
   padding: 0.75rem;
   font-size: 1rem;
   border: 1px solid #ccc;
@@ -193,8 +213,27 @@ button:hover {
   background-color: var(--btn-hover);
 }
 
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
 /* ==============================
-   Community Arena
+   Community
 ============================== */
 #community {
   padding: 2rem;
@@ -218,7 +257,7 @@ button:hover {
   padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 6px;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 }
 
 .upvote-btn {

@@ -2,9 +2,7 @@
 // SPA Section Switching
 // ==========================
 function showSection(sectionId) {
-  document.querySelectorAll(".spa-section").forEach((section) => {
-    section.classList.remove("active");
-  });
+  document.querySelectorAll(".spa-section").forEach(section => section.classList.remove("active"));
   const target = document.getElementById(sectionId);
   if (target) target.classList.add("active");
 }
@@ -67,19 +65,27 @@ function initLoginDropdown() {
 }
 
 // ==========================
-// Form Display Toggle
+// Dashboard Form Controls
 // ==========================
-function openForm(formId) {
-  const allForms = document.querySelectorAll(".task-form");
-  const targetForm = document.getElementById(formId);
-  if (!targetForm) return;
+function initDashboardForms() {
+  const toggleButtons = document.querySelectorAll(".dashboard-card");
+  const closeButtons = document.querySelectorAll(".close-btn");
 
-  const alreadyVisible = !targetForm.classList.contains("hidden");
-  allForms.forEach((form) => form.classList.add("hidden"));
-  if (!alreadyVisible) {
-    targetForm.classList.remove("hidden");
-    targetForm.scrollIntoView({ behavior: "smooth" });
-  }
+  toggleButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      const formId = button.dataset.target;
+      const form = document.getElementById(formId);
+      form?.classList.toggle("hidden");
+      form?.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  closeButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.close;
+      document.getElementById(target)?.classList.add("hidden");
+    });
+  });
 }
 
 function handleTaskSubmit(e, type) {
@@ -89,19 +95,7 @@ function handleTaskSubmit(e, type) {
 }
 
 // ==========================
-// Auto Resize Textareas
-// ==========================
-function initTextareaAutoResize() {
-  document.addEventListener("input", (e) => {
-    if (e.target.tagName.toLowerCase() === "textarea") {
-      e.target.style.height = "auto";
-      e.target.style.height = `${e.target.scrollHeight}px`;
-    }
-  });
-}
-
-// ==========================
-// Community Arena Logic
+// Community Arena
 // ==========================
 function initCommunityArena() {
   const postForm = document.getElementById("post-form");
@@ -191,6 +185,18 @@ function initCommunityArena() {
   });
 
   renderPosts();
+}
+
+// ==========================
+// Auto Resize Textareas
+// ==========================
+function initTextareaAutoResize() {
+  document.addEventListener("input", (e) => {
+    if (e.target.tagName.toLowerCase() === "textarea") {
+      e.target.style.height = "auto";
+      e.target.style.height = `${e.target.scrollHeight}px`;
+    }
+  });
 }
 
 // ==========================
