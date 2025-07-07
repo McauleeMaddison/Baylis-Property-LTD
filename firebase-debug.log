@@ -1,0 +1,203 @@
+[debug] [2025-07-06T15:43:24.932Z] ----------------------------------------------------------------------
+[debug] [2025-07-06T15:43:24.934Z] Command:       /usr/local/share/nvm/versions/node/v22.16.0/bin/node /home/codespace/nvm/current/bin/firebase init
+[debug] [2025-07-06T15:43:24.935Z] CLI Version:   14.9.0
+[debug] [2025-07-06T15:43:24.935Z] Platform:      linux
+[debug] [2025-07-06T15:43:24.935Z] Node Version:  v22.16.0
+[debug] [2025-07-06T15:43:24.935Z] Time:          Sun Jul 06 2025 15:43:24 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-07-06T15:43:24.935Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-07-06T15:43:24.935Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-06T15:43:24.939Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-06T15:43:24.939Z] > authorizing via signed-in user (vuz9wv37@students.codeinstitute.net)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /workspaces/Baylis-Property-LTD
+
+Before we get started, keep in mind:
+
+  * You are currently outside your home directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-07-06T15:43:58.160Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:43:58.160Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:43:58.161Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2025-07-06T15:43:58.622Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-07-06T15:43:58.622Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project baylis-property-ltd (Baylis-Property-LTD) 
+[info] 
+=== Dataconnect Setup
+[debug] [2025-07-06T15:44:00.419Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:44:00.419Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:44:00.419Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/baylis-property-ltd/billingInfo [none]
+[debug] [2025-07-06T15:44:00.713Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/baylis-property-ltd/billingInfo 200
+[debug] [2025-07-06T15:44:00.713Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/baylis-property-ltd/billingInfo {"name":"projects/baylis-property-ltd/billingInfo","projectId":"baylis-property-ltd","billingAccountName":"","billingEnabled":false}
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2025-07-06T15:44:00.714Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:44:00.714Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:44:00.714Z] >>> [apiv2][query] GET https://firebasedataconnect.googleapis.com/v1/projects/baylis-property-ltd/locations/-/services [none]
+[debug] [2025-07-06T15:44:01.658Z] <<< [apiv2][status] GET https://firebasedataconnect.googleapis.com/v1/projects/baylis-property-ltd/locations/-/services 200
+[debug] [2025-07-06T15:44:01.658Z] <<< [apiv2][body] GET https://firebasedataconnect.googleapis.com/v1/projects/baylis-property-ltd/locations/-/services {}
+[info] ✔  Wrote dataconnect/dataconnect.yaml 
+[info] ✔  Wrote dataconnect/schema/schema.gql 
+[info] ✔  Wrote dataconnect/connector/connector.yaml 
+[info] ✔  Wrote dataconnect/connector/queries.gql 
+[info] ✔  Wrote dataconnect/connector/mutations.gql 
+[info] i  If you'd like to add the generated SDK to your app later, run firebase init dataconnect:sdk 
+[info] i  If you'd like to provision a CloudSQL Postgres instance on the Firebase Data Connect no-cost trial:
+1. Please upgrade to the pay-as-you-go (Blaze) billing plan. Visit the following page:
+     https://console.firebase.google.com/project/baylis-property-ltd/usage/details
+2. Run firebase init dataconnect again to configure the Cloud SQL instance.
+3. Run firebase deploy --only dataconnect to deploy your Data Connect service. 
+[info] 
+=== Firestore Setup
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2025-07-06T15:44:01.663Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:44:01.663Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:44:01.663Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/firestore.googleapis.com [none]
+[debug] [2025-07-06T15:44:01.663Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/firestore.googleapis.com x-goog-quota-user=projects/baylis-property-ltd
+[debug] [2025-07-06T15:44:02.447Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/firestore.googleapis.com 200
+[debug] [2025-07-06T15:44:02.448Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/firestore.googleapis.com [omitted]
+[info] ✔  firestore: required API firestore.googleapis.com is enabled 
+[debug] [2025-07-06T15:44:02.451Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:44:02.451Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:44:02.451Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases [none]
+[debug] [2025-07-06T15:44:02.890Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases 200
+[debug] [2025-07-06T15:44:02.890Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases {"databases":[{"name":"projects/baylis-property-ltd/databases/(default)","uid":"2aa9e0ed-1c07-4036-a6ec-17ed3feac792","createTime":"2025-07-06T15:04:48.889084Z","updateTime":"2025-07-06T15:04:48.889084Z","locationId":"europe-west2","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2025-07-06T15:04:48.889084Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"g","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"etag":"IN/3w8XJqI4DMI2A24bBqI4D"}]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2025-07-06T15:46:21.698Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:21.699Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:21.699Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/baylis-property-ltd/releases pageSize=10&pageToken=
+[debug] [2025-07-06T15:46:22.367Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/baylis-property-ltd/releases 200
+[debug] [2025-07-06T15:46:22.367Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/baylis-property-ltd/releases {"releases":[{"name":"projects/baylis-property-ltd/releases/cloud.firestore","rulesetName":"projects/baylis-property-ltd/rulesets/44a04ea2-80fb-4827-87b1-ca00dcca2606","createTime":"2025-07-06T15:04:55.761141Z","updateTime":"2025-07-06T15:04:55.761141Z"}]}
+[debug] [2025-07-06T15:46:22.367Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:22.367Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:22.368Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/baylis-property-ltd/rulesets/44a04ea2-80fb-4827-87b1-ca00dcca2606 [none]
+[debug] [2025-07-06T15:46:23.012Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/baylis-property-ltd/rulesets/44a04ea2-80fb-4827-87b1-ca00dcca2606 200
+[debug] [2025-07-06T15:46:23.012Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/baylis-property-ltd/rulesets/44a04ea2-80fb-4827-87b1-ca00dcca2606 [omitted]
+[info] i  Downloaded the existing Firestore Security Rules from the Firebase console 
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2025-07-06T15:46:33.364Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:33.364Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:33.364Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:33.364Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:33.365Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2025-07-06T15:46:33.367Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2025-07-06T15:46:33.454Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2025-07-06T15:46:33.454Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/baylis-property-ltd/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[debug] [2025-07-06T15:46:33.461Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2025-07-06T15:46:33.461Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/baylis-property-ltd/databases/(default)/collectionGroups/-/indexes {}
+[info] i  Downloaded the existing Firestore indexes from the Firebase console 
+[info] ✔  Wrote firestore.rules 
+[info] ✔  Wrote firestore.indexes.json 
+[info] 
+=== Genkit Setup
+[debug] [2025-07-06T15:46:44.449Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-06T15:46:44.449Z] > authorizing via signed-in user (vuz9wv37@students.codeinstitute.net)
+[debug] [2025-07-06T15:46:44.449Z] [iam] checking project baylis-property-ltd for permissions ["firebase.projects.get"]
+[debug] [2025-07-06T15:46:44.450Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:44.450Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:44.451Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions [none]
+[debug] [2025-07-06T15:46:44.451Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions x-goog-quota-user=projects/baylis-property-ltd
+[debug] [2025-07-06T15:46:44.451Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-07-06T15:46:45.053Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions 200
+[debug] [2025-07-06T15:46:45.053Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-07-06T15:46:45.054Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:45.054Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:45.054Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:45.054Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:45.054Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-07-06T15:46:45.054Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/baylis-property-ltd
+[debug] [2025-07-06T15:46:45.057Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-07-06T15:46:45.058Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/baylis-property-ltd
+[debug] [2025-07-06T15:46:45.784Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/runtimeconfig.googleapis.com 200
+[debug] [2025-07-06T15:46:45.785Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2025-07-06T15:46:45.813Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/cloudfunctions.googleapis.com 200
+[debug] [2025-07-06T15:46:45.813Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2025-07-06T15:46:45.814Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:45.814Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:46:45.814Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/cloudfunctions.googleapis.com:enable [none]
+[debug] [2025-07-06T15:46:45.814Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/cloudfunctions.googleapis.com:enable x-goog-quota-user=projects/baylis-property-ltd
+[debug] [2025-07-06T15:46:46.404Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/cloudfunctions.googleapis.com:enable 200
+[debug] [2025-07-06T15:46:46.404Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/baylis-property-ltd/services/cloudfunctions.googleapis.com:enable [omitted]
+[info] Let's create a new codebase for your functions.
+[info] A directory corresponding to the codebase will be created in your project
+[info] with sample code pre-configured.
+
+[info] See https://firebase.google.com/docs/functions/organize-functions for
+[info] more information on organizing your functions using codebases.
+
+[info] Functions can be deployed with firebase deploy.
+
+[info] ✔  Wrote functions/package.json 
+[info] ✔  Wrote functions/.eslintrc.js 
+[info] ✔  Wrote functions/tsconfig.dev.json 
+[info] ✔  Wrote functions/tsconfig.json 
+[info] ✔  Wrote functions/src/index.ts 
+[info] ✔  Wrote functions/.gitignore 
+[info] 
+[info] i  genkit: Installing Genkit CLI version 1.14.0
+ 
+[info] i  genkit: Installing NPM packages for genkit 
+[info] ✔  genkit: Successfully installed NPM packages 
+[info] i  genkit: Updating tsconfig.json 
+[info] ✔  genkit: Successfully updated tsconfig.json 
+[info] i  genkit: Updating package.json 
+[info] ✔  genkit: Successfully updated package.json 
+[info] Telemetry data can be used to monitor and gain insights into your AI features. There may be a cost associated with using this feature. See https://firebase.google.com/docs/genkit/observability/telemetry-collection.
+[info] i  genkit: Generating sample file 
+[info] ✔  genkit: Successfully generated sample file (src/genkit-sample.ts) 
+[info] 
+[info] 
+Login to Google Cloud using:
+[info]     gcloud auth application-default login --project baylis-property-ltd
+
+[info] Then start the Genkit developer experience by running:
+[info]     cd functions && npm run genkit:start
+[info] 
+=== Functions Setup
+[debug] [2025-07-06T15:53:18.728Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-06T15:53:18.729Z] > authorizing via signed-in user (vuz9wv37@students.codeinstitute.net)
+[debug] [2025-07-06T15:53:18.729Z] [iam] checking project baylis-property-ltd for permissions ["firebase.projects.get"]
+[debug] [2025-07-06T15:53:18.729Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:53:18.729Z] Checked if tokens are valid: true, expires at: 1751819646469
+[debug] [2025-07-06T15:53:18.729Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions [none]
+[debug] [2025-07-06T15:53:18.729Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions x-goog-quota-user=projects/baylis-property-ltd
+[debug] [2025-07-06T15:53:18.729Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-07-06T15:53:19.321Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions 200
+[debug] [2025-07-06T15:53:19.321Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/baylis-property-ltd:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+Detected existing codebase(s): default
+
+[info] Let's create a new codebase for your functions.
+[info] A directory corresponding to the codebase will be created in your project
+[info] with sample code pre-configured.
+
+[info] See https://firebase.google.com/docs/functions/organize-functions for
+[info] more information on organizing your functions using codebases.
+
+[info] Functions can be deployed with firebase deploy.
+
+[error] Invalid codebase name. Codebase must be less than 64 characters and can contain only lowercase letters, numeric characters, underscores, and dashes.
+[error] Invalid codebase name. Codebase must be less than 64 characters and can contain only lowercase letters, numeric characters, underscores, and dashes.

@@ -1,0 +1,12 @@
+specVersion: "v1"
+serviceId: "baylis-property-ltd"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "baylis-property-ltd-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]
