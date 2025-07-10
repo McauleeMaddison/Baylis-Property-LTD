@@ -1,3 +1,4 @@
+// js/script.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
 import {
@@ -8,7 +9,7 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-// Firebase config + init
+// Firebase config + initialize
 const firebaseConfig = {
   apiKey: "AIzaSyBc2xWdvMNDtrmCFSG1zHL1lV-OxJx1uiE",
   authDomain: "baylis-property-ltd.firebaseapp.com",
@@ -22,7 +23,9 @@ const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 const auth = getAuth(app);
 
+// Wait for DOM
 document.addEventListener("DOMContentLoaded", () => {
+  // Element refs
   const hamburgerBtn = document.getElementById("hamburgerBtn");
   const navLinks     = document.getElementById("navLinks");
   const loginToggle  = document.getElementById("loginToggle");
@@ -37,40 +40,49 @@ document.addEventListener("DOMContentLoaded", () => {
   const previewDiv   = document.getElementById("image-preview");
   const postList     = document.getElementById("post-list");
 
-  // Mobile nav
-  hamburgerBtn.addEventListener("click", () => navLinks.classList.toggle("active"));
-  // Login dropdown
-  loginToggle.addEventListener("click", () => loginMenu.classList.toggle("show"));
-  // SPA nav
+  // Mobile navigation toggle
+  hamburgerBtn.addEventListener("click", () => {
+    navLinks.classList.toggle("active");
+  });
+
+  // Login dropdown toggle
+  loginToggle.addEventListener("click", () => {
+    loginMenu.classList.toggle("show");
+  });
+
+  // Single Page App (SPA) navigation
   document.querySelectorAll(".nav-links a, .dropdown-menu a").forEach(link => {
     link.addEventListener("click", e => {
       e.preventDefault();
-      const tgt = link.getAttribute("href").slice(1);
-      spaSections.forEach(s => s.classList.toggle("active", s.id === tgt));
+      const targetId = link.getAttribute("href").substring(1);
+      spaSections.forEach(section => {
+        section.classList.toggle("active", section.id === targetId);
+      });
       navLinks.classList.remove("active");
       loginMenu.classList.remove("show");
     });
   });
 
-  // Open modals
+  // Open form modals
   dashboardCards.forEach(btn => {
     btn.addEventListener("click", () => {
       const form = document.getElementById(btn.dataset.target);
-      const wrap = form.closest(".form-wrapper");
-      wrap.classList.add("active");
+      const wrapper = form.closest(".form-wrapper");
+      wrapper.classList.add("active");
       form.classList.remove("hidden");
     });
   });
-  // Close modals
-  document.querySelectorAll(".close-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const wrap = btn.closest(".form-wrapper");
-      wrap.classList.remove("active");
-      wrap.querySelector(".task-form").classList.add("hidden");
+
+  // Close form modals
+  formWrappers.forEach(wrapper => {
+    const closeBtn = wrapper.querySelector(".close-btn");
+    closeBtn.addEventListener("click", () => {
+      wrapper.classList.remove("active");
+      wrapper.querySelector(".task-form").classList.add("hidden");
     });
   });
 
-  // Dark mode persistence
+  // Dark mode toggle and persistence
   darkToggle.checked = localStorage.getItem("dark") === "true";
   document.body.classList.toggle("dark", darkToggle.checked);
   darkToggle.addEventListener("change", () => {
@@ -78,37 +90,84 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("dark", darkToggle.checked);
   });
 
-  // Auth state
+  // Auth state listener
   onAuthStateChanged(auth, user => {
     logoutBtn.classList.toggle("hide", !user);
   });
 
-  // Helper: add to recent
+  // Helper to add entries to recent requests
   function addToRecent(type, data) {
     const list = document.getElementById("recent-requests-list");
     const li = document.createElement("li");
     li.className = "request-item";
-    const when = new Date().toLocaleString();
+    const timestamp = new Date().toLocaleString();
     li.innerHTML = `
       <div class="request-item__info">
         <strong>${type}:</strong> ${data.name} — ${data.detail}
       </div>
-      <div class="request-item__time">${when}</div>
+      <div class="request-item__time">${timestamp}</div>
     `;
     list.prepend(li);
   }
 
-  // Register
-  document.getElementById("register-form").addEventListener("submit", async e => {
+  // Form submission handlers
+  document.getElementById("repair-form").addEventListener("submit", e => {
     e.preventDefault();
-    const email = e.target["register-email"].value;
-    const pw    = e.target["register-password"].value;
-    try {
-      await createUserWithEmailAndPassword(auth, email, pw);
-      alert("Registered! Logged in as " + email);
-      document.querySelector('a[href="#home"]').click();
-    } catch(err) { alert(err.message); }
+    const [nameInput, addrInput, detailInput] = e.target.elements;
+    addToRecent("Repair", { name: nameInput.value, detail: addrInput.value + ", " + detailInput.value });
+    e.target.reset();
+    e.target.closest(".form-wrapper").classList.remove("active");
+    e.target.classList.add("hidden");
   });
 
-  // Landlord login
-  document.getElementById("landlord-login-form").addEvent
+  document.getElementById("cleaning-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const [nameInput, addrInput, dateInput] = e.target.elements;
+    addToRecent("Cleaning", { name: nameInput.value, detail: addrInput.value + " on " + dateInput.value });
+    e.target.reset();
+    e.target.closest(".form-wrapper").classList.remove("active");
+    e.target.classList.add("hidden");
+  });
+
+  document.getElementById("message-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const [nameInput, emailInput, msgInput] = e.target.elements;
+    addToRecent("Message", { name: nameInput.value, detail: emailInput.value + ": " + msgInput.value });
+    e.target.reset();
+    e.target.closest(".form-wrapper").classList.remove("active");
+    e.target.classList.add("hidden");
+  });
+
+  // Logout button
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth);
+  });
+
+  // Community post preview
+  imageInput.addEventListener("change", () => {
+    previewDiv.innerHTML = "";
+    const file = imageInput.files[0];
+    if (!file) return;
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    previewDiv.appendChild(img);
+  });
+
+  // Community post submit
+  postForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const name = e.target["post-name"].value;
+    const message = e.target["post-message"].value;
+    const li = document.createElement("li");
+    li.innerHTML = `<strong>${name}:</strong> ${message}`;
+    const file = imageInput.files[0];
+    if (file) {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      li.appendChild(img);
+    }
+    postList.prepend(li);
+    postForm.reset();
+    previewDiv.innerHTML = "";
+  });
+});
