@@ -1,4 +1,3 @@
-// Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
 import {
@@ -9,7 +8,7 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-// Config + init
+// Firebase config + init
 const firebaseConfig = {
   apiKey: "AIzaSyBc2xWdvMNDtrmCFSG1zHL1lV-OxJx1uiE",
   authDomain: "baylis-property-ltd.firebaseapp.com",
@@ -38,63 +37,66 @@ document.addEventListener("DOMContentLoaded", () => {
   const previewDiv   = document.getElementById("image-preview");
   const postList     = document.getElementById("post-list");
 
-  // Mobile nav toggle
-  hamburgerBtn.addEventListener("click", () =>
-    navLinks.classList.toggle("active")
-  );
-
+  // Mobile nav
+  hamburgerBtn.addEventListener("click", () => navLinks.classList.toggle("active"));
   // Login dropdown
-  loginToggle.addEventListener("click", () =>
-    loginMenu.classList.toggle("show")
-  );
-
+  loginToggle.addEventListener("click", () => loginMenu.classList.toggle("show"));
   // SPA nav
-  document
-    .querySelectorAll(".nav-links a, .dropdown-menu a")
-    .forEach(link => {
-      link.addEventListener("click", e => {
-        e.preventDefault();
-        const tgt = link.getAttribute("href").slice(1);
-        spaSections.forEach(s => s.classList.toggle("active", s.id === tgt));
-        navLinks.classList.remove("active");
-        loginMenu.classList.remove("show");
-      });
-    });
-
-  // Dashboard cards open forms
-  dashboardCards.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const form = document.getElementById(btn.dataset.target);
-      form.classList.remove("hidden");
-      form.parentElement.style.display = "block";
+  document.querySelectorAll(".nav-links a, .dropdown-menu a").forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      const tgt = link.getAttribute("href").slice(1);
+      spaSections.forEach(s => s.classList.toggle("active", s.id === tgt));
+      navLinks.classList.remove("active");
+      loginMenu.classList.remove("show");
     });
   });
 
-  // Close buttons
+  // Open modals
+  dashboardCards.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const form = document.getElementById(btn.dataset.target);
+      const wrap = form.closest(".form-wrapper");
+      wrap.classList.add("active");
+      form.classList.remove("hidden");
+    });
+  });
+  // Close modals
   document.querySelectorAll(".close-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const wrap = btn.closest(".form-wrapper");
+      wrap.classList.remove("active");
       wrap.querySelector(".task-form").classList.add("hidden");
-      wrap.style.display = "none";
     });
   });
 
   // Dark mode persistence
   darkToggle.checked = localStorage.getItem("dark") === "true";
+  document.body.classList.toggle("dark", darkToggle.checked);
   darkToggle.addEventListener("change", () => {
     document.body.classList.toggle("dark", darkToggle.checked);
     localStorage.setItem("dark", darkToggle.checked);
   });
-  if (darkToggle.checked) document.body.classList.add("dark");
 
   // Auth state
   onAuthStateChanged(auth, user => {
-    if (user) {
-      logoutBtn.classList.remove("hide");
-    } else {
-      logoutBtn.classList.add("hide");
-    }
+    logoutBtn.classList.toggle("hide", !user);
   });
+
+  // Helper: add to recent
+  function addToRecent(type, data) {
+    const list = document.getElementById("recent-requests-list");
+    const li = document.createElement("li");
+    li.className = "request-item";
+    const when = new Date().toLocaleString();
+    li.innerHTML = `
+      <div class="request-item__info">
+        <strong>${type}:</strong> ${data.name} — ${data.detail}
+      </div>
+      <div class="request-item__time">${when}</div>
+    `;
+    list.prepend(li);
+  }
 
   // Register
   document.getElementById("register-form").addEventListener("submit", async e => {
@@ -105,67 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
       await createUserWithEmailAndPassword(auth, email, pw);
       alert("Registered! Logged in as " + email);
       document.querySelector('a[href="#home"]').click();
-    } catch(err) {
-      alert(err.message);
-    }
+    } catch(err) { alert(err.message); }
   });
 
   // Landlord login
-  document.getElementById("landlord-login-form").addEventListener("submit", async e => {
-    e.preventDefault();
-    const email = e.target["landlord-email"].value;
-    const pw    = e.target["landlord-password"].value;
-    try {
-      await signInWithEmailAndPassword(auth, email, pw);
-      alert("Welcome back, landlord!");
-      document.querySelector('a[href="#home"]').click();
-    } catch(err) {
-      alert(err.message);
-    }
-  });
-
-  // Resident login
-  document.getElementById("resident-login-form").addEventListener("submit", async e => {
-    e.preventDefault();
-    const email = e.target["resident-email"].value;
-    const pw    = e.target["resident-password"].value;
-    try {
-      await signInWithEmailAndPassword(auth, email, pw);
-      alert("Welcome back, resident!");
-      document.querySelector('a[href="#home"]').click();
-    } catch(err) {
-      alert(err.message);
-    }
-  });
-
-  // Logout
-  logoutBtn.addEventListener("click", () => signOut(auth));
-
-  // Community post preview
-  imageInput.addEventListener("change", () => {
-    previewDiv.innerHTML = "";
-    const file = imageInput.files[0];
-    if (!file) return;
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
-    previewDiv.appendChild(img);
-  });
-
-  // Community post submit
-  postForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const name = e.target["post-name"].value;
-    const msg  = e.target["post-message"].value;
-    const li   = document.createElement("li");
-    li.innerHTML = `<strong>${name}:</strong> ${msg}`;
-    if (imageInput.files[0]) {
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(imageInput.files[0]);
-      li.appendChild(img);
-    }
-    postList.prepend(li);
-    postForm.reset();
-    previewDiv.innerHTML = "";
-  });
-});
-
+  document.getElementById("landlord-login-form").addEvent
