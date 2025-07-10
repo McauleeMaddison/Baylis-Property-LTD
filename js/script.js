@@ -1,216 +1,171 @@
-// ==========================
-// SPA Section Switching
-// ==========================
-function showSection(sectionId) {
-  document.querySelectorAll(".spa-section").forEach(section => section.classList.remove("active"));
-  const target = document.getElementById(sectionId);
-  if (target) target.classList.add("active");
-}
+// Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-function handleHashChange() {
-  const hash = location.hash.replace("#", "") || "home";
-  if (hash === "home" && window.currentUserRole !== "landlord") {
-    alert("Only landlords can access the dashboard.");
-    location.hash = "#community";
-    return;
-  }
-  showSection(hash);
-}
+// Config + init
+const firebaseConfig = {
+  apiKey: "AIzaSyBc2xWdvMNDtrmCFSG1zHL1lV-OxJx1uiE",
+  authDomain: "baylis-property-ltd.firebaseapp.com",
+  projectId: "baylis-property-ltd",
+  storageBucket: "baylis-property-ltd.appspot.com",
+  messagingSenderId: "288885561422",
+  appId: "1:288885561422:web:bd2a50f4727d782a260b1f",
+  measurementId: "G-4VT24D0H09"
+};
+const app = initializeApp(firebaseConfig);
+getAnalytics(app);
+const auth = getAuth(app);
 
-window.addEventListener("hashchange", handleHashChange);
-window.addEventListener("load", handleHashChange);
-
-// ==========================
-// DOM Ready
-// ==========================
 document.addEventListener("DOMContentLoaded", () => {
-  initMobileNav();
-  initLoginDropdown();
-  initDashboardForms();
-  initCommunityArena();
-  initTextareaAutoResize();
-  initDarkModeToggle();
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  const navLinks     = document.getElementById("navLinks");
+  const loginToggle  = document.getElementById("loginToggle");
+  const loginMenu    = document.getElementById("loginMenu");
+  const logoutBtn    = document.getElementById("logoutBtn");
+  const darkToggle   = document.getElementById("darkToggle");
+  const spaSections  = document.querySelectorAll(".spa-section");
+  const dashboardCards = document.querySelectorAll(".dashboard-card");
+  const formWrappers = document.querySelectorAll(".form-wrapper");
+  const postForm     = document.getElementById("post-form");
+  const imageInput   = document.getElementById("post-image");
+  const previewDiv   = document.getElementById("image-preview");
+  const postList     = document.getElementById("post-list");
+
+  // Mobile nav toggle
+  hamburgerBtn.addEventListener("click", () =>
+    navLinks.classList.toggle("active")
+  );
+
+  // Login dropdown
+  loginToggle.addEventListener("click", () =>
+    loginMenu.classList.toggle("show")
+  );
+
+  // SPA nav
+  document
+    .querySelectorAll(".nav-links a, .dropdown-menu a")
+    .forEach(link => {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        const tgt = link.getAttribute("href").slice(1);
+        spaSections.forEach(s => s.classList.toggle("active", s.id === tgt));
+        navLinks.classList.remove("active");
+        loginMenu.classList.remove("show");
+      });
+    });
+
+  // Dashboard cards open forms
+  dashboardCards.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const form = document.getElementById(btn.dataset.target);
+      form.classList.remove("hidden");
+      form.parentElement.style.display = "block";
+    });
+  });
+
+  // Close buttons
+  document.querySelectorAll(".close-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const wrap = btn.closest(".form-wrapper");
+      wrap.querySelector(".task-form").classList.add("hidden");
+      wrap.style.display = "none";
+    });
+  });
+
+  // Dark mode persistence
+  darkToggle.checked = localStorage.getItem("dark") === "true";
+  darkToggle.addEventListener("change", () => {
+    document.body.classList.toggle("dark", darkToggle.checked);
+    localStorage.setItem("dark", darkToggle.checked);
+  });
+  if (darkToggle.checked) document.body.classList.add("dark");
+
+  // Auth state
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      logoutBtn.classList.remove("hide");
+    } else {
+      logoutBtn.classList.add("hide");
+    }
+  });
+
+  // Register
+  document.getElementById("register-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = e.target["register-email"].value;
+    const pw    = e.target["register-password"].value;
+    try {
+      await createUserWithEmailAndPassword(auth, email, pw);
+      alert("Registered! Logged in as " + email);
+      document.querySelector('a[href="#home"]').click();
+    } catch(err) {
+      alert(err.message);
+    }
+  });
+
+  // Landlord login
+  document.getElementById("landlord-login-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = e.target["landlord-email"].value;
+    const pw    = e.target["landlord-password"].value;
+    try {
+      await signInWithEmailAndPassword(auth, email, pw);
+      alert("Welcome back, landlord!");
+      document.querySelector('a[href="#home"]').click();
+    } catch(err) {
+      alert(err.message);
+    }
+  });
+
+  // Resident login
+  document.getElementById("resident-login-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = e.target["resident-email"].value;
+    const pw    = e.target["resident-password"].value;
+    try {
+      await signInWithEmailAndPassword(auth, email, pw);
+      alert("Welcome back, resident!");
+      document.querySelector('a[href="#home"]').click();
+    } catch(err) {
+      alert(err.message);
+    }
+  });
+
+  // Logout
+  logoutBtn.addEventListener("click", () => signOut(auth));
+
+  // Community post preview
+  imageInput.addEventListener("change", () => {
+    previewDiv.innerHTML = "";
+    const file = imageInput.files[0];
+    if (!file) return;
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    previewDiv.appendChild(img);
+  });
+
+  // Community post submit
+  postForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const name = e.target["post-name"].value;
+    const msg  = e.target["post-message"].value;
+    const li   = document.createElement("li");
+    li.innerHTML = `<strong>${name}:</strong> ${msg}`;
+    if (imageInput.files[0]) {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(imageInput.files[0]);
+      li.appendChild(img);
+    }
+    postList.prepend(li);
+    postForm.reset();
+    previewDiv.innerHTML = "";
+  });
 });
 
-// ==========================
-// Mobile Hamburger Nav
-// ==========================
-function initMobileNav() {
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  const navLinks = document.getElementById("navLinks");
-  if (hamburgerBtn && navLinks) {
-    hamburgerBtn.addEventListener("click", () => {
-      navLinks.classList.toggle("open");
-    });
-  }
-}
-
-// ==========================
-// Login Dropdown Toggle
-// ==========================
-function initLoginDropdown() {
-  const loginToggle = document.getElementById("loginToggle");
-  const loginDropdown = document.getElementById("loginDropdown");
-  if (loginToggle && loginDropdown) {
-    loginToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      loginDropdown.classList.toggle("open");
-    });
-    document.addEventListener("click", (e) => {
-      if (!loginDropdown.contains(e.target)) {
-        loginDropdown.classList.remove("open");
-      }
-    });
-  }
-}
-
-// ==========================
-// Dashboard Form Controls
-// ==========================
-function initDashboardForms() {
-  const toggleButtons = document.querySelectorAll(".dashboard-card");
-  const closeButtons = document.querySelectorAll(".close-btn");
-
-  toggleButtons.forEach(button => {
-    button.addEventListener("click", () => {
-      const formId = button.dataset.target;
-      const form = document.getElementById(formId);
-      form?.classList.toggle("hidden");
-      form?.scrollIntoView({ behavior: "smooth" });
-    });
-  });
-
-  closeButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.close;
-      document.getElementById(target)?.classList.add("hidden");
-    });
-  });
-}
-
-function handleTaskSubmit(e, type) {
-  e.preventDefault();
-  alert(`${type} request submitted!`);
-  e.target.reset();
-}
-
-// ==========================
-// Community Arena
-// ==========================
-function initCommunityArena() {
-  const postForm = document.getElementById("post-form");
-  const postList = document.getElementById("post-list");
-  const imageInput = document.getElementById("post-image");
-  const preview = document.getElementById("image-preview");
-
-  let posts = JSON.parse(localStorage.getItem("communityPosts")) || [];
-
-  const renderPosts = () => {
-    postList.innerHTML = "";
-    posts.slice().reverse().forEach((post, index) => {
-      const li = document.createElement("li");
-      li.className = "post";
-      li.innerHTML = `
-        <strong>${post.name}</strong>
-        <span class="timestamp">${post.time}</span>
-        <p>${post.message}</p>
-        ${post.image ? `<img src="${post.image}" alt="Post image" />` : ""}
-        <button class="upvote-btn" data-index="${posts.length - 1 - index}">👍 ${post.upvotes}</button>
-      `;
-      postList.appendChild(li);
-    });
-  };
-
-  if (imageInput) {
-    imageInput.addEventListener("change", () => {
-      preview.innerHTML = "";
-      const file = imageInput.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const img = document.createElement("img");
-          img.src = reader.result;
-          preview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-
-  if (postForm) {
-    postForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = document.getElementById("post-name").value.trim();
-      const message = document.getElementById("post-message").value.trim();
-      const imageFile = imageInput.files[0];
-      const timestamp = new Date().toLocaleString();
-
-      if (!name || !message) {
-        alert("Please enter your name and message.");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const image = imageFile ? reader.result : null;
-        const newPost = {
-          name,
-          message,
-          image,
-          time: timestamp,
-          upvotes: 0,
-        };
-        posts.push(newPost);
-        localStorage.setItem("communityPosts", JSON.stringify(posts));
-        renderPosts();
-        postForm.reset();
-        preview.innerHTML = "";
-      };
-
-      if (imageFile) {
-        reader.readAsDataURL(imageFile);
-      } else {
-        reader.onloadend();
-      }
-    });
-  }
-
-  postList.addEventListener("click", (e) => {
-    if (e.target.classList.contains("upvote-btn")) {
-      const index = e.target.dataset.index;
-      posts[index].upvotes++;
-      localStorage.setItem("communityPosts", JSON.stringify(posts));
-      renderPosts();
-    }
-  });
-
-  renderPosts();
-}
-
-// ==========================
-// Auto Resize Textareas
-// ==========================
-function initTextareaAutoResize() {
-  document.addEventListener("input", (e) => {
-    if (e.target.tagName.toLowerCase() === "textarea") {
-      e.target.style.height = "auto";
-      e.target.style.height = `${e.target.scrollHeight}px`;
-    }
-  });
-}
-
-// ==========================
-// Dark Mode Toggle
-// ==========================
-function initDarkModeToggle() {
-  const toggle = document.getElementById("darkToggle");
-  const saved = localStorage.getItem("darkMode") === "true";
-  if (toggle) {
-    toggle.checked = saved;
-    document.body.classList.toggle("dark-mode", saved);
-    toggle.addEventListener("change", (e) => {
-      document.body.classList.toggle("dark-mode", e.target.checked);
-      localStorage.setItem("darkMode", e.target.checked);
-    });
-  }
-}
