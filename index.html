@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Baylis Property LTD</title>
+  <!-- Core Styles -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -15,15 +16,17 @@
       <button id="logoutBtn" class="hide">Logout</button>
       <label class="dark-mode-toggle" for="darkToggle">
         🌙
-        <input type="checkbox" id="darkToggle" />
+        <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode" />
       </label>
       <ul class="nav-links" id="navLinks">
         <li><a href="#home">🏠 Dashboard</a></li>
         <li class="dropdown">
-          <button class="dropdown-toggle" id="loginToggle">🔐 Login</button>
-          <ul class="dropdown-menu" id="loginMenu">
-            <li><a href="#landlord-login">👔 Landlord Login</a></li>
-            <li><a href="#resident-login">🏡 Resident Login</a></li>
+          <button class="dropdown-toggle" id="loginToggle" aria-haspopup="true" aria-expanded="false">
+            🔐 Login
+          </button>
+          <ul class="dropdown-menu" id="loginMenu" role="menu">
+            <li role="none"><a role="menuitem" href="#landlord-login">👔 Landlord Login</a></li>
+            <li role="none"><a role="menuitem" href="#resident-login">🏡 Resident Login</a></li>
           </ul>
         </li>
         <li><a href="#community">💬 Community</a></li>
@@ -31,9 +34,9 @@
     </div>
   </header>
 
-  <!-- Main -->
+  <!-- Main Content -->
   <main>
-    <!-- Dashboard Section -->
+    <!-- Dashboard -->
     <section id="home" class="spa-section active">
       <div class="dashboard-container">
         <div>
@@ -56,7 +59,7 @@
           <form id="repair-form" class="task-form hidden">
             <div class="form-header">
               <h3>Repair Request</h3>
-              <button type="button" class="close-btn">✖</button>
+              <button type="button" class="close-btn" aria-label="Close">✖</button>
             </div>
             <input type="text" placeholder="Your name" required />
             <input type="text" placeholder="Property address" required />
@@ -69,7 +72,7 @@
           <form id="cleaning-form" class="task-form hidden">
             <div class="form-header">
               <h3>Schedule Cleaning</h3>
-              <button type="button" class="close-btn">✖</button>
+              <button type="button" class="close-btn" aria-label="Close">✖</button>
             </div>
             <input type="text" placeholder="Your name" required />
             <input type="text" placeholder="Property address" required />
@@ -82,7 +85,7 @@
           <form id="message-form" class="task-form hidden">
             <div class="form-header">
               <h3>Contact Landlord</h3>
-              <button type="button" class="close-btn">✖</button>
+              <button type="button" class="close-btn" aria-label="Close">✖</button>
             </div>
             <input type="text" placeholder="Your name" required />
             <input type="email" placeholder="Your email" required />
@@ -93,7 +96,7 @@
       </div>
     </section>
 
-    <!-- Registration Section -->
+    <!-- Registration -->
     <section id="register" class="spa-section">
       <div class="login-box">
         <h3>Register Account</h3>
@@ -134,7 +137,7 @@
       </div>
     </section>
 
-    <!-- Community Section -->
+    <!-- Community Arena -->
     <section id="community" class="spa-section">
       <h2>Community Arena 🧑‍🤝‍🧑</h2>
       <p>Chat, share, and connect with your neighbours!</p>
@@ -149,12 +152,12 @@
     </section>
   </main>
 
-  <!-- Footer -->
+  <!-- Sticky Footer -->
   <footer>
     <p>&copy; 2025 Baylis Property LTD. All rights reserved. Built by Mac</p>
   </footer>
 
-  <!-- Module Script -->
-  <script type="module" src="js/script.js"></script>
+  <!-- Core Script -->
+  <script type="module" src="js/script.js" defer></script>
 </body>
 </html>
