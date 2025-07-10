@@ -1,302 +1,55 @@
-/* ==============================
-   Theme Variables
-============================== */
-:root {
-  --bg-color: #f5f7fa;
-  --text-color: #333;
-  --card-bg: #ffffff;
-  --nav-bg: #1e2a38;
-  --nav-text: white;
-  --btn-bg: #007bff;
-  --btn-hover: #0056b3;
-  --upvote-bg: #ffc107;
+/* Simple reset */
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: sans-serif; line-height:1.5; transition: background 0.3s, color 0.3s; }
+.hide { display: none !important; }
+
+/* Dark mode */
+body.dark { background: #121212; color: #eee; }
+.dark-mode-toggle { position: fixed; top:1rem; right:1rem; cursor:pointer; }
+.dark-mode-toggle input { display:none; }
+
+/* Navbar */
+.navbar { background:#fff; padding:0.5rem 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position:sticky; top:0; z-index:100; }
+body.dark .navbar { background:#1f1f1f; box-shadow:0 2px 4px rgba(0,0,0,0.5); }
+.nav-container { display:flex; align-items:center; justify-content:space-between; }
+.logo { font-weight:bold; }
+.hamburger { font-size:1.5rem; background:none; border:none; cursor:pointer; }
+.nav-links { list-style:none; display:flex; gap:1rem; }
+.nav-links.active { display:block; }
+.nav-links li { position:relative; }
+.dropdown-menu { position:absolute; top:100%; left:0; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.2); list-style:none; padding:0.5rem 0; display:none; }
+body.dark .dropdown-menu { background:#333; }
+.dropdown-menu.show, .dropdown-menu.show { display:block; }
+.dropdown-menu li a { display:block; padding:0.5rem 1rem; white-space:nowrap; }
+
+/* SPA sections */
+.spa-section { display:none; padding:1rem; }
+.spa-section.active { display:block; }
+
+/* Dashboard */
+.dashboard-container { margin-bottom:1rem; }
+.dashboard-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:1rem; }
+.dashboard-card { padding:1rem; background:#f5f5f5; border:none; cursor:pointer; }
+body.dark .dashboard-card { background:#2a2a2a; }
+
+/* Forms */
+.form-wrapper { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:1rem; box-shadow:0 2px 6px rgba(0,0,0,0.3); display:none; }
+body.dark .form-wrapper { background:#1e1e1e; }
+.form-wrapper .hidden { display:none; }
+.form-wrapper input, .form-wrapper textarea, .form-wrapper button, .login-box input, .login-box select, .login-box button {
+  display:block; width:100%; margin:0.5rem 0; padding:0.5rem; border:1px solid #ccc; border-radius:4px;
 }
+body.dark .form-wrapper input, body.dark .login-box input, body.dark .login-box select { background:#333; border:1px solid #555; color:#eee; }
 
-body.dark-mode {
-  --bg-color: #1c1f26;
-  --text-color: #eee;
-  --card-bg: #2b2f38;
-  --nav-bg: #14181e;
-  --nav-text: #eee;
-  --btn-bg: #3399ff;
-  --btn-hover: #227acc;
-  --upvote-bg: #ffca28;
-}
+/* Login/Register boxes */
+.login-box { max-width:320px; margin:2rem auto; padding:1rem; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
+body.dark .login-box { background:#222; }
 
-/* ==============================
-   Base Reset
-============================== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  transition: background-color 0.3s, color 0.3s;
-}
+/* Community */
+.post-form { margin-bottom:2rem; }
+.post-feed { list-style:none; }
+.post-feed li { margin-bottom:1rem; padding:0.5rem; background:#fafafa; }
+body.dark .post-feed li { background:#2b2b2b; }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-main {
-  flex: 1;
-}
-
-/* ==============================
-   Navbar
-============================== */
-.navbar {
-  background-color: var(--nav-bg);
-  color: var(--nav-text);
-  padding: 1rem 2rem;
-}
-
-.nav-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.hamburger {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--nav-text);
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 1.2rem;
-}
-
-.nav-links a {
-  color: var(--nav-text);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.nav-links a:hover {
-  text-decoration: underline;
-}
-
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  background-color: var(--nav-bg);
-  margin-top: 0.5rem;
-  border-radius: 6px;
-  padding: 0.5rem 0;
-  min-width: 160px;
-  list-style: none;
-  z-index: 1000;
-}
-
-.dropdown.open .dropdown-menu {
-  display: block;
-}
-
-.dropdown-menu li a {
-  color: var(--nav-text);
-  padding: 0.5rem 1rem;
-  display: block;
-}
-
-/* ==============================
-   Dashboard
-============================== */
-.dashboard-container {
-  padding: 2rem;
-  max-width: 1000px;
-  margin: auto;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-}
-
-.dashboard-card {
-  background: var(--card-bg);
-  border-radius: 8px;
-  padding: 1.2rem;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.dashboard-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-.task-form.hidden {
-  display: none;
-}
-
-.dashboard-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.dashboard-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-
-/* ==============================
-   Forms
-============================== */
-.task-form,
-.login-box form,
-.post-form {
-  background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 8px;
-  max-width: 500px;
-  margin: 2rem auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.task-form.hidden {
-  display: none;
-}
-
-input,
-textarea,
-select {
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background: #fff;
-  color: #000;
-}
-
-.dark-mode input,
-.dark-mode textarea,
-.dark-mode select {
-  background: #333;
-  color: #fff;
-  border-color: #666;
-}
-
-button {
-  background-color: var(--btn-bg);
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: var(--btn-hover);
-}
-
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #999;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.close-btn:hover {
-  color: #333;
-}
-
-/* ==============================
-   Community
-============================== */
-#community {
-  padding: 2rem;
-  text-align: center;
-}
-
-.image-preview img {
-  max-width: 100%;
-  border-radius: 5px;
-  margin-top: 1rem;
-}
-
-.post-feed {
-  list-style: none;
-  margin-top: 2rem;
-  padding: 0;
-}
-
-.post {
-  background: var(--card-bg);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 6px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-}
-
-.upvote-btn {
-  background-color: var(--upvote-bg);
-  color: #333;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  margin-top: 0.5rem;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
-/* ==============================
-   Footer
-============================== */
-footer {
-  background-color: var(--nav-bg);
-  color: var(--nav-text);
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.9rem;
-}
-
-/* ==============================
-   Responsive Nav
-============================== */
-@media (max-width: 768px) {
-  .hamburger {
-    display: block;
-  }
-
-  .nav-links {
-    flex-direction: column;
-    display: none;
-    background-color: var(--nav-bg);
-    width: 100%;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-}
+/* Image preview */
+.image-preview img { max-width:100px; margin-top:0.5rem; }
