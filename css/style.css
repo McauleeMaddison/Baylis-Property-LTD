@@ -1,8 +1,6 @@
 /* =====================
-   Variables & Base
+   Layout & Responsive
    ===================== */
-
-/* ensure full-height flex layout */
 html, body {
   height: 100%;
   margin: 0;
@@ -11,11 +9,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: background var(--transition), color var(--transition);
 }
-/* let main grow to push footer down */
-main {
-  flex: 1;
-}
+main { flex: 1; }
+
 :root {
   /* Typography */
   --fs-xs: 0.75rem;
@@ -143,3 +143,41 @@ body.dark .navbar { background: #1e1e1e; box-shadow: 0 2px 5px rgba(0,0,0,0.7); 
 .form-header h3 { font-size: var(--fs-lg); font-weight: 600; }
 .close-btn { background: none; border: none; font-size: 1.25rem; }
 .task-form input, \
+
+/* =====================
+   Community Interactivity
+   ===================== */
+.post-feed li {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.post-feed li .actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
+.post-feed li .actions button {
+  font-size: var(--fs-sm);
+  padding: 0.5rem 1rem;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  transition: background var(--transition);
+}
+.post-feed li .actions button:hover { background: var(--color-accent); }
+.post-feed li .reply-box {
+  display: none;
+  margin-top: 0.75rem;
+}
+.post-feed li.replied .reply-box { display: block; }
+.post-feed li .reply-box input {
+  width: calc(100% - 110px);
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-right: 0.5rem;
+}
+.post-feed li .reply-box button {
+  padding: 0.5rem 1rem;
+}
