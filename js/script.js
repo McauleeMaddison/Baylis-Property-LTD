@@ -20,6 +20,18 @@ const firebaseConfig = {
   measurementId: "G-4VT24D0H09"
 };
 
+document.getElementById("logoutBtnDropdown")?.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    alert("You’ve been logged out.");
+    location.hash = "#landlord-login"; // Redirect to login
+  } catch (err) {
+    console.error("Logout error:", err);
+    alert("Failed to logout.");
+  }
+});
+
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
