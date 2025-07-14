@@ -17,13 +17,11 @@
           <li><a href="#home">Dashboard</a></li>
           <li><a href="#community">Community</a></li>
           <li class="dropdown">
-            <button id="loginToggle" aria-haspopup="true" aria-expanded="false">
-              Login ▼
-            </button>
+            <button id="loginToggle" aria-haspopup="true" aria-expanded="false">Login ▼</button>
             <ul class="dropdown-menu hidden" id="loginMenu" aria-label="Login options">
-              <li><a href="#landlord-login">Landlord Login</a></li>
-              <li><a href="#resident-login">Resident Login</a></li>
-              <li><a href="#logout" id="logoutBtn">Logout</a></li>
+              <li><a href="#" data-role="landlord" class="openLogin">Landlord Login</a></li>
+              <li><a href="#" data-role="resident" class="openLogin">Resident Login</a></li>
+              <li><a href="#" id="logoutBtn">Logout</a></li>
             </ul>
           </li>
           <li>
@@ -125,6 +123,41 @@
       </div>
     </section>
   </main>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close" data-modal="loginModal">&times;</button>
+      <h3>Login</h3>
+      <form id="loginForm">
+        <input type="hidden" id="loginRole" name="loginRole">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" required>
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" required>
+        <button type="submit" class="btn">Login</button>
+        <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close" data-modal="registerModal">&times;</button>
+      <h3>Register</h3>
+      <form id="registerForm">
+        <input type="hidden" id="registerRole" name="registerRole" value="resident">
+        <label for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" required>
+        <label for="registerPassword">Password</label>
+        <input type="password" id="registerPassword" required>
+        <label for="registerConfirm">Confirm Password</label>
+        <input type="password" id="registerConfirm" required>
+        <button type="submit" class="btn">Register</button>
+      </form>
+    </div>
+  </div>
 
   <footer>
     <div class="container footer-content">
