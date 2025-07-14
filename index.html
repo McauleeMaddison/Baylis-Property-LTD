@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Baylis Property LTD</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <!-- Navbar -->
@@ -19,9 +19,7 @@
           <li><a href="#home">Dashboard</a></li>
           <li><a href="#community">Community</a></li>
           <li class="dropdown">
-            <button class="dropdown-toggle" id="loginToggle" aria-haspopup="true" aria-expanded="false">
-              Login
-            </button>
+            <button class="dropdown-toggle" id="loginToggle" aria-haspopup="true" aria-expanded="false">Login</button>
             <ul class="dropdown-menu" id="loginMenu" aria-label="Login options">
               <li><a href="#landlord-login">Landlord Login</a></li>
               <li><a href="#resident-login">Resident Login</a></li>
@@ -30,7 +28,7 @@
           </li>
           <li>
             <label for="darkToggle" class="dark-mode-toggle">
-              <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode" />
+              <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode">
               <span>Dark Mode</span>
             </label>
           </li>
@@ -54,8 +52,8 @@
           <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')">
             <fieldset>
               <legend>Repair Request</legend>
-              <label>Name<input type="text" name="repairName" required /></label>
-              <label>Address<input type="text" name="repairAddress" required /></label>
+              <label>Name<input type="text" name="repairName" required></label>
+              <label>Address<input type="text" name="repairAddress" required></label>
               <label>Issue<textarea name="repairIssue" required></textarea></label>
               <button type="submit">Submit</button>
             </fieldset>
@@ -63,17 +61,17 @@
           <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')">
             <fieldset>
               <legend>Schedule Cleaning</legend>
-              <label>Name<input type="text" name="cleaningName" required /></label>
-              <label>Address<input type="text" name="cleaningAddress" required /></label>
-              <label>Date<input type="date" name="cleaningDate" required /></label>
+              <label>Name<input type="text" name="cleaningName" required></label>
+              <label>Address<input type="text" name="cleaningAddress" required></label>
+              <label>Date<input type="date" name="cleaningDate" required></label>
               <button type="submit">Book</button>
             </fieldset>
           </form>
           <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')">
             <fieldset>
               <legend>Contact Landlord</legend>
-              <label>Name<input type="text" name="messageName" required /></label>
-              <label>Email<input type="email" name="messageEmail" required /></label>
+              <label>Name<input type="text" name="messageName" required></label>
+              <label>Email<input type="email" name="messageEmail" required></label>
               <label>Message<textarea name="messageBody" required></textarea></label>
               <button type="submit">Send</button>
             </fieldset>
@@ -90,9 +88,9 @@
         <form id="post-form" class="post-form">
           <fieldset>
             <legend>New Post</legend>
-            <label>Name<input type="text" id="post-name" name="postName" required /></label>
+            <label>Name<input type="text" id="post-name" name="postName" required></label>
             <label>Message<textarea id="post-message" name="postMessage" rows="3" required></textarea></label>
-            <label>Image<input type="file" id="post-image" name="postImage" accept="image/*" /></label>
+            <label>Image<input type="file" id="post-image" name="postImage" accept="image/*"></label>
             <div id="image-preview" class="image-preview" aria-live="polite"></div>
             <button type="submit">Post</button>
           </fieldset>
@@ -106,8 +104,8 @@
       <div class="container login-box">
         <h3>Create Account</h3>
         <form id="register-form">
-          <label>Email<input type="email" id="register-email" name="email" required /></label>
-          <label>Password<input type="password" id="register-password" name="password" required /></label>
+          <label>Email<input type="email" id="register-email" name="email" required></label>
+          <label>Password<input type="password" id="register-password" name="password" required></label>
           <label>Role<select id="register-role" name="role" required>
             <option value="">Select Role</option>
             <option value="landlord">Landlord</option>
@@ -121,8 +119,8 @@
       <div class="container login-box">
         <h3>Landlord Login</h3>
         <form id="landlord-login-form">
-          <label>Email<input type="email" id="landlord-email" name="email" required /></label>
-          <label>Password<input type="password" id="landlord-password" name="password" required /></label>
+          <label>Email<input type="email" id="landlord-email" name="email" required></label>
+          <label>Password<input type="password" id="landlord-password" name="password" required></label>
           <button type="submit">Login</button>
         </form>
       </div>
@@ -131,8 +129,8 @@
       <div class="container login-box">
         <h3>Resident Login</h3>
         <form id="resident-login-form">
-          <label>Email<input type="email" id="resident-email" name="email" required /></label>
-          <label>Password<input type="password" id="resident-password" name="password" required /></label>
+          <label>Email<input type="email" id="resident-email" name="email" required></label>
+          <label>Password<input type="password" id="resident-password" name="password" required></label>
           <button type="submit">Login</button>
         </form>
       </div>
