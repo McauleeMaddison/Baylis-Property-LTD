@@ -1,6 +1,8 @@
-// js/script.js
+// Front-end interactivity & auth against back end
 document.addEventListener('DOMContentLoaded', () => {
-  // — Responsive nav
+  const API = 'http://localhost:5000/api';
+
+  // Responsive nav
   const hamb = document.getElementById('hamburgerBtn'),
         navLinks = document.getElementById('navLinks');
   hamb.addEventListener('click', () => {
@@ -9,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navLinks.classList.toggle('show');
   });
 
-  // — Login dropdown
+  // Login dropdown
   const loginToggle = document.getElementById('loginToggle'),
         loginMenu   = document.getElementById('loginMenu');
   loginToggle.addEventListener('click', () => {
@@ -24,46 +26,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // — Dark mode toggle
+  // Dark mode
   const darkToggle = document.getElementById('darkToggle');
   darkToggle.addEventListener('change', () => {
     document.body.classList.toggle('dark', darkToggle.checked);
     localStorage.setItem('darkMode', darkToggle.checked);
   });
-  if (localStorage.getItem('darkMode')==='true') {
+  if (localStorage.getItem('darkMode') === 'true') {
     darkToggle.checked = true;
     document.body.classList.add('dark');
   }
 
-  // — Collapsible dashboard forms
-  document.querySelectorAll('.collapsible').forEach(container => {
-    const hdr = container.querySelector('.collapsible-header');
+  // Collapsible
+  document.querySelectorAll('.collapsible').forEach(c => {
+    const hdr = c.querySelector('.collapsible-header');
     hdr.addEventListener('click', () => {
-      const isOpen = container.classList.toggle('open');
+      const isOpen = c.classList.toggle('open');
       hdr.setAttribute('aria-expanded', isOpen);
     });
   });
 
-  // — AUTH: login & register via localStorage/sessionStorage
-  let loginRole = null;
+  // Auth modals & forms
   const openLoginLinks = document.querySelectorAll('.openLogin'),
         loginModal      = document.getElementById('loginModal'),
         registerModal   = document.getElementById('registerModal'),
         loginForm       = document.getElementById('loginForm'),
-        registerForm    = document.getElementById('registerForm');
+        registerForm    = document.getElementById('registerForm'),
+        logoutBtn       = document.getElementById('logoutBtn'),
+        loginRoleInput  = document.getElementById('loginRole'),
+        registerRoleInput = document.getElementById('registerRole'),
+        showRegister    = document.getElementById('showRegister');
 
-  // Open login modal & set role
+  let loginRole = '';
+
+  // Show login modal
   openLoginLinks.forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
       loginRole = a.dataset.role;
-      document.getElementById('loginRole').value = loginRole;
+      loginRoleInput.value = loginRole;
       loginModal.classList.remove('hidden');
     });
   });
 
   // Switch to register
-  document.getElementById('showRegister').addEventListener('click', e => {
+  showRegister.addEventListener('click', e => {
     e.preventDefault();
     loginModal.classList.add('hidden');
     registerModal.classList.remove('hidden');
@@ -76,50 +83,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Register handler
-  registerForm.addEventListener('submit', e => {
+  // Update nav text based on session
+  async function updateNavForUser() {
+    const res = await fetch(`${API}/user`, { credentials: 'include' });
+    const { user } = await res.json();
+    loginToggle.textContent = user ? `${user.email} ▼` : 'Login ▼';
+  }
+  updateNavForUser();
+
+  // Register
+  registerForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const email   = registerForm.registerEmail.value,
-          pass    = registerForm.registerPassword.value,
-          confirm = registerForm.registerConfirm.value,
-          role    = registerForm.registerRole.value;
+    const email   = registerForm.registerEmail.value;
+    const pass    = registerForm.registerPassword.value;
+    const confirm = registerForm.registerConfirm.value;
+    const role    = registerRoleInput.value;
     if (pass !== confirm) return alert('Passwords do not match');
-    let users = JSON.parse(localStorage.getItem('users')||'[]');
-    if (users.find(u=>u.email===email)) return alert('Email already registered');
-    users.push({ email, pass, role });
-    localStorage.setItem('users', JSON.stringify(users));
+    const res = await fetch(`${API}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass, role })
+    });
+    const data = await res.json();
+    if (!res.ok) return alert(data.message);
     alert('Registered! Please log in.');
     registerModal.classList.add('hidden');
     loginModal.classList.remove('hidden');
   });
 
-  // Login handler
-  loginForm.addEventListener('submit', e => {
+  // Login
+  loginForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const email = loginForm.loginEmail.value,
-          pass  = loginForm.loginPassword.value,
-          role  = loginForm.loginRole.value;
-    const users = JSON.parse(localStorage.getItem('users')||'[]'),
-          user  = users.find(u=>u.email===email && u.pass===pass && u.role===role);
-    if (!user) return alert('Invalid credentials');
-    sessionStorage.setItem('currentUser', JSON.stringify(user));
-    alert(`Welcome, ${email}!`);
+    const email = document.getElementById('loginEmail').value;
+    const pass  = document.getElementById('loginPassword').value;
+    const role  = loginRoleInput.value;
+    const res = await fetch(`${API}/login`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass, role })
+    });
+    const data = await res.json();
+    if (!res.ok) return alert(data.message);
+    alert(`Welcome, ${data.email}!`);
     loginModal.classList.add('hidden');
     updateNavForUser();
   });
 
   // Logout
-  document.getElementById('logoutBtn').addEventListener('click', e => {
+  logoutBtn.addEventListener('click', async e => {
     e.preventDefault();
-    sessionStorage.removeItem('currentUser');
+    await fetch(`${API}/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
     updateNavForUser();
   });
-
-  // Update nav button text
-  function updateNavForUser() {
-    const btn = document.getElementById('loginToggle'),
-          u   = JSON.parse(sessionStorage.getItem('currentUser')||'null');
-    btn.textContent = u ? `${u.email} ▼` : 'Login ▼';
-  }
-  updateNavForUser();
 });
