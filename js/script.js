@@ -2,8 +2,8 @@
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const navLinks = document.getElementById('navLinks');
 hamburgerBtn.addEventListener('click', () => {
-  const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-  hamburgerBtn.setAttribute('aria-expanded', !expanded);
+  const exp = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+  hamburgerBtn.setAttribute('aria-expanded', !exp);
   navLinks.classList.toggle('visible');
 });
 
@@ -11,8 +11,8 @@ hamburgerBtn.addEventListener('click', () => {
 const loginToggle = document.getElementById('loginToggle');
 const loginMenu = document.getElementById('loginMenu');
 loginToggle.addEventListener('click', () => {
-  const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
-  loginToggle.setAttribute('aria-expanded', !expanded);
+  const exp = loginToggle.getAttribute('aria-expanded') === 'true';
+  loginToggle.setAttribute('aria-expanded', !exp);
   loginMenu.classList.toggle('hidden');
 });
 
@@ -30,6 +30,7 @@ cards.forEach(card => {
     document.getElementById(card.dataset.target).classList.remove('hidden');
   });
 });
+
 function handleTaskSubmit(e, type) {
   e.preventDefault();
   alert(`${type} submitted!`);
