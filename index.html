@@ -23,7 +23,7 @@
             <ul class="dropdown-menu hidden" id="loginMenu" aria-label="Login options">
               <li><a href="#landlord-login">Landlord Login</a></li>
               <li><a href="#resident-login">Resident Login</a></li>
-              <li><button id="logoutBtn">Logout</button></li>
+              <li><a href="#logout" id="logoutBtn">Logout</a></li>
             </ul>
           </li>
           <li>
@@ -38,6 +38,7 @@
   </header>
 
   <main>
+    <!-- Dashboard Section -->
     <section id="home" class="spa-section">
       <div class="container dashboard">
         <h1 class="section-title">Dashboard Overview</h1>
@@ -57,49 +58,72 @@
         </div>
 
         <div class="dashboard-forms">
-          <form id="repair-form" class="task-form hidden" novalidate>
-            <fieldset>
-              <legend>Repair Request</legend>
-              <label for="repairName">Name</label>
-              <input id="repairName" type="text" required>
-              <label for="repairAddress">Address</label>
-              <input id="repairAddress" type="text" required>
-              <label for="repairIssue">Issue</label>
-              <textarea id="repairIssue" rows="3" required></textarea>
-              <button type="submit" class="btn">Submit</button>
-            </fieldset>
-          </form>
+          <div class="collapsible" data-target="repair-form">
+            <div class="collapsible-header" aria-expanded="false">🔧 Repairs</div>
+            <div class="collapsible-body">
+              <form id="repair-form" class="task-form" novalidate>
+                <fieldset>
+                  <legend>Repair Request</legend>
+                  <label for="repairName">Name</label>
+                  <input id="repairName" type="text" required>
+                  <label for="repairAddress">Address</label>
+                  <input id="repairAddress" type="text" required>
+                  <label for="repairIssue">Issue</label>
+                  <textarea id="repairIssue" rows="3" required></textarea>
+                  <button type="submit" class="btn">Submit</button>
+                </fieldset>
+              </form>
+            </div>
+          </div>
 
-          <form id="cleaning-form" class="task-form hidden" novalidate>
-            <fieldset>
-              <legend>Schedule Cleaning</legend>
-              <label for="cleaningName">Name</label>
-              <input id="cleaningName" type="text" required>
-              <label for="cleaningAddress">Address</label>
-              <input id="cleaningAddress" type="text" required>
-              <label for="cleaningDate">Date</label>
-              <input id="cleaningDate" type="date" required>
-              <button type="submit" class="btn">Book</button>
-            </fieldset>
-          </form>
+          <div class="collapsible" data-target="cleaning-form">
+            <div class="collapsible-header" aria-expanded="false">🧹 Cleaning</div>
+            <div class="collapsible-body">
+              <form id="cleaning-form" class="task-form" novalidate>
+                <fieldset>
+                  <legend>Schedule Cleaning</legend>
+                  <label for="cleaningName">Name</label>
+                  <input id="cleaningName" type="text" required>
+                  <label for="cleaningAddress">Address</label>
+                  <input id="cleaningAddress" type="text" required>
+                  <label for="cleaningDate">Date</label>
+                  <input id="cleaningDate" type="date" required>
+                  <button type="submit" class="btn">Book</button>
+                </fieldset>
+              </form>
+            </div>
+          </div>
 
-          <form id="message-form" class="task-form hidden" novalidate>
-            <fieldset>
-              <legend>Contact Landlord</legend>
-              <label for="messageName">Name</label>
-              <input id="messageName" type="text" required>
-              <label for="messageEmail">Email</label>
-              <input id="messageEmail" type="email" required>
-              <label for="messageBody">Message</label>
-              <textarea id="messageBody" rows="3" required></textarea>
-              <button type="submit" class="btn">Send</button>
-            </fieldset>
-          </form>
+          <div class="collapsible" data-target="message-form">
+            <div class="collapsible-header" aria-expanded="false">✉️ Message</div>
+            <div class="collapsible-body">
+              <form id="message-form" class="task-form" novalidate>
+                <fieldset>
+                  <legend>Contact Landlord</legend>
+                  <label for="messageName">Name</label>
+                  <input id="messageName" type="text" required>
+                  <label for="messageEmail">Email</label>
+                  <input id="messageEmail" type="email" required>
+                  <label for="messageBody">Message</label>
+                  <textarea id="messageBody" rows="3" required></textarea>
+                  <button type="submit" class="btn">Send</button>
+                </fieldset>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- …other SPA sections… -->
+    <!-- Community Section -->
+    <section id="community" class="spa-section">
+      <div class="container community">
+        <h2 class="section-title">Community Board</h2>
+        <ul class="community-list">
+          <li>No posts yet—be the first to say hello!</li>
+        </ul>
+      </div>
+    </section>
   </main>
 
   <footer>
