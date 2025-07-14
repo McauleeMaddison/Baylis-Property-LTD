@@ -7,7 +7,7 @@ hamburgerBtn.addEventListener('click', () => {
   navLinks.classList.toggle('visible');
 });
 
-// Dropdown login menu
+// Dropdown login menu toggle
 const loginToggle = document.getElementById('loginToggle');
 const loginMenu = document.getElementById('loginMenu');
 loginToggle.addEventListener('click', () => {
@@ -22,9 +22,8 @@ darkToggle.addEventListener('change', () => {
   document.body.classList.toggle('dark', darkToggle.checked);
 });
 
-// SPA form navigation
-const cards = document.querySelectorAll('.dashboard-card');
-cards.forEach(card => {
+// SPA-like form switching
+document.querySelectorAll('.dashboard-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.task-form').forEach(form => form.classList.add('hidden'));
     document.getElementById(card.dataset.target).classList.remove('hidden');
@@ -37,7 +36,7 @@ function handleTaskSubmit(e, type) {
   e.target.reset();
 }
 
-// Community post preview & submission
+// Community post preview & submit
 const postForm = document.getElementById('post-form');
 const postList = document.getElementById('post-list');
 const postImage = document.getElementById('postImage');
@@ -69,7 +68,7 @@ postForm.addEventListener('submit', e => {
   imagePreview.innerHTML = '';
 });
 
-// Initialize SPA sections
+// Initialize sections visibility
 window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.spa-section:not(#home)').forEach(sec => sec.classList.add('hidden'));
 });
