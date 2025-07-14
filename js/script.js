@@ -1,17 +1,15 @@
-// Toggle mobile nav
+// Mobile nav toggle
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const navLinks = document.getElementById('navLinks');
-
 hamburgerBtn.addEventListener('click', () => {
   const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
   hamburgerBtn.setAttribute('aria-expanded', !expanded);
-  navLinks.classList.toggle('hidden');
+  navLinks.classList.toggle('visible');
 });
 
 // Dropdown login menu
 const loginToggle = document.getElementById('loginToggle');
 const loginMenu = document.getElementById('loginMenu');
-
 loginToggle.addEventListener('click', () => {
   const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
   loginToggle.setAttribute('aria-expanded', !expanded);
@@ -20,34 +18,29 @@ loginToggle.addEventListener('click', () => {
 
 // Dark mode toggle
 const darkToggle = document.getElementById('darkToggle');
-
 darkToggle.addEventListener('change', () => {
   document.body.classList.toggle('dark', darkToggle.checked);
 });
 
-// SPA navigation between sections
+// SPA navigation
 const cards = document.querySelectorAll('.dashboard-card');
-const sections = document.querySelectorAll('.spa-section');
-
 cards.forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.task-form').forEach(f => f.classList.add('hidden'));
     document.getElementById(card.dataset.target).classList.remove('hidden');
   });
 });
-
 function handleTaskSubmit(e, type) {
   e.preventDefault();
   alert(`${type} submitted!`);
   e.target.reset();
 }
 
-// Community post preview
+// Community post preview & submit
 const postForm = document.getElementById('post-form');
 const postList = document.getElementById('post-list');
 const postImage = document.getElementById('post-image');
 const imagePreview = document.getElementById('image-preview');
-
 postImage.addEventListener('change', () => {
   const file = postImage.files[0];
   imagePreview.innerHTML = '';
@@ -57,7 +50,6 @@ postImage.addEventListener('change', () => {
     imagePreview.appendChild(img);
   }
 });
-
 postForm.addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('post-name').value;
@@ -74,7 +66,6 @@ postForm.addEventListener('submit', e => {
   imagePreview.innerHTML = '';
 });
 
-// Hide SPA sections not in use on load
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.spa-section:not(#home)').forEach(sec => sec.classList.add('hidden'));
 });
