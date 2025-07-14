@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,16 +17,19 @@
           <li><a href="#home">Dashboard</a></li>
           <li><a href="#community">Community</a></li>
           <li class="dropdown">
-            <button id="loginToggle" aria-haspopup="true" aria-expanded="false">Login ▼</button>
-            <ul class="dropdown-menu" id="loginMenu" aria-label="Login options">
+            <button id="loginToggle" aria-haspopup="true" aria-expanded="false">
+              Login ▼
+            </button>
+            <ul class="dropdown-menu hidden" id="loginMenu" aria-label="Login options">
               <li><a href="#landlord-login">Landlord Login</a></li>
               <li><a href="#resident-login">Resident Login</a></li>
               <li><button id="logoutBtn">Logout</button></li>
             </ul>
           </li>
           <li>
-            <label for="darkToggle">
-              <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode"> Dark Mode
+            <label class="dark-mode-label">
+              <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode">
+              Dark Mode
             </label>
           </li>
         </ul>
@@ -51,48 +55,51 @@
             <span>Message</span>
           </div>
         </div>
+
         <div class="dashboard-forms">
-          <form id="repair-form" class="task-form" onsubmit="handleTaskSubmit(event, 'Repair')" novalidate>
+          <form id="repair-form" class="task-form" novalidate>
             <fieldset>
               <legend>Repair Request</legend>
               <label for="repairName">Name</label>
-              <input id="repairName" type="text" name="repairName" required>
+              <input id="repairName" type="text" required>
               <label for="repairAddress">Address</label>
-              <input id="repairAddress" type="text" name="repairAddress" required>
+              <input id="repairAddress" type="text" required>
               <label for="repairIssue">Issue</label>
-              <textarea id="repairIssue" name="repairIssue" rows="3" required></textarea>
-              <button type="submit" class="btn btn-primary">Submit</button>
+              <textarea id="repairIssue" rows="3" required></textarea>
+              <button type="submit" class="btn">Submit</button>
             </fieldset>
           </form>
-          <form id="cleaning-form" class="task-form" onsubmit="handleTaskSubmit(event, 'Cleaning')" novalidate>
+
+          <form id="cleaning-form" class="task-form" novalidate>
             <fieldset>
               <legend>Schedule Cleaning</legend>
               <label for="cleaningName">Name</label>
-              <input id="cleaningName" type="text" name="cleaningName" required>
+              <input id="cleaningName" type="text" required>
               <label for="cleaningAddress">Address</label>
-              <input id="cleaningAddress" type="text" name="cleaningAddress" required>
+              <input id="cleaningAddress" type="text" required>
               <label for="cleaningDate">Date</label>
-              <input id="cleaningDate" type="date" name="cleaningDate" required>
-              <button type="submit" class="btn btn-primary">Book</button>
+              <input id="cleaningDate" type="date" required>
+              <button type="submit" class="btn">Book</button>
             </fieldset>
           </form>
-          <form id="message-form" class="task-form" onsubmit="handleTaskSubmit(event, 'Message')" novalidate>
+
+          <form id="message-form" class="task-form" novalidate>
             <fieldset>
               <legend>Contact Landlord</legend>
               <label for="messageName">Name</label>
-              <input id="messageName" type="text" name="messageName" required>
+              <input id="messageName" type="text" required>
               <label for="messageEmail">Email</label>
-              <input id="messageEmail" type="email" name="messageEmail" required>
+              <input id="messageEmail" type="email" required>
               <label for="messageBody">Message</label>
-              <textarea id="messageBody" name="messageBody" rows="3" required></textarea>
-              <button type="submit" class="btn btn-primary">Send</button>
+              <textarea id="messageBody" rows="3" required></textarea>
+              <button type="submit" class="btn">Send</button>
             </fieldset>
           </form>
         </div>
       </div>
     </section>
 
-    <!-- Other sections omitted -->
+    <!-- …other SPA sections… -->
   </main>
 
   <footer>
@@ -104,3 +111,4 @@
   <script src="js/script.js" defer></script>
 </body>
 </html>
+
