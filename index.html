@@ -7,11 +7,10 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-
   <!-- Navbar -->
-  <header>
+  <header class="site-header">
     <nav class="navbar" aria-label="Main navigation">
-      <div class="container">
+      <div class="container nav-container">
         <a href="#home" class="logo">Baylis Property LTD</a>
         <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
           <span class="hamburger-icon">☰</span>
@@ -31,8 +30,8 @@
           </li>
           <li>
             <label for="darkToggle" class="dark-mode-toggle">
-              Dark Mode
               <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode" />
+              <span>Dark Mode</span>
             </label>
           </li>
         </ul>
@@ -51,7 +50,6 @@
           <button class="dashboard-card" data-target="cleaning-form">Cleaning</button>
           <button class="dashboard-card" data-target="message-form">Message</button>
         </div>
-
         <div class="dashboard-forms">
           <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')">
             <fieldset>
@@ -62,7 +60,6 @@
               <button type="submit">Submit</button>
             </fieldset>
           </form>
-
           <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')">
             <fieldset>
               <legend>Schedule Cleaning</legend>
@@ -72,7 +69,6 @@
               <button type="submit">Book</button>
             </fieldset>
           </form>
-
           <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')">
             <fieldset>
               <legend>Contact Landlord</legend>
@@ -87,11 +83,10 @@
     </section>
 
     <!-- Community Section -->
-    <section id="community" class="spa-section">
+    <section id="community" class="spa-section hidden">
       <div class="container">
         <h2>Community Arena</h2>
         <p>Chat, share, and connect with your neighbours!</p>
-
         <form id="post-form" class="post-form">
           <fieldset>
             <legend>New Post</legend>
@@ -102,7 +97,6 @@
             <button type="submit">Post</button>
           </fieldset>
         </form>
-
         <ul id="post-list" class="post-feed" aria-live="polite"></ul>
       </div>
     </section>
@@ -123,7 +117,6 @@
         </form>
       </div>
     </section>
-
     <section id="landlord-login" class="spa-section hidden">
       <div class="container login-box">
         <h3>Landlord Login</h3>
@@ -134,7 +127,6 @@
         </form>
       </div>
     </section>
-
     <section id="resident-login" class="spa-section hidden">
       <div class="container login-box">
         <h3>Resident Login</h3>
