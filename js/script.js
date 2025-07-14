@@ -1,9 +1,9 @@
-// Mobile nav toggle
+// Mobile navigation toggle
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const navLinks = document.getElementById('navLinks');
 hamburgerBtn.addEventListener('click', () => {
-  const exp = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-  hamburgerBtn.setAttribute('aria-expanded', !exp);
+  const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+  hamburgerBtn.setAttribute('aria-expanded', String(!expanded));
   navLinks.classList.toggle('visible');
 });
 
@@ -11,8 +11,8 @@ hamburgerBtn.addEventListener('click', () => {
 const loginToggle = document.getElementById('loginToggle');
 const loginMenu = document.getElementById('loginMenu');
 loginToggle.addEventListener('click', () => {
-  const exp = loginToggle.getAttribute('aria-expanded') === 'true';
-  loginToggle.setAttribute('aria-expanded', !exp);
+  const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
+  loginToggle.setAttribute('aria-expanded', String(!expanded));
   loginMenu.classList.toggle('hidden');
 });
 
@@ -22,25 +22,25 @@ darkToggle.addEventListener('change', () => {
   document.body.classList.toggle('dark', darkToggle.checked);
 });
 
-// SPA navigation
+// SPA form navigation
 const cards = document.querySelectorAll('.dashboard-card');
 cards.forEach(card => {
   card.addEventListener('click', () => {
-    document.querySelectorAll('.task-form').forEach(f => f.classList.add('hidden'));
+    document.querySelectorAll('.task-form').forEach(form => form.classList.add('hidden'));
     document.getElementById(card.dataset.target).classList.remove('hidden');
   });
 });
 
 function handleTaskSubmit(e, type) {
   e.preventDefault();
-  alert(`${type} submitted!`);
+  alert(`${type} submitted successfully.`);
   e.target.reset();
 }
 
-// Community post preview & submit
+// Community post preview & submission
 const postForm = document.getElementById('post-form');
 const postList = document.getElementById('post-list');
-const postImage = document.getElementById('post-image');
+const postImage = document.getElementById('postImage');
 const imagePreview = document.getElementById('image-preview');
 postImage.addEventListener('change', () => {
   const file = postImage.files[0];
@@ -51,12 +51,14 @@ postImage.addEventListener('change', () => {
     imagePreview.appendChild(img);
   }
 });
+
 postForm.addEventListener('submit', e => {
   e.preventDefault();
-  const name = document.getElementById('post-name').value;
-  const message = document.getElementById('post-message').value;
+  const name = document.getElementById('postName').value.trim();
+  const message = document.getElementById('postMessage').value.trim();
+  if (!name || !message) return;
   const li = document.createElement('li');
-  li.innerHTML = `<strong>${name}:</strong> <p>${message}</p>`;
+  li.innerHTML = `<strong>${name}</strong><p>${message}</p>`;
   if (postImage.files[0]) {
     const img = document.createElement('img');
     img.src = URL.createObjectURL(postImage.files[0]);
@@ -67,6 +69,7 @@ postForm.addEventListener('submit', e => {
   imagePreview.innerHTML = '';
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize SPA sections
+window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.spa-section:not(#home)').forEach(sec => sec.classList.add('hidden'));
 });
