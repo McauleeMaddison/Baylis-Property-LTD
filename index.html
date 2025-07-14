@@ -43,14 +43,14 @@
     <!-- Dashboard Section -->
     <section id="home" class="spa-section">
       <div class="container dashboard">
-        <h1>Dashboard Overview</h1>
+        <h1 class="fade-in-up">Dashboard Overview</h1>
         <div class="dashboard-grid">
-          <button class="dashboard-card" data-target="repair-form">Repairs</button>
-          <button class="dashboard-card" data-target="cleaning-form">Cleaning</button>
-          <button class="dashboard-card" data-target="message-form">Message</button>
+          <button class="dashboard-card slide-in-left" data-target="repair-form">Repairs</button>
+          <button class="dashboard-card slide-in-up" data-target="cleaning-form">Cleaning</button>
+          <button class="dashboard-card slide-in-right" data-target="message-form">Message</button>
         </div>
         <div class="dashboard-forms">
-          <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')" novalidate>
+          <form id="repair-form" class="task-form hidden fade-in" onsubmit="handleTaskSubmit(event, 'Repair')" novalidate>
             <fieldset>
               <legend>Repair Request</legend>
               <label for="repairName">Name</label>
@@ -59,10 +59,10 @@
               <input id="repairAddress" type="text" name="repairAddress" required>
               <label for="repairIssue">Issue</label>
               <textarea id="repairIssue" name="repairIssue" rows="4" required></textarea>
-              <button type="submit">Submit</button>
+              <button type="submit" class="btn btn-primary">Submit</button>
             </fieldset>
           </form>
-          <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')" novalidate>
+          <form id="cleaning-form" class="task-form hidden fade-in" onsubmit="handleTaskSubmit(event, 'Cleaning')" novalidate>
             <fieldset>
               <legend>Schedule Cleaning</legend>
               <label for="cleaningName">Name</label>
@@ -71,10 +71,10 @@
               <input id="cleaningAddress" type="text" name="cleaningAddress" required>
               <label for="cleaningDate">Date</label>
               <input id="cleaningDate" type="date" name="cleaningDate" required>
-              <button type="submit">Book</button>
+              <button type="submit" class="btn btn-primary">Book</button>
             </fieldset>
           </form>
-          <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')" novalidate>
+          <form id="message-form" class="task-form hidden fade-in" onsubmit="handleTaskSubmit(event, 'Message')" novalidate>
             <fieldset>
               <legend>Contact Landlord</legend>
               <label for="messageName">Name</label>
@@ -83,7 +83,7 @@
               <input id="messageEmail" type="email" name="messageEmail" required>
               <label for="messageBody">Message</label>
               <textarea id="messageBody" name="messageBody" rows="4" required></textarea>
-              <button type="submit">Send</button>
+              <button type="submit" class="btn btn-primary">Send</button>
             </fieldset>
           </form>
         </div>
@@ -93,9 +93,9 @@
     <!-- Community Section -->
     <section id="community" class="spa-section hidden">
       <div class="container">
-        <h2>Community Arena</h2>
+        <h2 class="fade-in-up">Community Arena</h2>
         <p>Chat, share, and connect with your neighbours!</p>
-        <form id="post-form" class="post-form" novalidate>
+        <form id="post-form" class="post-form fade-in" novalidate>
           <fieldset>
             <legend>New Post</legend>
             <label for="postName">Name</label>
@@ -105,16 +105,16 @@
             <label for="postImage">Image (optional)</label>
             <input id="postImage" type="file" name="postImage" accept="image/*">
             <div id="image-preview" class="image-preview" aria-live="polite"></div>
-            <button type="submit">Post</button>
+            <button type="submit" class="btn btn-primary">Post</button>
           </fieldset>
         </form>
-        <ul id="post-list" class="post-feed" aria-live="polite"></ul>
+        <ul id="post-list" class="post-feed"></ul>
       </div>
     </section>
 
     <!-- Authentication Sections -->
     <section id="register" class="spa-section hidden">
-      <div class="container login-box">
+      <div class="container login-box fade-in">
         <h2>Create Account</h2>
         <form id="register-form" novalidate>
           <label for="registerEmail">Email</label>
@@ -127,33 +127,33 @@
             <option value="landlord">Landlord</option>
             <option value="resident">Resident</option>
           </select>
-          <button type="submit">Register</button>
+          <button type="submit" class="btn btn-primary">Register</button>
         </form>
       </div>
     </section>
 
     <section id="landlord-login" class="spa-section hidden">
-      <div class="container login-box">
+      <div class="container login-box fade-in">
         <h2>Landlord Login</h2>
         <form id="landlord-login-form" novalidate>
           <label for="landlordEmail">Email</label>
           <input id="landlordEmail" type="email" name="email" required>
           <label for="landlordPassword">Password</label>
           <input id="landlordPassword" type="password" name="password" required>
-          <button type="submit">Login</button>
+          <button type="submit" class="btn btn-primary">Login</button>
         </form>
       </div>
     </section>
 
     <section id="resident-login" class="spa-section hidden">
-      <div class="container login-box">
+      <div class="container login-box fade-in">
         <h2>Resident Login</h2>
-        <form id="resident-login-form" novalidate>
+        <form id="resident登录-form" novalidate>
           <label for="residentEmail">Email</label>
           <input id="residentEmail" type="email" name="email" required>
           <label for="residentPassword">Password</label>
           <input id="residentPassword" type="password" name="password" required>
-          <button type="submit">Login</button>
+          <button type="submit" class="btn btn-primary">Login</button>
         </form>
       </div>
     </section>
@@ -161,7 +161,7 @@
 
   <!-- Footer -->
   <footer>
-    <div class="container">
+    <div class="container footer-content fade-in-up">
       <p>&copy; 2025 Baylis Property LTD. All rights reserved.</p>
     </div>
   </footer>
