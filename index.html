@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Baylis Property LTD</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Navbar -->
+  <!-- Header & Navigation -->
   <header class="site-header">
     <nav class="navbar" aria-label="Main navigation">
       <div class="container nav-container">
@@ -29,7 +30,7 @@
           <li>
             <label for="darkToggle" class="dark-mode-toggle">
               <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode">
-              <span>Dark Mode</span>
+              Dark Mode
             </label>
           </li>
         </ul>
@@ -42,37 +43,46 @@
     <!-- Dashboard Section -->
     <section id="home" class="spa-section">
       <div class="container dashboard">
-        <h2>Dashboard Overview</h2>
+        <h1>Dashboard Overview</h1>
         <div class="dashboard-grid">
           <button class="dashboard-card" data-target="repair-form">Repairs</button>
           <button class="dashboard-card" data-target="cleaning-form">Cleaning</button>
           <button class="dashboard-card" data-target="message-form">Message</button>
         </div>
         <div class="dashboard-forms">
-          <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')">
+          <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')" novalidate>
             <fieldset>
               <legend>Repair Request</legend>
-              <label>Name<input type="text" name="repairName" required></label>
-              <label>Address<input type="text" name="repairAddress" required></label>
-              <label>Issue<textarea name="repairIssue" required></textarea></label>
+              <label for="repairName">Name</label>
+              <input id="repairName" type="text" name="repairName" required>
+              <label for="repairAddress">Address</label>
+              <input id="repairAddress" type="text" name="repairAddress" required>
+              <label for="repairIssue">Issue</label>
+              <textarea id="repairIssue" name="repairIssue" rows="4" required></textarea>
               <button type="submit">Submit</button>
             </fieldset>
           </form>
-          <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')">
+          <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')" novalidate>
             <fieldset>
               <legend>Schedule Cleaning</legend>
-              <label>Name<input type="text" name="cleaningName" required></label>
-              <label>Address<input type="text" name="cleaningAddress" required></label>
-              <label>Date<input type="date" name="cleaningDate" required></label>
+              <label for="cleaningName">Name</label>
+              <input id="cleaningName" type="text" name="cleaningName" required>
+              <label for="cleaningAddress">Address</label>
+              <input id="cleaningAddress" type="text" name="cleaningAddress" required>
+              <label for="cleaningDate">Date</label>
+              <input id="cleaningDate" type="date" name="cleaningDate" required>
               <button type="submit">Book</button>
             </fieldset>
           </form>
-          <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')">
+          <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')" novalidate>
             <fieldset>
               <legend>Contact Landlord</legend>
-              <label>Name<input type="text" name="messageName" required></label>
-              <label>Email<input type="email" name="messageEmail" required></label>
-              <label>Message<textarea name="messageBody" required></textarea></label>
+              <label for="messageName">Name</label>
+              <input id="messageName" type="text" name="messageName" required>
+              <label for="messageEmail">Email</label>
+              <input id="messageEmail" type="email" name="messageEmail" required>
+              <label for="messageBody">Message</label>
+              <textarea id="messageBody" name="messageBody" rows="4" required></textarea>
               <button type="submit">Send</button>
             </fieldset>
           </form>
@@ -85,12 +95,15 @@
       <div class="container">
         <h2>Community Arena</h2>
         <p>Chat, share, and connect with your neighbours!</p>
-        <form id="post-form" class="post-form">
+        <form id="post-form" class="post-form" novalidate>
           <fieldset>
             <legend>New Post</legend>
-            <label>Name<input type="text" id="post-name" name="postName" required></label>
-            <label>Message<textarea id="post-message" name="postMessage" rows="3" required></textarea></label>
-            <label>Image<input type="file" id="post-image" name="postImage" accept="image/*"></label>
+            <label for="postName">Name</label>
+            <input id="postName" type="text" name="postName" required>
+            <label for="postMessage">Message</label>
+            <textarea id="postMessage" name="postMessage" rows="3" required></textarea>
+            <label for="postImage">Image (optional)</label>
+            <input id="postImage" type="file" name="postImage" accept="image/*">
             <div id="image-preview" class="image-preview" aria-live="polite"></div>
             <button type="submit">Post</button>
           </fieldset>
@@ -102,35 +115,44 @@
     <!-- Authentication Sections -->
     <section id="register" class="spa-section hidden">
       <div class="container login-box">
-        <h3>Create Account</h3>
-        <form id="register-form">
-          <label>Email<input type="email" id="register-email" name="email" required></label>
-          <label>Password<input type="password" id="register-password" name="password" required></label>
-          <label>Role<select id="register-role" name="role" required>
-            <option value="">Select Role</option>
+        <h2>Create Account</h2>
+        <form id="register-form" novalidate>
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" type="email" name="email" required>
+          <label for="registerPassword">Password</label>
+          <input id="registerPassword" type="password" name="password" minlength="8" required>
+          <label for="registerRole">Role</label>
+          <select id="registerRole" name="role" required>
+            <option value="" disabled selected>Select Role</option>
             <option value="landlord">Landlord</option>
             <option value="resident">Resident</option>
-          </select></label>
+          </select>
           <button type="submit">Register</button>
         </form>
       </div>
     </section>
+
     <section id="landlord-login" class="spa-section hidden">
       <div class="container login-box">
-        <h3>Landlord Login</h3>
-        <form id="landlord-login-form">
-          <label>Email<input type="email" id="landlord-email" name="email" required></label>
-          <label>Password<input type="password" id="landlord-password" name="password" required></label>
+        <h2>Landlord Login</h2>
+        <form id="landlord-login-form" novalidate>
+          <label for="landlordEmail">Email</label>
+          <input id="landlordEmail" type="email" name="email" required>
+          <label for="landlordPassword">Password</label>
+          <input id="landlordPassword" type="password" name="password" required>
           <button type="submit">Login</button>
         </form>
       </div>
     </section>
+
     <section id="resident-login" class="spa-section hidden">
       <div class="container login-box">
-        <h3>Resident Login</h3>
-        <form id="resident-login-form">
-          <label>Email<input type="email" id="resident-email" name="email" required></label>
-          <label>Password<input type="password" id="resident-password" name="password" required></label>
+        <h2>Resident Login</h2>
+        <form id="resident-login-form" novalidate>
+          <label for="residentEmail">Email</label>
+          <input id="residentEmail" type="email" name="email" required>
+          <label for="residentPassword">Password</label>
+          <input id="residentPassword" type="password" name="password" required>
           <button type="submit">Login</button>
         </form>
       </div>
