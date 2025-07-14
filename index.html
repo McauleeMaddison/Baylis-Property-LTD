@@ -4,103 +4,94 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Baylis Property LTD</title>
-  <!-- Core Styles -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
   <!-- Navbar -->
   <header class="navbar">
     <div class="nav-container">
       <div class="logo">Baylis Property LTD</div>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Menu">☰</button>
-      <button id="logoutBtn" class="hide">Logout</button>
-      <label class="dark-mode-toggle" for="darkToggle">
-        🌙
-        <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode" />
-      </label>
+      <button class="hamburger" id="hamburgerBtn">☰</button>
       <ul class="nav-links" id="navLinks">
         <li><a href="#home">🏠 Dashboard</a></li>
-        <li class="dropdown">
-          <button class="dropdown-toggle" id="loginToggle" aria-haspopup="true" aria-expanded="false">
-            🔐 Login
-          </button>
-          <ul class="dropdown-menu" id="loginMenu">
-  <li><a href="#landlord-login">👔 Landlord Login</a></li>
-  <li><a href="#resident-login">🏡 Resident Login</a></li>
-  <li><button id="logoutBtnDropdown" class="logout-link">🚪 Logout</button></li>
-</ul>
-        </li>
         <li><a href="#community">💬 Community</a></li>
+        <li class="dropdown" id="loginDropdown">
+          <button class="dropdown-toggle" id="loginToggle">🔐 Login</button>
+          <ul class="dropdown-menu" id="loginMenu">
+            <li><a href="#landlord-login">👔 Landlord Login</a></li>
+            <li><a href="#resident-login">🏡 Resident Login</a></li>
+            <li><button class="logout-link" id="logoutBtn">🚪 Logout</button></li>
+          </ul>
+        </li>
+        <li>
+          <label class="dark-mode-toggle" for="darkToggle">
+            🌙 <input type="checkbox" id="darkToggle" />
+          </label>
+        </li>
       </ul>
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <main>
     <!-- Dashboard -->
-    <section id="home" class="spa-section active">
+    <section id="home" class="spa-section">
       <div class="dashboard-container">
-        <div>
-          <h2>Dashboard Overview</h2>
-          <div class="dashboard-grid">
-            <button class="dashboard-card" data-target="repair-form">🔧 Repairs</button>
-            <button class="dashboard-card" data-target="cleaning-form">🧹 Cleaning</button>
-            <button class="dashboard-card" data-target="message-form">📬 Message</button>
-          </div>
+        <h2>Dashboard Overview</h2>
+        <div class="dashboard-grid">
+          <button class="dashboard-card" data-target="repair-form">🔧 Repairs</button>
+          <button class="dashboard-card" data-target="cleaning-form">🧹 Cleaning</button>
+          <button class="dashboard-card" data-target="message-form">📬 Message</button>
         </div>
-        <aside class="recent-requests">
-          <h3>Recent Requests</h3>
-          <ul id="recent-requests-list"></ul>
-        </aside>
       </div>
 
+      <!-- Forms -->
       <div class="dashboard-forms">
-        <!-- Repair Form -->
-        <div class="form-wrapper">
-          <form id="repair-form" class="task-form hidden">
-            <div class="form-header">
-              <h3>Repair Request</h3>
-              <button type="button" class="close-btn" aria-label="Close">✖</button>
-            </div>
-            <input type="text" placeholder="Your name" required />
-            <input type="text" placeholder="Property address" required />
-            <textarea placeholder="Describe the issue..." required></textarea>
-            <button type="submit">Submit Repair</button>
-          </form>
-        </div>
-        <!-- Cleaning Form -->
-        <div class="form-wrapper">
-          <form id="cleaning-form" class="task-form hidden">
-            <div class="form-header">
-              <h3>Schedule Cleaning</h3>
-              <button type="button" class="close-btn" aria-label="Close">✖</button>
-            </div>
-            <input type="text" placeholder="Your name" required />
-            <input type="text" placeholder="Property address" required />
-            <input type="date" required />
-            <button type="submit">Book Cleaner</button>
-          </form>
-        </div>
-        <!-- Message Form -->
-        <div class="form-wrapper">
-          <form id="message-form" class="task-form hidden">
-            <div class="form-header">
-              <h3>Contact Landlord</h3>
-              <button type="button" class="close-btn" aria-label="Close">✖</button>
-            </div>
-            <input type="text" placeholder="Your name" required />
-            <input type="email" placeholder="Your email" required />
-            <textarea placeholder="Write your message..." required></textarea>
-            <button type="submit">Send Message</button>
-          </form>
-        </div>
+        <form id="repair-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Repair')">
+          <h3>Repair Request</h3>
+          <input type="text" placeholder="Your name" required />
+          <input type="text" placeholder="Property address" required />
+          <textarea placeholder="Describe the issue..." required></textarea>
+          <button type="submit">Submit Repair</button>
+        </form>
+
+        <form id="cleaning-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Cleaning')">
+          <h3>Schedule Cleaning</h3>
+          <input type="text" placeholder="Your name" required />
+          <input type="text" placeholder="Property address" required />
+          <input type="date" required />
+          <button type="submit">Book Cleaner</button>
+        </form>
+
+        <form id="message-form" class="task-form hidden" onsubmit="handleTaskSubmit(event, 'Message')">
+          <h3>Contact Landlord</h3>
+          <input type="text" placeholder="Your name" required />
+          <input type="email" placeholder="Your email" required />
+          <textarea placeholder="Write your message..." required></textarea>
+          <button type="submit">Send Message</button>
+        </form>
       </div>
     </section>
 
-    <!-- Registration -->
+    <!-- Community -->
+    <section id="community" class="spa-section">
+      <h2>Community Arena 🧑‍🤝‍🧑</h2>
+      <p>Chat, share, and connect with your neighbours!</p>
+      <form id="post-form" class="post-form">
+        <input type="text" id="post-name" placeholder="Your name" required />
+        <textarea id="post-message" rows="3" placeholder="What's on your mind? 😊" required></textarea>
+        <input type="file" id="post-image" accept="image/*" />
+        <div id="image-preview" class="image-preview"></div>
+        <button type="submit">Post</button>
+      </form>
+      <ul id="post-list" class="post-feed"></ul>
+    </section>
+
+    <!-- Register -->
     <section id="register" class="spa-section">
       <div class="login-box">
-        <h3>Register Account</h3>
+        <h3>Create Your Account</h3>
         <form id="register-form">
           <input type="email" id="register-email" placeholder="Email" required />
           <input type="password" id="register-password" placeholder="Password" required />
@@ -119,8 +110,8 @@
       <div class="login-box">
         <h3>Landlord Login</h3>
         <form id="landlord-login-form">
-          <input type="email" id="landlord-email" placeholder="Email" required />
-          <input type="password" id="landlord-password" placeholder="Password" required />
+          <input type="email" id="landlord-email" required placeholder="Email" />
+          <input type="password" id="landlord-password" required placeholder="Password" />
           <button type="submit">Login</button>
         </form>
       </div>
@@ -131,34 +122,21 @@
       <div class="login-box">
         <h3>Resident Login</h3>
         <form id="resident-login-form">
-          <input type="email" id="resident-email" placeholder="Email" required />
-          <input type="password" id="resident-password" placeholder="Password" required />
+          <input type="email" id="resident-email" required placeholder="Email" />
+          <input type="password" id="resident-password" required placeholder="Password" />
           <button type="submit">Login</button>
         </form>
       </div>
     </section>
-
-    <!-- Community Arena -->
-    <section id="community" class="spa-section">
-      <h2>Community Arena 🧑‍🤝‍🧑</h2>
-      <p>Chat, share, and connect with your neighbours!</p>
-      <form id="post-form" class="post-form">
-        <input type="text" id="post-name" placeholder="Your name" required />
-        <textarea id="post-message" rows="3" placeholder="What's on your mind? 😊" required></textarea>
-        <input type="file" id="post-image" accept="image/*" />
-        <div id="image-preview" class="image-preview"></div>
-        <button type="submit">Post</button>
-      </form>
-      <ul id="post-list" class="post-feed"></ul>
-    </section>
   </main>
 
-  <!-- Sticky Footer -->
+  <!-- Footer -->
   <footer>
     <p>&copy; 2025 Baylis Property LTD. All rights reserved. Built by Mac</p>
   </footer>
 
-  <!-- Core Script -->
-  <script type="module" src="js/script.js" defer></script>
+  <!-- Scripts -->
+  <script src="js/script.js"></script>
+  <script type="module" src="js/firebase-auth.js"></script>
 </body>
 </html>
