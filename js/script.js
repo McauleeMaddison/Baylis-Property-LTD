@@ -1,198 +1,238 @@
-// js/script.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+// ==========================
+// SPA Section Switching
+// ==========================
+function showSection(sectionId) {
+  document.querySelectorAll(".spa-section").forEach((section) => {
+    section.classList.remove("active");
+  });
+  const target = document.getElementById(sectionId);
+  if (target) target.classList.add("active");
+}
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBc2xWdvMNDtrmCFSG1zHL1lV-OxJx1uiE",
-  authDomain: "baylis-property-ltd.firebaseapp.com",
-  projectId: "baylis-property-ltd",
-  storageBucket: "baylis-property-ltd.appspot.com",
-  messagingSenderId: "288885561422",
-  appId: "1:288885561422:web:bd2a50f4727d782a260b1f",
-  measurementId: "G-4VT24D0H09"
-};
-
-document.getElementById("logoutBtnDropdown")?.addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-    alert("You’ve been logged out.");
-    location.hash = "#landlord-login"; // Redirect to login
-  } catch (err) {
-    console.error("Logout error:", err);
-    alert("Failed to logout.");
+function handleHashChange() {
+  const hash = location.hash.replace("#", "") || "home";
+  if (hash === "home" && window.currentUserRole !== "landlord") {
+    alert("Only landlords can access the dashboard.");
+    location.hash = "#community";
+    return;
   }
+  showSection(hash);
+}
+
+window.addEventListener("hashchange", handleHashChange);
+window.addEventListener("load", handleHashChange);
+
+// ==========================
+// DOM Ready
+// ==========================
+document.addEventListener("DOMContentLoaded", () => {
+  initMobileNav();
+  initLoginDropdown();
+  initDashboardForms();
+  initCommunityArena();
+  initTextareaAutoResize();
+  initDarkModeToggle();
 });
 
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-getAnalytics(app);
-const auth = getAuth(app);
-
-document.addEventListener("DOMContentLoaded", () => {
+// ==========================
+// Mobile Hamburger Nav
+// ==========================
+function initMobileNav() {
   const hamburgerBtn = document.getElementById("hamburgerBtn");
-  const navLinks     = document.getElementById("navLinks");
-  const loginToggle  = document.getElementById("loginToggle");
-  const loginMenu    = document.getElementById("loginMenu");
-  const logoutBtn    = document.getElementById("logoutBtn");
-  const darkToggle   = document.getElementById("darkToggle");
-  const spaSections  = document.querySelectorAll(".spa-section");
-  const dashboardCards = document.querySelectorAll(".dashboard-card");
-  const formWrappers = document.querySelectorAll(".form-wrapper");
-  const postForm     = document.getElementById("post-form");
-  const imageInput   = document.getElementById("post-image");
-  const previewDiv   = document.getElementById("image-preview");
-  const postList     = document.getElementById("post-list");
-
-  // Mobile nav toggle
-  hamburgerBtn.addEventListener("click", () => navLinks.classList.toggle("active"));
-  // Login dropdown
-  loginToggle.addEventListener("click", () => loginMenu.classList.toggle("show"));
-  // SPA navigation
-  document.querySelectorAll(".nav-links a, .dropdown-menu a").forEach(link => {
-    link.addEventListener("click", e => {
-      e.preventDefault();
-      const targetId = link.getAttribute("href").substring(1);
-      spaSections.forEach(sec => sec.classList.toggle("active", sec.id === targetId));
-      navLinks.classList.remove("active");
-      loginMenu.classList.remove("show");
+  const navLinks = document.getElementById("navLinks");
+  if (hamburgerBtn && navLinks) {
+    hamburgerBtn.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
     });
-  });
+  }
+}
 
-  // Open/close form modals
-  dashboardCards.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const form = document.getElementById(btn.dataset.target);
-      const wrap = form.closest(".form-wrapper");
-      wrap.classList.add("active");
-      form.classList.remove("hidden");
+// ==========================
+// Login Dropdown Toggle
+// ==========================
+function initLoginDropdown() {
+  const loginToggle = document.getElementById("loginToggle");
+  const loginDropdown = document.getElementById("loginDropdown");
+  if (loginToggle && loginDropdown) {
+    loginToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      loginDropdown.classList.toggle("open");
     });
-  });
-  formWrappers.forEach(wrap => {
-    wrap.querySelector(".close-btn").addEventListener("click", () => {
-      wrap.classList.remove("active");
-      wrap.querySelector(".task-form").classList.add("hidden");
+    document.addEventListener("click", (e) => {
+      if (!loginDropdown.contains(e.target)) {
+        loginDropdown.classList.remove("open");
+      }
     });
-  });
+  }
+}
 
-  // Dark mode persistence
-  darkToggle.checked = localStorage.getItem("dark") === "true";
-  document.body.classList.toggle("dark", darkToggle.checked);
-  darkToggle.addEventListener("change", () => {
-    document.body.classList.toggle("dark", darkToggle.checked);
-    localStorage.setItem("dark", darkToggle.checked);
-  });
+// ==========================
+// Form Display Toggle
+// ==========================
+function openForm(formId) {
+  const allForms = document.querySelectorAll(".task-form");
+  const targetForm = document.getElementById(formId);
+  if (!targetForm) return;
 
-  // Auth state listener
-  onAuthStateChanged(auth, user => {
-    logoutBtn.classList.toggle("hide", !user);
-  });
-  logoutBtn.addEventListener("click", () => signOut(auth));
+  const alreadyVisible = !targetForm.classList.contains("hidden");
+  allForms.forEach((form) => form.classList.add("hidden"));
+  if (!alreadyVisible) {
+    targetForm.classList.remove("hidden");
+    targetForm.scrollIntoView({ behavior: "smooth" });
+  }
+}
 
-  // Recent Requests helper
-  function addToRecent(type, detail) {
-    const list = document.getElementById("recent-requests-list");
-    const li = document.createElement("li");
-    li.className = "request-item";
-    const time = new Date().toLocaleString();
-    li.innerHTML = `
-      <div class="request-item__info"><strong>${type}:</strong> ${detail}</div>
-      <div class="request-item__time">${time}</div>
-    `;
-    list.prepend(li);
+function handleTaskSubmit(e, type) {
+  e.preventDefault();
+  alert(`${type} request submitted!`);
+  e.target.reset();
+}
+
+// ==========================
+// Auto Resize Textareas
+// ==========================
+function initTextareaAutoResize() {
+  document.addEventListener("input", (e) => {
+    if (e.target.tagName.toLowerCase() === "textarea") {
+      e.target.style.height = "auto";
+      e.target.style.height = `${e.target.scrollHeight}px`;
+    }
+  });
+}
+
+// ==========================
+// Community Arena Logic
+// ==========================
+function initCommunityArena() {
+  const postForm = document.getElementById("post-form");
+  const postList = document.getElementById("post-list");
+  const imageInput = document.getElementById("post-image");
+  const preview = document.getElementById("image-preview");
+
+  let posts = JSON.parse(localStorage.getItem("communityPosts")) || [];
+
+  const renderPosts = () => {
+    postList.innerHTML = "";
+    posts.slice().reverse().forEach((post, index) => {
+      const li = document.createElement("li");
+      li.className = "post";
+      li.innerHTML = `
+        <strong>${post.name}</strong>
+        <span class="timestamp">${post.time}</span>
+        <p>${post.message}</p>
+        ${post.image ? `<img src="${post.image}" alt="Post image" />` : ""}
+        <button class="upvote-btn" data-index="${posts.length - 1 - index}">👍 ${post.upvotes}</button>
+      `;
+      postList.appendChild(li);
+    });
+  };
+
+  if (imageInput) {
+    imageInput.addEventListener("change", () => {
+      preview.innerHTML = "";
+      const file = imageInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = document.createElement("img");
+          img.src = reader.result;
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
   }
 
-  // Handle task forms
-  document.getElementById("repair-form").addEventListener("submit", e => {
-    e.preventDefault();
-    const [name, addr, desc] = e.target.elements;
-    addToRecent("Repair", `${name.value}, ${addr.value}, ${desc.value}`);
-    e.target.closest(".form-wrapper").classList.remove("active");
-    e.target.classList.add("hidden");
-    e.target.reset();
-  });
-  document.getElementById("cleaning-form").addEventListener("submit", e => {
-    e.preventDefault();
-    const [name, addr, date] = e.target.elements;
-    addToRecent("Cleaning", `${name.value}, ${addr.value} on ${date.value}`);
-    e.target.closest(".form-wrapper").classList.remove("active");
-    e.target.classList.add("hidden");
-    e.target.reset();
-  });
-  document.getElementById("message-form").addEventListener("submit", e => {
-    e.preventDefault();
-    const [name, email, msg] = e.target.elements;
-    addToRecent("Message", `${name.value}, ${email.value}: ${msg.value}`);
-    e.target.closest(".form-wrapper").classList.remove("active");
-    e.target.classList.add("hidden");
-    e.target.reset();
-  });
+  if (postForm) {
+    postForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("post-name").value.trim();
+      const message = document.getElementById("post-message").value.trim();
+      const imageFile = imageInput.files[0];
+      const timestamp = new Date().toLocaleString();
 
-  // Community: image preview
-  imageInput.addEventListener("change", () => {
-    previewDiv.innerHTML = '';
-    const file = imageInput.files[0];
-    if (file) {
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      previewDiv.appendChild(img);
+      if (!name || !message) {
+        alert("Please enter your name and message.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const image = imageFile ? reader.result : null;
+        const newPost = {
+          name,
+          message,
+          image,
+          time: timestamp,
+          upvotes: 0,
+        };
+        posts.push(newPost);
+        localStorage.setItem("communityPosts", JSON.stringify(posts));
+        renderPosts();
+        postForm.reset();
+        preview.innerHTML = "";
+      };
+
+      if (imageFile) {
+        reader.readAsDataURL(imageFile);
+      } else {
+        reader.onloadend();
+      }
+    });
+  }
+
+  postList.addEventListener("click", (e) => {
+    if (e.target.classList.contains("upvote-btn")) {
+      const index = e.target.dataset.index;
+      posts[index].upvotes++;
+      localStorage.setItem("communityPosts", JSON.stringify(posts));
+      renderPosts();
     }
   });
 
-  // Community: post creation
-  postForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const name = postForm["post-name"].value.trim();
-    const msg = postForm["post-message"].value.trim();
-    if (!name || !msg) return;
-    const li = document.createElement("li");
-    li.className = "post-item";
-    li.innerHTML = `
-      <div class="post-content"><strong>${name}:</strong> ${msg}</div>
-      <div class="actions">
-        <button class="like-btn">Like <span class="like-count">0</span></button>
-        <button class="reply-btn">Reply</button>
-      </div>
-      <div class="reply-box">
-        <input type="text" placeholder="Write a reply..." />
-        <button class="submit-reply">Send</button>
-      </div>
-    `;
-    postList.prepend(li);
-    postForm.reset();
-    previewDiv.innerHTML = '';
+  renderPosts();
+}
 
-    // Like handler
-    const likeBtn = li.querySelector(".like-btn");
-    const countSpan = li.querySelector(".like-count");
-    likeBtn.addEventListener("click", () => {
-      let count = parseInt(countSpan.textContent, 10) || 0;
-      countSpan.textContent = ++count;
+// ==========================
+// Dark Mode Toggle
+// ==========================
+function initDarkModeToggle() {
+  const toggle = document.getElementById("darkToggle");
+  const saved = localStorage.getItem("darkMode") === "true";
+  if (toggle) {
+    toggle.checked = saved;
+    document.body.classList.toggle("dark", saved);
+    toggle.addEventListener("change", (e) => {
+      document.body.classList.toggle("dark", e.target.checked);
+      localStorage.setItem("darkMode", e.target.checked);
     });
+  }
+}
 
-    // Reply handler
-    const replyBtn = li.querySelector(".reply-btn");
-    const replyBox = li.querySelector(".reply-box");
-    const submitReply = li.querySelector(".submit-reply");
-    replyBtn.addEventListener("click", () => replyBox.classList.toggle("visible"));
-    submitReply.addEventListener("click", () => {
-      const input = replyBox.querySelector("input");
-      const text = input.value.trim();
-      if (!text) return;
-      const replyEl = document.createElement("p");
-      replyEl.className = "reply-text";
-      replyEl.textContent = text;
-      li.appendChild(replyEl);
-      input.value = '';
-      replyBox.classList.remove("visible");
+// ==========================
+// Dashboard Form Toggles
+// ==========================
+function initDashboardForms() {
+  const toggleButtons = document.querySelectorAll(".dashboard-card");
+  const closeButtons = document.querySelectorAll(".close-btn");
+
+  toggleButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      const formId = button.dataset.target;
+      const form = document.getElementById(formId);
+      form?.classList.toggle("hidden");
+      form?.scrollIntoView({ behavior: "smooth" });
     });
   });
-});
+
+  closeButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.close;
+      document.getElementById(target)?.classList.add("hidden");
+    });
+  });
+}
+"""
+        }
+    }
+}
