@@ -34,37 +34,47 @@ document.addEventListener("DOMContentLoaded", () => {
   initDarkModeToggle();
 });
 
-// ==========================
-// Mobile Hamburger Nav
-// ==========================
-function initMobileNav() {
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  const navLinks = document.getElementById("navLinks");
-  if (hamburgerBtn && navLinks) {
-    hamburgerBtn.addEventListener("click", () => {
-      navLinks.classList.toggle("active");
-    });
-  }
-}
+document.addEventListener('DOMContentLoaded', () => {
+  // Collapse/expand dashboard forms
+  const cards = document.querySelectorAll('.dashboard-card');
+  const forms = document.querySelectorAll('.task-form');
 
-// ==========================
-// Login Dropdown Toggle
-// ==========================
-function initLoginDropdown() {
-  const loginToggle = document.getElementById("loginToggle");
-  const loginDropdown = document.getElementById("loginDropdown");
-  if (loginToggle && loginDropdown) {
-    loginToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      loginDropdown.classList.toggle("open");
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const targetId = card.dataset.target;
+      forms.forEach(form => {
+        if (form.id === targetId) {
+          // Toggle the clicked one
+          form.classList.toggle('hidden');
+        } else {
+          // Always hide all others
+          form.classList.add('hidden');
+        }
+      });
     });
-    document.addEventListener("click", (e) => {
-      if (!loginDropdown.contains(e.target)) {
-        loginDropdown.classList.remove("open");
-      }
-    });
-  }
-}
+  });
+
+  // Hamburger menu toggle
+  const hamburger = document.getElementById('hamburgerBtn');
+  const navLinks = document.getElementById('navLinks');
+  hamburger.addEventListener('click', () => {
+    navLinks.classList.toggle('open');
+  });
+
+  // Login dropdown
+  const loginToggle = document.getElementById('loginToggle');
+  const loginMenu = document.getElementById('loginMenu');
+  loginToggle.addEventListener('click', () => {
+    loginMenu.classList.toggle('hidden');
+  });
+
+  // Dark mode toggle
+  const darkToggle = document.getElementById('darkToggle');
+  darkToggle.addEventListener('change', () => {
+    document.body.classList.toggle('dark-mode', darkToggle.checked);
+  });
+});
+
 
 // ==========================
 // Form Display Toggle
