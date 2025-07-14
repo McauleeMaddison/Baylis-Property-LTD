@@ -23,7 +23,7 @@ body {
   padding: 2rem 0;
 }
 
-/* Color Palette */
+/* Color scheme */
 :root {
   --primary: #4f46e5;      /* Indigo */
   --primary-light: #818cf8;
@@ -125,6 +125,7 @@ body {
   color: var(--primary);
   background: var(--gradient);
   -webkit-background-clip: text;
+  background-clip: text;
   color: transparent;
 }
 .dashboard-grid {
