@@ -1,32 +1,35 @@
-// Front-end interactivity & auth against back end
+// js/script.js
 document.addEventListener('DOMContentLoaded', () => {
-  const API = 'http://localhost:5000/api';
+  const API = 'http://localhost:5000/api'; // ← your back-end base URL
 
-  // Responsive nav
-  const hamb = document.getElementById('hamburgerBtn'),
-        navLinks = document.getElementById('navLinks');
+  // 1) Responsive nav
+  const hamb = document.getElementById('hamburgerBtn');
+  const navLinks = document.getElementById('navLinks');
   hamb.addEventListener('click', () => {
     const open = hamb.getAttribute('aria-expanded') === 'true';
     hamb.setAttribute('aria-expanded', String(!open));
     navLinks.classList.toggle('show');
   });
 
-  // Login dropdown
-  const loginToggle = document.getElementById('loginToggle'),
-        loginMenu   = document.getElementById('loginMenu');
+  // 2) Login dropdown toggle
+  const loginToggle = document.getElementById('loginToggle');
+  const loginMenu   = document.getElementById('loginMenu');
   loginToggle.addEventListener('click', () => {
     const open = loginToggle.getAttribute('aria-expanded') === 'true';
     loginToggle.setAttribute('aria-expanded', String(!open));
     loginMenu.classList.toggle('hidden');
   });
   document.addEventListener('click', e => {
-    if (!loginToggle.contains(e.target) && !loginMenu.contains(e.target)) {
+    if (
+      !loginToggle.contains(e.target) &&
+      !loginMenu.contains(e.target)
+    ) {
       loginMenu.classList.add('hidden');
-      loginToggle.setAttribute('aria-expanded','false');
+      loginToggle.setAttribute('aria-expanded', 'false');
     }
   });
 
-  // Dark mode
+  // 3) Dark mode persistence
   const darkToggle = document.getElementById('darkToggle');
   darkToggle.addEventListener('change', () => {
     document.body.classList.toggle('dark', darkToggle.checked);
@@ -37,61 +40,67 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('dark');
   }
 
-  // Collapsible
-  document.querySelectorAll('.collapsible').forEach(c => {
-    const hdr = c.querySelector('.collapsible-header');
+  // 4) Collapsibles
+  document.querySelectorAll('.collapsible').forEach(container => {
+    const hdr = container.querySelector('.collapsible-header');
     hdr.addEventListener('click', () => {
-      const isOpen = c.classList.toggle('open');
+      const isOpen = container.classList.toggle('open');
       hdr.setAttribute('aria-expanded', isOpen);
     });
   });
 
-  // Auth modals & forms
-  const openLoginLinks = document.querySelectorAll('.openLogin'),
-        loginModal      = document.getElementById('loginModal'),
-        registerModal   = document.getElementById('registerModal'),
-        loginForm       = document.getElementById('loginForm'),
-        registerForm    = document.getElementById('registerForm'),
-        logoutBtn       = document.getElementById('logoutBtn'),
-        loginRoleInput  = document.getElementById('loginRole'),
-        registerRoleInput = document.getElementById('registerRole'),
-        showRegister    = document.getElementById('showRegister');
+  // 5) Auth modals & forms
+  const openLoginLinks    = document.querySelectorAll('.openLogin');
+  const loginModal        = document.getElementById('loginModal');
+  const registerModal     = document.getElementById('registerModal');
+  const loginForm         = document.getElementById('loginForm');
+  const registerForm      = document.getElementById('registerForm');
+  const logoutBtn         = document.getElementById('logoutBtn');
+  const loginRoleInput    = document.getElementById('loginRole');
+  const registerRoleInput = document.getElementById('registerRole');
+  const showRegister      = document.getElementById('showRegister');
 
-  let loginRole = '';
-
-  // Show login modal
-  openLoginLinks.forEach(a => {
-    a.addEventListener('click', e => {
+  // a) Open login modal with role
+  openLoginLinks.forEach(link => {
+    link.addEventListener('click', e => {
       e.preventDefault();
-      loginRole = a.dataset.role;
-      loginRoleInput.value = loginRole;
+      loginRoleInput.value = link.dataset.role;
       loginModal.classList.remove('hidden');
     });
   });
 
-  // Switch to register
+  // b) Switch to register
   showRegister.addEventListener('click', e => {
     e.preventDefault();
     loginModal.classList.add('hidden');
     registerModal.classList.remove('hidden');
   });
 
-  // Close modals
+  // c) Close modals
   document.querySelectorAll('.modal .close').forEach(btn => {
     btn.addEventListener('click', () => {
       document.getElementById(btn.dataset.modal).classList.add('hidden');
     });
   });
 
-  // Update nav text based on session
+  // d) Update nav text
   async function updateNavForUser() {
-    const res = await fetch(`${API}/user`, { credentials: 'include' });
-    const { user } = await res.json();
-    loginToggle.textContent = user ? `${user.email} ▼` : 'Login ▼';
+    try {
+      const res = await fetch(`${API}/user`, {
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const { user } = await res.json();
+      loginToggle.textContent = user
+        ? `${user.email} ▼`
+        : 'Login ▼';
+    } catch (err) {
+      console.error('Could not fetch /user:', err);
+    }
   }
   updateNavForUser();
 
-  // Register
+  // e) Register handler
   registerForm.addEventListener('submit', async e => {
     e.preventDefault();
     const email   = registerForm.registerEmail.value;
@@ -99,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirm = registerForm.registerConfirm.value;
     const role    = registerRoleInput.value;
     if (pass !== confirm) return alert('Passwords do not match');
+
     const res = await fetch(`${API}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -111,12 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loginModal.classList.remove('hidden');
   });
 
-  // Login
+  // f) Login handler
   loginForm.addEventListener('submit', async e => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value;
     const pass  = document.getElementById('loginPassword').value;
     const role  = loginRoleInput.value;
+
     const res = await fetch(`${API}/login`, {
       method: 'POST',
       credentials: 'include',
@@ -130,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavForUser();
   });
 
-  // Logout
+  // g) Logout handler
   logoutBtn.addEventListener('click', async e => {
     e.preventDefault();
     await fetch(`${API}/logout`, {
@@ -140,37 +151,3 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavForUser();
   });
 });
-<!-- Login Modal -->
-<div id="loginModal" class="modal hidden">
-  <div class="modal-content">
-    <button class="close" data-modal="loginModal">&times;</button>
-    <h3>Login</h3>
-    <form id="loginForm">
-      <input type="hidden" id="loginRole" name="role">
-      <label>Email</label>
-      <input type="email" id="loginEmail" required>
-      <label>Password</label>
-      <input type="password" id="loginPassword" required>
-      <button type="submit" class="btn">Login</button>
-      <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
-    </form>
-  </div>
-</div>
-
-<!-- Register Modal -->
-<div id="registerModal" class="modal hidden">
-  <div class="modal-content">
-    <button class="close" data-modal="registerModal">&times;</button>
-    <h3>Register</h3>
-    <form id="registerForm">
-      <input type="hidden" id="registerRole" name="role" value="resident">
-      <label>Email</label>
-      <input type="email" id="registerEmail" required>
-      <label>Password</label>
-      <input type="password" id="registerPassword" required>
-      <label>Confirm Password</label>
-      <input type="password" id="registerConfirm" required>
-      <button type="submit" class="btn">Register</button>
-    </form>
-  </div>
-</div>
