@@ -140,3 +140,37 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavForUser();
   });
 });
+<!-- Login Modal -->
+<div id="loginModal" class="modal hidden">
+  <div class="modal-content">
+    <button class="close" data-modal="loginModal">&times;</button>
+    <h3>Login</h3>
+    <form id="loginForm">
+      <input type="hidden" id="loginRole" name="role">
+      <label>Email</label>
+      <input type="email" id="loginEmail" required>
+      <label>Password</label>
+      <input type="password" id="loginPassword" required>
+      <button type="submit" class="btn">Login</button>
+      <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- Register Modal -->
+<div id="registerModal" class="modal hidden">
+  <div class="modal-content">
+    <button class="close" data-modal="registerModal">&times;</button>
+    <h3>Register</h3>
+    <form id="registerForm">
+      <input type="hidden" id="registerRole" name="role" value="resident">
+      <label>Email</label>
+      <input type="email" id="registerEmail" required>
+      <label>Password</label>
+      <input type="password" id="registerPassword" required>
+      <label>Confirm Password</label>
+      <input type="password" id="registerConfirm" required>
+      <button type="submit" class="btn">Register</button>
+    </form>
+  </div>
+</div>
