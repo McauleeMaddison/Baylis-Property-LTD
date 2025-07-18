@@ -1,6 +1,5 @@
-// js/script.js
 document.addEventListener('DOMContentLoaded', () => {
-  const API = 'http://localhost:5000/api'; // ← your back-end base URL
+  const API = 'http://localhost:5000/api'; // Your backend base URL
 
   // 1) Responsive nav
   const hamb = document.getElementById('hamburgerBtn');
@@ -13,17 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2) Login dropdown toggle
   const loginToggle = document.getElementById('loginToggle');
-  const loginMenu   = document.getElementById('loginMenu');
+  const loginMenu = document.getElementById('loginMenu');
   loginToggle.addEventListener('click', () => {
     const open = loginToggle.getAttribute('aria-expanded') === 'true';
     loginToggle.setAttribute('aria-expanded', String(!open));
     loginMenu.classList.toggle('hidden');
   });
+  
   document.addEventListener('click', e => {
-    if (
-      !loginToggle.contains(e.target) &&
-      !loginMenu.contains(e.target)
-    ) {
+    if (!loginToggle.contains(e.target) && !loginMenu.contains(e.target)) {
       loginMenu.classList.add('hidden');
       loginToggle.setAttribute('aria-expanded', 'false');
     }
@@ -35,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.toggle('dark', darkToggle.checked);
     localStorage.setItem('darkMode', darkToggle.checked);
   });
+
   if (localStorage.getItem('darkMode') === 'true') {
     darkToggle.checked = true;
     document.body.classList.add('dark');
@@ -50,15 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 5) Auth modals & forms
-  const openLoginLinks    = document.querySelectorAll('.openLogin');
-  const loginModal        = document.getElementById('loginModal');
-  const registerModal     = document.getElementById('registerModal');
-  const loginForm         = document.getElementById('loginForm');
-  const registerForm      = document.getElementById('registerForm');
-  const logoutBtn         = document.getElementById('logoutBtn');
-  const loginRoleInput    = document.getElementById('loginRole');
+  const openLoginLinks = document.querySelectorAll('.openLogin');
+  const loginModal = document.getElementById('loginModal');
+  const registerModal = document.getElementById('registerModal');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginRoleInput = document.getElementById('loginRole');
   const registerRoleInput = document.getElementById('registerRole');
-  const showRegister      = document.getElementById('showRegister');
+  const showRegister = document.getElementById('showRegister');
 
   // a) Open login modal with role
   openLoginLinks.forEach(link => {
@@ -86,16 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // d) Update nav text
   async function updateNavForUser() {
     try {
-      const res = await fetch(`${API}/user`, {
-        credentials: 'include'
-      });
+      const res = await fetch(`${API}/user`, { credentials: 'include' });
       if (!res.ok) throw new Error(`Status ${res.status}`);
       const { user } = await res.json();
-      loginToggle.textContent = user
-        ? `${user.email} ▼`
-        : 'Login ▼';
+      loginToggle.textContent = user ? `${user.email} ▼` : 'Login ▼';
     } catch (err) {
-      console.error('Could not fetch /user:', err);
+      console.error('Error fetching user info:', err);
+      loginToggle.textContent = 'Login ▼'; // Fallback
     }
   }
   updateNavForUser();
@@ -103,51 +98,69 @@ document.addEventListener('DOMContentLoaded', () => {
   // e) Register handler
   registerForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const email   = registerForm.registerEmail.value;
-    const pass    = registerForm.registerPassword.value;
+    const email = registerForm.registerEmail.value;
+    const pass = registerForm.registerPassword.value;
     const confirm = registerForm.registerConfirm.value;
-    const role    = registerRoleInput.value;
-    if (pass !== confirm) return alert('Passwords do not match');
+    const role = registerRoleInput.value;
 
-    const res = await fetch(`${API}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pass, role })
-    });
-    const data = await res.json();
-    if (!res.ok) return alert(data.message);
-    alert('Registered! Please log in.');
-    registerModal.classList.add('hidden');
-    loginModal.classList.remove('hidden');
+    if (pass !== confirm) {
+      return alert('Passwords do not match');
+    }
+
+    try {
+      const res = await fetch(`${API}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass, role })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      alert('Registered! Please log in.');
+      registerModal.classList.add('hidden');
+      loginModal.classList.remove('hidden');
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
   });
 
   // f) Login handler
   loginForm.addEventListener('submit', async e => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value;
-    const pass  = document.getElementById('loginPassword').value;
-    const role  = loginRoleInput.value;
+    const pass = document.getElementById('loginPassword').value;
+    const role = loginRoleInput.value;
 
-    const res = await fetch(`${API}/login`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pass, role })
-    });
-    const data = await res.json();
-    if (!res.ok) return alert(data.message);
-    alert(`Welcome, ${data.email}!`);
-    loginModal.classList.add('hidden');
-    updateNavForUser();
+    try {
+      const res = await fetch(`${API}/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass, role })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      alert(`Welcome, ${data.email}!`);
+      loginModal.classList.add('hidden');
+      updateNavForUser();
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
   });
 
   // g) Logout handler
   logoutBtn.addEventListener('click', async e => {
     e.preventDefault();
-    await fetch(`${API}/logout`, {
-      method: 'POST',
-      credentials: 'include'
-    });
-    updateNavForUser();
+
+    try {
+      await fetch(`${API}/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      updateNavForUser();
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
   });
 });
