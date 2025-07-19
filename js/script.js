@@ -1,6 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
   const API = 'http://localhost:5000/api'; // Your backend base URL
 
+  // Fetch and display properties
+  function renderProperties(properties) {
+    const container = document.getElementById('properties-container');
+    if (!container) return;
+    if (!properties.length) {
+      container.innerHTML = '<p>No properties available.</p>';
+      return;
+    }
+    container.innerHTML = properties.map(p => `
+      <div class="property-card">
+        <h3>${p.name}</h3>
+        <p>Location: ${p.location}</p>
+      </div>
+    `).join('');
+  }
+
+  fetch(`${API}/properties`)
+    .then(res => res.json())
+    .then(renderProperties)
+    .catch(err => {
+      document.getElementById('properties-container').innerHTML = '<p>Error loading properties.</p>';
+      console.error(err);
+    });
+
   // 1) Responsive nav
   const hamb = document.getElementById('hamburgerBtn');
   const navLinks = document.getElementById('navLinks');
@@ -102,11 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const pass = registerForm.registerPassword.value;
     const confirm = registerForm.registerConfirm.value;
     const role = registerRoleInput.value;
-
     if (pass !== confirm) {
-      return alert('Passwords do not match');
+      alert('Passwords do not match');
+      return;
     }
-
+    registerForm.querySelector('.btn').disabled = true;
     try {
       const res = await fetch(`${API}/register`, {
         method: 'POST',
@@ -114,13 +138,24 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ email, password: pass, role })
       });
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message);
-      alert('Registered! Please log in.');
+      // Auto-login after registration
+      const loginRes = await fetch(`${API}/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass, role })
+      });
+      const loginData = await loginRes.json();
+      if (!loginRes.ok) throw new Error(loginData.message);
+      alert('Registered and logged in!');
+      registerForm.reset();
       registerModal.classList.add('hidden');
-      loginModal.classList.remove('hidden');
+      updateNavForUser();
     } catch (err) {
       alert(`Error: ${err.message}`);
+    } finally {
+      registerForm.querySelector('.btn').disabled = false;
     }
   });
 
@@ -130,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPassword').value;
     const role = loginRoleInput.value;
-
+    loginForm.querySelector('.btn').disabled = true;
     try {
       const res = await fetch(`${API}/login`, {
         method: 'POST',
@@ -139,13 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ email, password: pass, role })
       });
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message);
       alert(`Welcome, ${data.email}!`);
+      loginForm.reset();
       loginModal.classList.add('hidden');
       updateNavForUser();
     } catch (err) {
       alert(`Error: ${err.message}`);
+    } finally {
+      loginForm.querySelector('.btn').disabled = false;
     }
   });
 
@@ -162,5 +199,97 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error('Logout failed:', err);
     }
+  });
+  
+  // 6) Form submissions
+  // a) Repair form
+  const repairForm = document.getElementById('repairForm');
+  if (repairForm) {
+    repairForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('repairName').value;
+      const address = document.getElementById('repairAddress').value;
+      const issue = document.getElementById('repairIssue').value;
+      try {
+        const res = await fetch(`${API}/repair`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, address, issue })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        alert('Repair request submitted!');
+        repairForm.reset();
+      } catch (err) {
+        alert('Error submitting repair: ' + err.message);
+      }
+    });
+  }
+
+  // b) Cleaning form
+  const cleaningForm = document.getElementById('cleaningForm');
+  if (cleaningForm) {
+    cleaningForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('cleaningName').value;
+      const address = document.getElementById('cleaningAddress').value;
+      const date = document.getElementById('cleaningDate').value;
+      try {
+        const res = await fetch(`${API}/cleaning`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, address, date })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        alert('Cleaning scheduled!');
+        cleaningForm.reset();
+      } catch (err) {
+        alert('Error scheduling cleaning: ' + err.message);
+      }
+    });
+  }
+
+  // c) Message form
+  const messageForm = document.getElementById('messageForm');
+  if (messageForm) {
+    messageForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('messageName').value;
+      const email = document.getElementById('messageEmail').value;
+      const body = document.getElementById('messageBody').value;
+      try {
+        const res = await fetch(`${API}/message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, body })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        alert('Message sent!');
+        messageForm.reset();
+      } catch (err) {
+        alert('Error sending message: ' + err.message);
+      }
+    });
+  }
+
+  // 7) Collapsible cards: open correct form when dashboard card clicked
+  document.querySelectorAll('.dashboard-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const target = card.getAttribute('data-target');
+      document.querySelectorAll('.collapsible').forEach(c => {
+        if (c.getAttribute('data-target') === target) {
+          c.classList.add('open');
+          c.querySelector('.collapsible-header').setAttribute('aria-expanded', true);
+        } else {
+          c.classList.remove('open');
+          c.querySelector('.collapsible-header').setAttribute('aria-expanded', false);
+        }
+      });
+      // Scroll to form
+      const el = document.getElementById(target);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   });
 });
