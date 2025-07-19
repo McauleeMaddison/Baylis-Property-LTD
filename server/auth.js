@@ -1,33 +1,33 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import User from './models/User.js';
+import { mongo } from './dbManager.js';
 
 const router = express.Router();
 
-// Register
+// Register (MongoDB only)
 router.post('/register', async (req, res) => {
   const { email, password, role } = req.body;
   try {
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ message: 'Email already registered' });
     const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hash, role });
-    res.status(201).json({ email: user.email, role: user.role });
+    const existing = await mongo.User.findOne({ email });
+    if (existing) return res.status(400).json({ message: 'Email already registered' });
+    const user = await mongo.User.create({ email, password: hash, role });
+    return res.status(201).json({ email: user.email, role: user.role });
   } catch (err) {
     res.status(500).json({ message: 'Registration failed' });
   }
 });
 
-// Login
+// Login (MongoDB only)
 router.post('/login', async (req, res) => {
   const { email, password, role } = req.body;
   try {
-    const user = await User.findOne({ email, role });
+    const user = await mongo.User.findOne({ email, role });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ message: 'Invalid credentials' });
     req.session.userId = user._id;
-    res.json({ email: user.email, role: user.role });
+    return res.json({ email: user.email, role: user.role });
   } catch (err) {
     res.status(500).json({ message: 'Login failed' });
   }

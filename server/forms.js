@@ -1,15 +1,13 @@
 import express from 'express';
-import Repair from './models/Repair.js';
-import Cleaning from './models/Cleaning.js';
-import Message from './models/Message.js';
+import { mongo } from './dbManager.js';
 import { appendToSheet } from './googleSheets.js';
 
 const router = express.Router();
 
-// Submit repair form
+// Submit repair form (MongoDB only)
 router.post('/repair', async (req, res) => {
   try {
-    const repair = await Repair.create(req.body);
+    const repair = await mongo.Repair.create(req.body);
     // Save to Google Sheets
     await appendToSheet({
       values: [repair.name, repair.address, repair.issue, new Date().toISOString()],
@@ -23,10 +21,10 @@ router.post('/repair', async (req, res) => {
   }
 });
 
-// Submit cleaning form
+// Submit cleaning form (MongoDB only)
 router.post('/cleaning', async (req, res) => {
   try {
-    const cleaning = await Cleaning.create(req.body);
+    const cleaning = await mongo.Cleaning.create(req.body);
     // Save to Google Sheets
     await appendToSheet({
       values: [cleaning.name, cleaning.address, cleaning.date, new Date().toISOString()],
@@ -40,10 +38,10 @@ router.post('/cleaning', async (req, res) => {
   }
 });
 
-// Submit message form
+// Submit message form (MongoDB only)
 router.post('/message', async (req, res) => {
   try {
-    const message = await Message.create(req.body);
+    const message = await mongo.Message.create(req.body);
     // Save to Google Sheets
     await appendToSheet({
       values: [message.name, message.email, message.body, new Date().toISOString()],
