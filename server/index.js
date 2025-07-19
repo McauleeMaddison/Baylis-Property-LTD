@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import Property from './models/Property.js';
+import session from './middleware/session.js';
+import authRoutes from './auth.js';
+import formRoutes from './forms.js';
 
 dotenv.config();
 
@@ -11,6 +14,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cors());
+app.use(session);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
@@ -23,6 +27,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });
+
+// Auth routes
+app.use('/api', authRoutes);
+
+// Form routes
+app.use('/api', formRoutes);
 
 // Sample API route
 // Get all properties from MongoDB
