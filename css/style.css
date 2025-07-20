@@ -45,6 +45,10 @@ a:hover {
   color: var(--secondary);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Containers */
 .container {
   width: 90%;
@@ -63,6 +67,7 @@ a:hover {
   justify-content: space-between;
   padding: 1rem 0;
 }
+
 .logo {
   font-size: 1.75rem;
   font-weight: bold;
@@ -143,7 +148,9 @@ a:hover {
   }
   .nav-links {
     position: absolute;
-    top: 100%; left: 0; right: 0;
+    top: 100%;
+    left: 0;
+    right: 0;
     background: var(--bg-light);
     flex-direction: column;
     padding: 1rem;
@@ -177,17 +184,21 @@ a:hover {
   margin-bottom: 2.5rem;
 }
 .dashboard-card {
+  --i: 0;
   background: #fff;
   border-radius: var(--radius);
   padding: 1.25rem;
   text-align: center;
   cursor: pointer;
   box-shadow: 0 2px 8px var(--shadow-light);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardFadeIn 0.6s forwards;
+  animation-delay: calc(var(--i) * 0.1s);
   transition: transform var(--transition), box-shadow var(--transition);
 }
 .dashboard-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px var(--shadow-light);
+  animation: cardPop 0.4s ease forwards;
 }
 .card-icon {
   display: block;
@@ -195,7 +206,19 @@ a:hover {
   margin-bottom: 0.75rem;
 }
 
-/* Collapsibles */
+@keyframes cardFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes cardPop {
+  0%   { transform: scale(1)    translateY(0); }
+  50%  { transform: scale(1.05) translateY(-5px); }
+  100% { transform: scale(1)    translateY(0); }
+}
+
+/* Collapsible Panels */
 .collapsible {
   border: 1px solid var(--primary);
   border-radius: var(--radius);
@@ -291,7 +314,7 @@ a:hover {
 @keyframes gradientShift {
   0%   { background-position: 0%   50%; }
   50%  { background-position: 100% 50%; }
- 100% { background-position: 0%   50%; }
+  100% { background-position: 0%   50%; }
 }
 
 .community h2.section-title {
@@ -315,6 +338,14 @@ a:hover {
 .community-form textarea:focus {
   border-color: var(--primary);
   box-shadow: 0 0 8px rgba(255,110,199,0.5);
+}
+.community-form.shake {
+  animation: formShake 0.4s ease;
+}
+@keyframes formShake {
+  0%,100% { transform: translateX(0); }
+  25%     { transform: translateX(-6px); }
+  75%     { transform: translateX(6px); }
 }
 .community-form button {
   background: var(--secondary);
@@ -351,6 +382,7 @@ a:hover {
 }
 
 .community-post {
+  --delay: 0s;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
@@ -375,16 +407,21 @@ a:hover {
   box-shadow: 0 8px 20px var(--shadow-light);
   background-color: rgba(255,238,110,0.2);
 }
+
 .community-avatar {
   width: 50px;
   height: 50px;
   border-radius: 50%;
   background: #ddd center/cover no-repeat;
   flex-shrink: 0;
+  animation: float 4s ease-in-out infinite;
 }
-.community-body {
-  flex: 1;
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-6px); }
 }
+
+.community-body { flex: 1; }
 .community-meta {
   font-weight: bold;
   font-size: 0.95rem;
@@ -426,16 +463,18 @@ a:hover {
 .reaction-btn::after {
   content: '✨';
   position: absolute;
-  top: -6px; right: -6px;
-  opacity: 0; transform: scale(0);
+  top: -6px;
+  right: -6px;
+  opacity: 0;
+  transform: scale(0);
   transition: opacity var(--transition), transform var(--transition);
 }
 .reaction-btn:hover::after,
 .reaction-btn:focus::after {
-  opacity: 1; transform: scale(1);
+  opacity: 1;
+  transform: scale(1);
 }
 
-/* Reaction pop */
 @keyframes pop {
   0%,100% { transform: scale(1); }
   50%     { transform: scale(1.3); }
