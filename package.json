@@ -6,5 +6,7 @@
   "scripts": {
     "start": "node server/index.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "dotenv": "^17.2.0"
+  }
 }
