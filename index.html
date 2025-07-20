@@ -7,12 +7,14 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- Skip Link -->
+  <a href="#mainContent" class="skip-link">Skip to content</a>
 
   <!-- Login Modal -->
-  <div id="loginModal" class="modal hidden" role="dialog" aria-labelledby="loginModalTitle">
+  <div id="loginModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
     <div class="modal-content">
       <button class="close" data-modal="loginModal" aria-label="Close login modal">&times;</button>
-      <h3 id="loginModalTitle">Login</h3>
+      <h2 id="loginModalTitle">Login</h2>
       <form id="loginForm">
         <input type="hidden" id="loginRole" name="role" />
         <label for="loginEmail">Email</label>
@@ -20,16 +22,19 @@
         <label for="loginPassword">Password</label>
         <input type="password" id="loginPassword" required aria-required="true" />
         <button type="submit" class="btn">Login</button>
-        <p class="small">Don't have an account? <a href="#" id="showRegister">Register</a></p>
+        <p class="small">
+          Don't have an account?
+          <a href="#" id="showRegister">Register</a>
+        </p>
       </form>
     </div>
   </div>
 
   <!-- Register Modal -->
-  <div id="registerModal" class="modal hidden" role="dialog" aria-labelledby="registerModalTitle">
+  <div id="registerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="registerModalTitle">
     <div class="modal-content">
       <button class="close" data-modal="registerModal" aria-label="Close register modal">&times;</button>
-      <h3 id="registerModalTitle">Register</h3>
+      <h2 id="registerModalTitle">Register</h2>
       <form id="registerForm">
         <input type="hidden" id="registerRole" name="role" value="resident" />
         <label for="registerEmail">Email</label>
@@ -48,21 +53,34 @@
     <nav class="navbar" aria-label="Main navigation">
       <div class="container nav-container">
         <a href="#home" class="logo">Baylis Property LTD</a>
-        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">☰</button>
+        <button
+          class="hamburger"
+          id="hamburgerBtn"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+        >☰</button>
         <ul class="nav-links" id="navLinks">
           <li><a href="#home">Dashboard</a></li>
           <li><a href="#community">Community</a></li>
           <li class="dropdown">
-            <button id="loginToggle" aria-haspopup="true" aria-expanded="false">Login ▼</button>
+            <button
+              id="loginToggle"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >Login ▼</button>
             <ul class="dropdown-menu hidden" id="loginMenu">
               <li><a href="#" data-role="landlord" class="openLogin">Landlord Login</a></li>
               <li><a href="#" data-role="resident" class="openLogin">Resident Login</a></li>
-              <li><a href="#" id="logoutBtn" class="logout-link">Logout</a></li>
+              <li><button id="logoutBtn" class="logout-link">Logout</button></li>
             </ul>
           </li>
           <li>
             <label class="dark-mode-label">
-              <input type="checkbox" id="darkToggle" aria-label="Toggle dark mode" />
+              <input
+                type="checkbox"
+                id="darkToggle"
+                aria-label="Toggle dark mode"
+              />
               Dark Mode
             </label>
           </li>
@@ -72,30 +90,31 @@
   </header>
 
   <!-- Main Content -->
-  <main>
+  <main id="mainContent">
     <!-- Dashboard Section -->
     <section id="home" class="spa-section">
       <div class="container dashboard">
         <h1 class="section-title">Dashboard Overview</h1>
         <div class="dashboard-grid">
           <div class="dashboard-card" data-target="repair-form">
-            <span class="card-icon">🔧</span>
+            <span class="card-icon" aria-hidden="true">🔧</span>
             <span>Repairs</span>
           </div>
           <div class="dashboard-card" data-target="cleaning-form">
-            <span class="card-icon">🧹</span>
+            <span class="card-icon" aria-hidden="true">🧹</span>
             <span>Cleaning</span>
           </div>
           <div class="dashboard-card" data-target="message-form">
-            <span class="card-icon">✉️</span>
+            <span class="card-icon" aria-hidden="true">✉️</span>
             <span>Message</span>
           </div>
         </div>
-
         <div class="dashboard-forms">
           <!-- Repair Form -->
           <div class="collapsible" data-target="repair-form">
-            <div class="collapsible-header" aria-expanded="false">🔧 Repairs</div>
+            <button class="collapsible-header" aria-expanded="false">
+              🔧 Repairs
+            </button>
             <div class="collapsible-body" id="repair-form">
               <form id="repairForm" class="task-form" novalidate>
                 <fieldset>
@@ -111,10 +130,11 @@
               </form>
             </div>
           </div>
-
           <!-- Cleaning Form -->
           <div class="collapsible" data-target="cleaning-form">
-            <div class="collapsible-header" aria-expanded="false">🧹 Cleaning</div>
+            <button class="collapsible-header" aria-expanded="false">
+              🧹 Cleaning
+            </button>
             <div class="collapsible-body" id="cleaning-form">
               <form id="cleaningForm" class="task-form" novalidate>
                 <fieldset>
@@ -130,10 +150,11 @@
               </form>
             </div>
           </div>
-
           <!-- Message Form -->
           <div class="collapsible" data-target="message-form">
-            <div class="collapsible-header" aria-expanded="false">✉️ Message</div>
+            <button class="collapsible-header" aria-expanded="false">
+              ✉️ Message
+            </button>
             <div class="collapsible-body" id="message-form">
               <form id="messageForm" class="task-form" novalidate>
                 <fieldset>
@@ -159,8 +180,18 @@
         <h2 class="section-title">🏘️ Community Board</h2>
         <!-- Post Form -->
         <form id="communityPostForm" class="community-form">
-          <input type="text" id="posterName" placeholder="Your name" required />
-          <textarea id="posterMessage" placeholder="What's on your mind?" rows="2" required></textarea>
+          <input
+            type="text"
+            id="posterName"
+            placeholder="Your name"
+            required
+          />
+          <textarea
+            id="posterMessage"
+            placeholder="What's on your mind?"
+            rows="2"
+            required
+          ></textarea>
           <button type="submit" class="btn">Post</button>
         </form>
         <!-- Posts List -->
