@@ -1,19 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const API = 'http://localhost:5000/api'; // adjust to your live URL
+  const API = 'http://localhost:5000/api'; // ← change to your live API URL
 
-  /* ------------------------------
-     1) Fetch & Render Properties
-  ------------------------------ */
-  const propsContainer = document.getElementById('properties-container');
-  async function loadProperties() {
-    if (!propsContainer) return;
+  /* ------------------------
+     1) Load & Render Properties
+  ------------------------ */
+  (async function loadProperties() {
+    const container = document.getElementById('properties-container');
+    if (!container) return;
     try {
       const res = await fetch(`${API}/properties`);
       const properties = await res.json();
-      if (!properties.length) {
-        propsContainer.innerHTML = '<p>No properties available.</p>';
+      if (!Array.isArray(properties) || properties.length === 0) {
+        container.innerHTML = '<p>No properties available.</p>';
       } else {
-        propsContainer.innerHTML = properties.map(p => `
+        container.innerHTML = properties.map(p => `
           <div class="property-card">
             <h3>${p.name}</h3>
             <p>Location: ${p.location}</p>
@@ -22,20 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (err) {
       console.error('Error loading properties:', err);
-      propsContainer.innerHTML = '<p>Error loading properties.</p>';
+      container.innerHTML = '<p>Error loading properties.</p>';
     }
-  }
-  loadProperties();
+  })();
 
-  /* ------------------------------
-     2) Responsive Nav & Dropdown
-  ------------------------------ */
+  /* ------------------------
+     2) Responsive Nav & Login Dropdown
+  ------------------------ */
   const hamb = document.getElementById('hamburgerBtn');
   const navLinks = document.getElementById('navLinks');
   if (hamb && navLinks) {
     hamb.addEventListener('click', () => {
-      const expanded = hamb.getAttribute('aria-expanded') === 'true';
-      hamb.setAttribute('aria-expanded', String(!expanded));
+      const open = hamb.getAttribute('aria-expanded') === 'true';
+      hamb.setAttribute('aria-expanded', String(!open));
       navLinks.classList.toggle('show');
     });
   }
@@ -44,8 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginMenu   = document.getElementById('loginMenu');
   if (loginToggle && loginMenu) {
     loginToggle.addEventListener('click', () => {
-      const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
-      loginToggle.setAttribute('aria-expanded', String(!expanded));
+      const open = loginToggle.getAttribute('aria-expanded') === 'true';
+      loginToggle.setAttribute('aria-expanded', String(!open));
       loginMenu.classList.toggle('hidden');
     });
     document.addEventListener('click', e => {
@@ -56,12 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ------------------------------
+  /* ------------------------
      3) Dark Mode Persistence
-  ------------------------------ */
+  ------------------------ */
   const darkToggle = document.getElementById('darkToggle');
   if (darkToggle) {
-    // initialize
     const saved = localStorage.getItem('darkMode') === 'true';
     darkToggle.checked = saved;
     document.body.classList.toggle('dark', saved);
@@ -72,32 +70,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ------------------------------
-     4) Collapsible Sections
-  ------------------------------ */
-  document.querySelectorAll('.collapsible').forEach(container => {
-    const hdr = container.querySelector('.collapsible-header');
+  /* ------------------------
+     4) Collapsible Panels
+  ------------------------ */
+  document.querySelectorAll('.collapsible').forEach(panel => {
+    const hdr = panel.querySelector('.collapsible-header');
     if (!hdr) return;
     hdr.addEventListener('click', () => {
-      const isOpen = container.classList.toggle('open');
-      hdr.setAttribute('aria-expanded', isOpen);
+      const isOpen = panel.classList.toggle('open');
+      hdr.setAttribute('aria-expanded', String(isOpen));
     });
   });
 
-  /* ------------------------------
-     5) Auth Modals & Nav Update
-  ------------------------------ */
-  const openLoginLinks   = document.querySelectorAll('.openLogin');
-  const loginModal       = document.getElementById('loginModal');
-  const registerModal    = document.getElementById('registerModal');
-  const loginForm        = document.getElementById('loginForm');
-  const registerForm     = document.getElementById('registerForm');
-  const logoutBtn        = document.getElementById('logoutBtn');
-  const loginRoleInput   = document.getElementById('loginRole');
-  const registerRoleInput= document.getElementById('registerRole');
-  const showRegister     = document.getElementById('showRegister');
+  /* ------------------------
+     5) Auth Modals, Login/Logout, Nav Text
+  ------------------------ */
+  const openLoginLinks    = document.querySelectorAll('.openLogin');
+  const loginModal        = document.getElementById('loginModal');
+  const registerModal     = document.getElementById('registerModal');
+  const loginForm         = document.getElementById('loginForm');
+  const registerForm      = document.getElementById('registerForm');
+  const logoutBtn         = document.getElementById('logoutBtn');
+  const loginRoleInput    = document.getElementById('loginRole');
+  const registerRoleInput = document.getElementById('registerRole');
+  const showRegisterLink  = document.getElementById('showRegister');
 
-  // a) Open login modal
   openLoginLinks.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -106,14 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // b) Switch to register
-  showRegister?.addEventListener('click', e => {
+  showRegisterLink?.addEventListener('click', e => {
     e.preventDefault();
     loginModal?.classList.add('hidden');
     registerModal?.classList.remove('hidden');
   });
 
-  // c) Close modals
   document.querySelectorAll('.modal .close').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.modal;
@@ -121,50 +116,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // d) Update nav text based on logged‑in user
-  async function updateNavForUser() {
+  async function updateNav() {
     if (!loginToggle) return;
     try {
       const res = await fetch(`${API}/user`, { credentials: 'include' });
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) throw new Error('not logged in');
       const { user } = await res.json();
-      loginToggle.textContent = user ? `${user.email} ▼` : 'Login ▼';
+      loginToggle.textContent = user?.email ? `${user.email} ▼` : 'Login ▼';
     } catch {
       loginToggle.textContent = 'Login ▼';
     }
   }
-  updateNavForUser();
+  updateNav();
 
-  // e) Register handler
   registerForm?.addEventListener('submit', async e => {
     e.preventDefault();
-    const email   = registerForm.registerEmail.value.trim();
-    const pass    = registerForm.registerPassword.value;
-    const confirm = registerForm.registerConfirm.value;
+    const email   = document.getElementById('registerEmail').value.trim();
+    const pass    = document.getElementById('registerPassword').value;
+    const confirm = document.getElementById('registerConfirm').value;
     const role    = registerRoleInput.value;
-    if (pass !== confirm) return alert('Passwords do not match');
+    if (pass !== confirm) {
+      alert('Passwords do not match');
+      return;
+    }
     const btn = registerForm.querySelector('.btn');
     btn.disabled = true;
     try {
+      // Register
       let res = await fetch(`${API}/register`, {
         method: 'POST',
         headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({ email, password: pass, role })
       });
-      let data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      // auto‑login
+      let json = await res.json();
+      if (!res.ok) throw new Error(json.message);
+      // Then login
       res = await fetch(`${API}/login`, {
-        method: 'POST', credentials:'include',
+        method:'POST', credentials:'include',
         headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({ email, password: pass, role })
       });
-      data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      json = await res.json();
+      if (!res.ok) throw new Error(json.message);
       alert('Registered & logged in!');
       registerForm.reset();
       registerModal?.classList.add('hidden');
-      updateNavForUser();
+      updateNav();
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
@@ -172,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // f) Login handler
   loginForm?.addEventListener('submit', async e => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -182,16 +178,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
     try {
       const res = await fetch(`${API}/login`, {
-        method: 'POST', credentials:'include',
+        method:'POST', credentials:'include',
         headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({ email, password: pass, role })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      alert(`Welcome, ${data.email}!`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message);
+      alert(`Welcome, ${json.email}!`);
       loginForm.reset();
       loginModal?.classList.add('hidden');
-      updateNavForUser();
+      updateNav();
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
@@ -199,75 +195,102 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // g) Logout handler
   logoutBtn?.addEventListener('click', async e => {
     e.preventDefault();
     try {
-      await fetch(`${API}/logout`, {
-        method:'POST', credentials:'include'
-      });
-      updateNavForUser();
+      await fetch(`${API}/logout`, { method:'POST', credentials:'include' });
+      updateNav();
     } catch (err) {
       console.error('Logout failed:', err);
     }
   });
 
-  /* ------------------------------
-     6) Task Forms (Repair, Cleaning, Message)
-  ------------------------------ */
-  const formsConfig = [
-    { id: 'repairForm',   endpoint: 'repair',  fields:['repairName','repairAddress','repairIssue'],   msg:'Repair request submitted!' },
-    { id: 'cleaningForm', endpoint: 'cleaning', fields:['cleaningName','cleaningAddress','cleaningDate'], msg:'Cleaning scheduled!' },
-    { id: 'messageForm',  endpoint: 'message',  fields:['messageName','messageEmail','messageBody'],     msg:'Message sent!' }
+  /* ------------------------
+     6) Task Forms Submission
+  ------------------------ */
+  const taskForms = [
+    {
+      formId:    'repairForm',
+      endpoint:  'repair',
+      getBody:   () => ({
+        name:    document.getElementById('repairName').value,
+        address: document.getElementById('repairAddress').value,
+        issue:   document.getElementById('repairIssue').value
+      }),
+      successMsg: 'Repair request submitted!'
+    },
+    {
+      formId:    'cleaningForm',
+      endpoint:  'cleaning',
+      getBody:   () => ({
+        name:    document.getElementById('cleaningName').value,
+        address: document.getElementById('cleaningAddress').value,
+        date:    document.getElementById('cleaningDate').value
+      }),
+      successMsg: 'Cleaning scheduled!'
+    },
+    {
+      formId:    'messageForm',
+      endpoint:  'message',
+      getBody:   () => ({
+        name:    document.getElementById('messageName').value,
+        email:   document.getElementById('messageEmail').value,
+        body:    document.getElementById('messageBody').value
+      }),
+      successMsg: 'Message sent!'
+    }
   ];
-  formsConfig.forEach(cfg => {
-    const form = document.getElementById(cfg.id);
+
+  taskForms.forEach(({ formId, endpoint, getBody, successMsg }) => {
+    const form = document.getElementById(formId);
     if (!form) return;
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      const payload = {};
-      cfg.fields.forEach(f => { payload[f.replace(/(Name|Address|Issue|Date|Email|Body)$/,'').toLowerCase()] = document.getElementById(f).value; });
+      const btn = form.querySelector('button[type=submit]');
+      btn.disabled = true;
       try {
-        const res = await fetch(`${API}/${cfg.endpoint}`, {
-          method:'POST',
+        const res = await fetch(`${API}/${endpoint}`, {
+          method: 'POST',
           headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(getBody())
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        alert(cfg.msg);
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message);
+        alert(successMsg);
         form.reset();
       } catch (err) {
         alert(`Error: ${err.message}`);
+      } finally {
+        btn.disabled = false;
       }
     });
   });
 
-  /* ------------------------------
-     7) Dashboard‑Card → Open Collapsible
-  ------------------------------ */
+  /* ------------------------
+     7) Dashboard cards → Open collapsible
+  ------------------------ */
   document.querySelectorAll('.dashboard-card').forEach(card => {
     card.addEventListener('click', () => {
       const target = card.dataset.target;
-      document.querySelectorAll('.collapsible').forEach(c => {
-        const hdr = c.querySelector('.collapsible-header');
-        if (c.dataset.target === target) {
-          c.classList.add('open');
-          hdr.setAttribute('aria-expanded', 'true');
-          document.getElementById(target)?.scrollIntoView({behavior:'smooth',block:'center'});
+      document.querySelectorAll('.collapsible').forEach(panel => {
+        const hdr = panel.querySelector('.collapsible-header');
+        if (panel.dataset.target === target) {
+          panel.classList.add('open');
+          hdr.setAttribute('aria-expanded','true');
+          document.getElementById(target)?.scrollIntoView({ behavior:'smooth', block:'center' });
         } else {
-          c.classList.remove('open');
-          hdr.setAttribute('aria-expanded', 'false');
+          panel.classList.remove('open');
+          hdr.setAttribute('aria-expanded','false');
         }
       });
     });
   });
 
-  /* ------------------------------
-     8) Community Posts
-  ------------------------------ */
-  const postForm = document.getElementById('communityPostForm');
-  const postList = document.getElementById('communityPosts');
+  /* ------------------------
+     8) Community: Load & Post
+  ------------------------ */
+  const postForm = document.getElementById('post-form');
+  const postList = document.getElementById('post-list');
 
   async function loadPosts() {
     if (!postList) return;
@@ -283,16 +306,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderCommunityPosts(posts) {
     if (!postList) return;
-    if (!posts.length) {
+    if (!Array.isArray(posts) || posts.length === 0) {
       postList.innerHTML = '<li>No posts yet—be the first!</li>';
       return;
     }
     postList.innerHTML = '';
-    posts.forEach((post,i) => {
+    posts.forEach((post, i) => {
       const li = document.createElement('li');
       li.className = 'community-post';
       li.style.setProperty('--delay', `${i * 0.1}s`);
-      const avatar = post.avatar || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(post.name)}`;
+      const avatar = post.avatar
+        || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(post.name)}`;
       li.innerHTML = `
         <div class="community-avatar" style="background-image:url('${avatar}')"></div>
         <div class="community-body">
@@ -307,13 +331,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (postForm) {
+  if (postForm && postList) {
     postForm.addEventListener('submit', async e => {
       e.preventDefault();
-      const name    = document.getElementById('posterName').value.trim();
-      const message = document.getElementById('posterMessage').value.trim();
+      const name    = document.getElementById('post-name').value.trim();
+      const message = document.getElementById('post-message').value.trim();
       if (!name || !message) return;
-      postForm.querySelector('button').disabled = true;
+      const btn = postForm.querySelector('button[type=submit]');
+      btn.disabled = true;
       try {
         const avatar = `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(name)}`;
         await fetch(`${API}/posts`, {
@@ -321,13 +346,13 @@ document.addEventListener('DOMContentLoaded', () => {
           headers:{ 'Content-Type':'application/json' },
           body: JSON.stringify({ name, message, avatar })
         });
-        await loadPosts();
         postForm.reset();
+        await loadPosts();
       } catch (err) {
         alert('Error posting message');
         console.error(err);
       } finally {
-        postForm.querySelector('button').disabled = false;
+        btn.disabled = false;
       }
     });
   }
