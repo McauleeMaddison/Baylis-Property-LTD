@@ -13,47 +13,57 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'https://mcauleemaddison.github.io', // ✅ Removed trailing slash
+  credentials: true
+}));
 app.use(helmet());
-app.use(session);
+
+// Optional: fix mongoose deprecation warning
+mongoose.set('strictQuery', false);
+
+// Safe session init (if needed)
+try {
+  app.use(session);
+} catch (err) {
+  console.warn('⚠️ Session middleware failed to load:', err.message);
+}
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, {
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/baylis';
+mongoose.connect(mongoURI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch((err) => console.error('MongoDB connection error:', err));
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch((err) => console.error('❌ MongoDB connection error:', err));
 
+// Routes
 app.get('/', (req, res) => {
-  res.send('Backend is running');
+  res.send('✅ Backend is running');
 });
 
-// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', mongo: mongoose.connection.readyState });
 });
 
-// Auth routes
 app.use('/api', authRoutes);
-
-// Form routes
 app.use('/api', formRoutes);
 
-// Sample API route
-// Get all properties from MongoDB
+// Property Route
 app.get('/api/properties', async (req, res) => {
   try {
     const properties = await Property.find();
     res.json(properties);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch properties' });
+    res.status(500).json({ error: '❌ Failed to fetch properties' });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
 
 // Fetch properties data (this part is usually in the client-side code)
