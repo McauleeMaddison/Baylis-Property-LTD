@@ -1,254 +1,337 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const API = 'http://localhost:5000/api'; // ← your API
+  const API = 'http://localhost:5000/api';
 
-  // Utilities
-  const fadeIn = (el, d=300) => {
+  /** Utility animations **/
+  const fadeIn = (el, duration = 300) => {
     el.style.opacity = 0;
     el.style.display = '';
-    el.style.transition = `opacity ${d}ms`;
-    requestAnimationFrame(() => el.style.opacity = 1);
-    setTimeout(() => el.style.transition = '', d);
-  };
-  const fadeOut = (el, d=300) => {
-    el.style.opacity = 1;
-    el.style.transition = `opacity ${d}ms`;
-    requestAnimationFrame(() => el.style.opacity = 0);
-    setTimeout(() => { el.style.display='none'; el.style.transition=''; }, d);
+    el.style.transition = `opacity ${duration}ms`;
+    requestAnimationFrame(() => (el.style.opacity = 1));
+    setTimeout(() => (el.style.transition = ''), duration);
   };
 
-  // 1) Properties
+  const fadeOut = (el, duration = 300) => {
+    el.style.opacity = 1;
+    el.style.transition = `opacity ${duration}ms`;
+    requestAnimationFrame(() => (el.style.opacity = 0));
+    setTimeout(() => {
+      el.style.display = 'none';
+      el.style.transition = '';
+    }, duration);
+  };
+
+  /** Load property cards **/
   (async function loadProperties() {
-    const c = document.getElementById('properties-container');
-    if (!c) return;
+    const container = document.getElementById('properties-container');
+    if (!container) return;
+
     try {
-      let res = await fetch(`${API}/properties`);
-      let list = await res.json();
-      if (!Array.isArray(list) || !list.length) {
-        c.innerHTML = '<p>No properties available.</p>';
-      } else {
-        c.innerHTML = list.map(p=>`
-          <div class="property-card">
-            <h3>${p.name}</h3><p>${p.location}</p>
-          </div>
-        `).join('');
-        c.querySelectorAll('.property-card').forEach((card,i)=>{
-          card.style.opacity=0;
-          card.style.transition='opacity 600ms';
-          setTimeout(()=>card.style.opacity=1, i*100);
-        });
+      const res = await fetch(`${API}/properties`);
+      const properties = await res.json();
+
+      if (!Array.isArray(properties) || properties.length === 0) {
+        container.innerHTML = '<p>No properties available.</p>';
+        return;
       }
-    } catch(e) {
-      console.error(e);
-      c.innerHTML = '<p>Error loading properties.</p>';
+
+      container.innerHTML = properties.map(p => `
+        <div class="property-card animated fade-up">
+          <h3>${p.name}</h3>
+          <p>${p.location}</p>
+        </div>
+      `).join('');
+
+    } catch (error) {
+      console.error(error);
+      container.innerHTML = '<p>Error loading properties.</p>';
     }
   })();
 
-  // 2) Nav & Dropdown
-  const hamb = document.getElementById('hamburgerBtn'),
-        navLinks = document.getElementById('navLinks');
+  /** Navigation & dropdown menu **/
+  const hamb = document.getElementById('hamburgerBtn');
+  const navLinks = document.getElementById('navLinks');
+
   if (hamb && navLinks) {
-    hamb.addEventListener('click', ()=>{
-      let open = hamb.getAttribute('aria-expanded')==='true';
+    hamb.addEventListener('click', () => {
+      const open = hamb.getAttribute('aria-expanded') === 'true';
       hamb.setAttribute('aria-expanded', !open);
       navLinks.classList.toggle('show');
+
       if (!open) {
-        navLinks.querySelectorAll('li').forEach((li,i)=>{
-          li.style.opacity=0; li.style.transition='opacity 300ms';
-          setTimeout(()=>li.style.opacity=1, i*80);
+        navLinks.querySelectorAll('li').forEach((li, i) => {
+          li.style.opacity = 0;
+          li.style.transition = 'opacity 300ms';
+          setTimeout(() => (li.style.opacity = 1), i * 80);
         });
       }
     });
   }
-  const loginToggle = document.getElementById('loginToggle'),
-        loginMenu   = document.getElementById('loginMenu');
+
+  const loginToggle = document.getElementById('loginToggle');
+  const loginMenu = document.getElementById('loginMenu');
+
   if (loginToggle && loginMenu) {
-    loginToggle.addEventListener('click', e=>{
+    loginToggle.addEventListener('click', e => {
       e.stopPropagation();
-      let open = loginToggle.getAttribute('aria-expanded')==='true';
-      loginToggle.setAttribute('aria-expanded', !open);
+      const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
+      loginToggle.setAttribute('aria-expanded', !expanded);
       loginMenu.classList.toggle('hidden');
-      if (!open) fadeIn(loginMenu, 200);
+      if (!expanded) fadeIn(loginMenu, 200);
     });
-    document.addEventListener('click', e=>{
+
+    document.addEventListener('click', e => {
       if (!loginToggle.contains(e.target) && !loginMenu.contains(e.target)) {
         loginMenu.classList.add('hidden');
-        loginToggle.setAttribute('aria-expanded','false');
+        loginToggle.setAttribute('aria-expanded', 'false');
       }
     });
   }
 
-  // 3) Dark Mode
+  /** Dark mode toggle **/
   const darkToggle = document.getElementById('darkToggle');
   if (darkToggle) {
-    let saved = localStorage.getItem('darkMode')==='true';
-    darkToggle.checked = saved;
-    document.body.classList.toggle('dark', saved);
-    darkToggle.addEventListener('change', ()=>{
-      document.body.classList.toggle('dark', darkToggle.checked);
-      localStorage.setItem('darkMode', darkToggle.checked);
+    const savedDark = localStorage.getItem('darkMode') === 'true';
+    darkToggle.checked = savedDark;
+    document.body.classList.toggle('dark', savedDark);
+
+    darkToggle.addEventListener('change', () => {
+      const isDark = darkToggle.checked;
+      document.body.classList.toggle('dark', isDark);
+      localStorage.setItem('darkMode', isDark);
       darkToggle.parentElement.classList.add('bumped');
-      setTimeout(()=>darkToggle.parentElement.classList.remove('bumped'),300);
+      setTimeout(() => darkToggle.parentElement.classList.remove('bumped'), 300);
     });
   }
 
-  // 4) Collapsible
-  document.querySelectorAll('.collapsible').forEach(panel=>{
-    let hdr = panel.querySelector('.collapsible-header'),
-        body= panel.querySelector('.collapsible-body');
-    hdr?.addEventListener('click', ()=>{
-      let open = panel.classList.toggle('open');
-      hdr.setAttribute('aria-expanded', open);
-      body.style.maxHeight = open ? body.scrollHeight+'px' : '0';
+  /** Collapsible Panels **/
+  document.querySelectorAll('.collapsible').forEach(panel => {
+    const header = panel.querySelector('.collapsible-header');
+    const body = panel.querySelector('.collapsible-body');
+
+    if (header && body) {
+      header.addEventListener('click', () => {
+        const isOpen = panel.classList.toggle('open');
+        header.setAttribute('aria-expanded', isOpen);
+        body.style.maxHeight = isOpen ? `${body.scrollHeight}px` : '0';
+      });
+    }
+  });
+
+  /** Modal handlers **/
+  const loginModal = document.getElementById('loginModal');
+  const registerModal = document.getElementById('registerModal');
+  const openLoginLinks = document.querySelectorAll('.openLogin');
+  const showRegister = document.getElementById('showRegister');
+  const closeBtns = document.querySelectorAll('.modal .close');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  const openModal = modal => {
+    modal.classList.remove('hidden');
+    fadeIn(modal.querySelector('.modal-content'), 200);
+  };
+  const closeModal = modal => {
+    fadeOut(modal.querySelector('.modal-content'), 200);
+    setTimeout(() => modal.classList.add('hidden'), 200);
+  };
+
+  openLoginLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('loginRole').value = link.dataset.role;
+      openModal(loginModal);
     });
   });
 
-  // 5) Modals & Auth
-  const loginModal     = document.getElementById('loginModal'),
-        registerModal  = document.getElementById('registerModal'),
-        openLoginLinks = document.querySelectorAll('.openLogin'),
-        showRegister   = document.getElementById('showRegister'),
-        closeBtns      = document.querySelectorAll('.modal .close'),
-        loginForm      = document.getElementById('loginForm'),
-        registerForm   = document.getElementById('registerForm'),
-        logoutBtn      = document.getElementById('logoutBtn'),
-        loginToggleBtn = loginToggle;
-
-  function openModal(modal){ modal.classList.remove('hidden'); fadeIn(modal.querySelector('.modal-content'),200); }
-  function closeModal(modal){ fadeOut(modal.querySelector('.modal-content'),200); setTimeout(()=>modal.classList.add('hidden'),200); }
-  openLoginLinks.forEach(a=>a.addEventListener('click',e=>{
-    e.preventDefault();
-    document.getElementById('loginRole').value = a.dataset.role;
-    openModal(loginModal);
-  }));
-  showRegister?.addEventListener('click',e=>{
+  showRegister?.addEventListener('click', e => {
     e.preventDefault();
     closeModal(loginModal);
     openModal(registerModal);
   });
-  closeBtns.forEach(b=>b.addEventListener('click',()=>closeModal(document.getElementById(b.dataset.modal))));
-  document.addEventListener('keydown',e=>{
-    if (e.key==='Escape') [loginModal,registerModal].forEach(m=>!m.classList.contains('hidden')&&closeModal(m));
+
+  closeBtns.forEach(btn => {
+    btn.addEventListener('click', () => closeModal(document.getElementById(btn.dataset.modal)));
   });
 
-  async function updateNav(){
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      [loginModal, registerModal].forEach(m => {
+        if (!m.classList.contains('hidden')) closeModal(m);
+      });
+    }
+  });
+
+  /** Navigation state update **/
+  async function updateNav() {
     try {
-      let res = await fetch(`${API}/user`,{credentials:'include'});
-      if (!res.ok) throw '';
-      let {user} = await res.json();
-      loginToggleBtn.textContent = user?.email ? `${user.email} ▼` : 'Login ▼';
+      const res = await fetch(`${API}/user`, { credentials: 'include' });
+      const { user } = await res.json();
+      loginToggle.textContent = user?.email ? `${user.email} ▼` : 'Login ▼';
     } catch {
-      loginToggleBtn.textContent = 'Login ▼';
+      loginToggle.textContent = 'Login ▼';
     }
   }
   updateNav();
 
-  // Register
-  registerForm?.addEventListener('submit',async e=>{
+  /** Registration **/
+  registerForm?.addEventListener('submit', async e => {
     e.preventDefault();
-    let email     = document.getElementById('registerEmail').value,
-        pass      = document.getElementById('registerPassword').value,
-        confirm   = document.getElementById('registerConfirm').value,
-        role      = document.getElementById('registerRole').value,
-        btn       = registerForm.querySelector('button');
-    if (pass!==confirm){ alert('Passwords must match'); return; }
-    btn.disabled=true;
-    try{
-      let r=await fetch(`${API}/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,role})});
-      let j=await r.json(); if(!r.ok) throw j.message;
-      // auto login
-      r=await fetch(`${API}/login`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,role})});
-      j=await r.json(); if(!r.ok) throw j.message;
+    const email = registerForm.registerEmail.value;
+    const password = registerForm.registerPassword.value;
+    const confirm = registerForm.registerConfirm.value;
+    const role = registerForm.registerRole.value;
+
+    if (password !== confirm) return alert('Passwords must match');
+
+    const btn = registerForm.querySelector('button');
+    btn.disabled = true;
+
+    try {
+      let r = await fetch(`${API}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role })
+      });
+      let j = await r.json();
+      if (!r.ok) throw j.message;
+
+      // Auto-login
+      r = await fetch(`${API}/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role })
+      });
+      j = await r.json();
+      if (!r.ok) throw j.message;
+
       closeModal(registerModal);
       updateNav();
-    }catch(err){ alert(`Error: ${err}`); }
-    finally{ btn.disabled=false; }
+    } catch (err) {
+      alert(`Error: ${err}`);
+    } finally {
+      btn.disabled = false;
+    }
   });
-  // Login
-  loginForm?.addEventListener('submit',async e=>{
+
+  /** Login **/
+  loginForm?.addEventListener('submit', async e => {
     e.preventDefault();
-    let email   = document.getElementById('loginEmail').value,
-        pass    = document.getElementById('loginPassword').value,
-        role    = document.getElementById('loginRole').value,
-        btn     = loginForm.querySelector('button');
-    btn.disabled=true;
-    try{
-      let r=await fetch(`${API}/login`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,role})});
-      let j=await r.json(); if(!r.ok) throw j.message;
+    const email = loginForm.loginEmail.value;
+    const password = loginForm.loginPassword.value;
+    const role = loginForm.loginRole.value;
+
+    const btn = loginForm.querySelector('button');
+    btn.disabled = true;
+
+    try {
+      const r = await fetch(`${API}/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role })
+      });
+      const j = await r.json();
+      if (!r.ok) throw j.message;
+
       closeModal(loginModal);
       updateNav();
-    }catch(err){ alert(`Error: ${err}`); }
-    finally{ btn.disabled=false; }
+    } catch (err) {
+      alert(`Error: ${err}`);
+    } finally {
+      btn.disabled = false;
+    }
   });
-  // Logout
-  logoutBtn?.addEventListener('click',async e=>{
+
+  /** Logout **/
+  logoutBtn?.addEventListener('click', async e => {
     e.preventDefault();
-    await fetch(`${API}/logout`,{method:'POST',credentials:'include'});
+    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
     updateNav();
   });
 
-  // 6) Task forms
-  [
-    {id:'repairForm',endpoint:'repair', fields:['repairName','repairAddress','repairIssue'], msg:'Repair sent!'},
-    {id:'cleaningForm',endpoint:'cleaning',fields:['cleaningName','cleaningAddress','cleaningDate'],msg:'Cleaning scheduled!'},
-    {id:'messageForm',endpoint:'message', fields:['messageName','messageEmail','messageBody'], msg:'Message sent!'}
-  ].forEach(cfg=>{
-    let f=document.getElementById(cfg.id);
-    if(!f) return;
-    f.addEventListener('submit',async e=>{
+  /** Dashboard form submissions **/
+  const formConfigs = [
+    { id: 'repairForm', endpoint: 'repair', fields: ['repairName', 'repairAddress', 'repairIssue'], msg: 'Repair sent!' },
+    { id: 'cleaningForm', endpoint: 'cleaning', fields: ['cleaningName', 'cleaningAddress', 'cleaningDate'], msg: 'Cleaning scheduled!' },
+    { id: 'messageForm', endpoint: 'message', fields: ['messageName', 'messageEmail', 'messageBody'], msg: 'Message sent!' }
+  ];
+
+  formConfigs.forEach(cfg => {
+    const form = document.getElementById(cfg.id);
+    if (!form) return;
+
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-      let btn=f.querySelector('button'); btn.disabled=true;
-      let body={};
-      cfg.fields.forEach(id=> body[id.replace(/(Name|Address|Issue|Date|Email|Body)$/,'').toLowerCase()] = document.getElementById(id).value );
+      const btn = form.querySelector('button');
+      btn.disabled = true;
+
+      const body = {};
+      cfg.fields.forEach(id => {
+        const key = id.replace(/(Name|Address|Issue|Date|Email|Body)$/, '').toLowerCase();
+        body[key] = document.getElementById(id).value;
+      });
+
       try {
-        let r=await fetch(`${API}/${cfg.endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-        let j=await r.json(); if(!r.ok) throw j.message;
+        const res = await fetch(`${API}/${cfg.endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const j = await res.json();
+        if (!res.ok) throw j.message;
+
         alert(cfg.msg);
-        f.reset();
-      } catch(err){
+        form.reset();
+      } catch (err) {
         btn.classList.add('jiggle');
-        setTimeout(()=>btn.classList.remove('jiggle'),300);
+        setTimeout(() => btn.classList.remove('jiggle'), 300);
         alert(`Error: ${err}`);
-      } finally{ btn.disabled=false; }
+      } finally {
+        btn.disabled = false;
+      }
     });
   });
 
-  // 7) Dashboard → Collapsible
-  document.querySelectorAll('.dashboard-card').forEach((card,i)=>{
+  /** Dashboard card expand toggle **/
+  document.querySelectorAll('.dashboard-card').forEach((card, i) => {
     card.style.setProperty('--i', i);
-    card.addEventListener('click',()=>{
-      let t=card.dataset.target;
-      document.querySelectorAll('.collapsible').forEach(panel=>{
-        let hdr=panel.querySelector('.collapsible-header'),
-            bd =panel.querySelector('.collapsible-body');
-        if(panel.dataset.target===t){
-          panel.classList.add('open');
-          hdr.setAttribute('aria-expanded',true);
-          bd.style.maxHeight=bd.scrollHeight+'px';
-        } else {
-          panel.classList.remove('open');
-          hdr.setAttribute('aria-expanded',false);
-          bd.style.maxHeight=0;
-        }
+    card.addEventListener('click', () => {
+      const target = card.dataset.target;
+      document.querySelectorAll('.collapsible').forEach(panel => {
+        const isTarget = panel.dataset.target === target;
+        panel.classList.toggle('open', isTarget);
+        const header = panel.querySelector('.collapsible-header');
+        const body = panel.querySelector('.collapsible-body');
+        header?.setAttribute('aria-expanded', isTarget);
+        body.style.maxHeight = isTarget ? `${body.scrollHeight}px` : '0';
       });
     });
   });
 
-  // 8) Community
-  const postForm = document.getElementById('communityPostForm'),
-        postList = document.getElementById('communityPosts');
-  async function loadPosts(){
-    if(!postList) return;
+  /** Community board **/
+  const postForm = document.getElementById('communityPostForm');
+  const postList = document.getElementById('communityPosts');
+
+  async function loadPosts() {
+    if (!postList) return;
+
     try {
-      let res=await fetch(`${API}/posts`), posts=await res.json();
+      const res = await fetch(`${API}/posts`);
+      const posts = await res.json();
+
       postList.innerHTML = posts.length
-        ? '' : '<li>No posts yet—be the first!</li>';
-      posts.forEach((p,i)=>{
-        let li=document.createElement('li');
-        li.className='community-post';
-        li.style.setProperty('--delay',`${i*0.1}s`);
-        let av = p.avatar || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(p.name)}`;
-        li.innerHTML=`
-          <div class="community-avatar" style="background-image:url('${av}')"></div>
+        ? ''
+        : '<li>No posts yet—be the first!</li>';
+
+      posts.forEach((p, i) => {
+        const li = document.createElement('li');
+        li.className = 'community-post';
+        li.style.setProperty('--delay', `${i * 0.1}s`);
+        const avatar = p.avatar || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(p.name)}`;
+        li.innerHTML = `
+          <div class="community-avatar" style="background-image:url('${avatar}')"></div>
           <div class="community-body">
             <div class="community-meta">
               <strong>${p.name}</strong>
@@ -259,33 +342,51 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         postList.appendChild(li);
       });
-      // scroll reveal
-      new IntersectionObserver((eos,obs)=>{
-        eos.forEach(eo=>eo.isIntersecting&&(eo.target.classList.add('visible'), obs.unobserve(eo.target)));
-      },{threshold:0.1})
-      .observeAll && postList.querySelectorAll('.community-post').forEach(li=>observer.observe(li));
+
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      postList.querySelectorAll('.community-post').forEach(post => observer.observe(post));
     } catch {
       postList.innerHTML = '<li>Error loading posts.</li>';
     }
   }
-  if(postForm){
-    postForm.addEventListener('submit',async e=>{
+
+  if (postForm) {
+    postForm.addEventListener('submit', async e => {
       e.preventDefault();
-      let n=document.getElementById('posterName').value.trim(),
-          m=document.getElementById('posterMessage').value.trim();
-      if(!n||!m) return;
-      let btn=postForm.querySelector('button'); btn.disabled=true;
-      try{
-        await fetch(`${API}/posts`,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ name:n,message:m,avatar:`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(n)}`})
+      const name = document.getElementById('posterName').value.trim();
+      const message = document.getElementById('posterMessage').value.trim();
+      if (!name || !message) return;
+
+      const btn = postForm.querySelector('button');
+      btn.disabled = true;
+
+      try {
+        await fetch(`${API}/posts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            message,
+            avatar: `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(name)}`
+          })
         });
         postForm.reset();
         await loadPosts();
-      }catch{ alert('Error posting.'); }
-      finally{ btn.disabled=false; }
+      } catch {
+        alert('Error posting.');
+      } finally {
+        btn.disabled = false;
+      }
     });
   }
+
   loadPosts();
 });
