@@ -1,4 +1,3 @@
-/* Color Palette */
 :root {
   --primary:      #4a90e2;
   --secondary:    #2d3e50;
@@ -21,7 +20,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  transition: background-color var(--transition), color var(--transition), border-color var(--transition);
+  transition: all var(--transition);
 }
 
 html {
@@ -53,12 +52,14 @@ a:focus {
   max-width: 1000px;
   margin: 0 auto;
   padding: 1rem 0;
+  animation: fadeIn 0.6s ease;
 }
 
 /* Header */
 .site-header {
   background: var(--secondary);
   box-shadow: 0 2px 8px var(--shadow-light);
+  animation: slideDown 0.5s ease;
 }
 
 .nav-container {
@@ -72,6 +73,7 @@ a:focus {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-light);
+  animation: fadeInLeft 0.6s ease;
 }
 
 .nav-links {
@@ -79,6 +81,7 @@ a:focus {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  animation: fadeInRight 0.6s ease;
 }
 
 .nav-links a,
@@ -90,6 +93,7 @@ a:focus {
   cursor: pointer;
   position: relative;
   padding: 0.25rem 0;
+  transition: all 0.2s ease-in-out;
 }
 
 .nav-links a::after,
@@ -103,13 +107,11 @@ a:focus {
   background: var(--primary);
   transition: width var(--transition);
 }
-
 .nav-links a:hover::after,
 .nav-links button:hover::after {
   width: 100%;
 }
 
-/* Hamburger */
 .hamburger {
   display: none;
   font-size: 2rem;
@@ -123,7 +125,6 @@ a:focus {
   .hamburger {
     display: block;
   }
-
   .nav-links {
     flex-direction: column;
     position: fixed;
@@ -137,11 +138,9 @@ a:focus {
     transition: right var(--transition);
     z-index: 999;
   }
-
   .nav-links.show {
     right: 0;
   }
-
   .nav-links li {
     margin: 1rem 0;
     padding-left: 1.5rem;
@@ -158,6 +157,18 @@ a:focus {
   font-size: 2rem;
   color: var(--secondary);
   margin-bottom: 2rem;
+  position: relative;
+  animation: slideUpFade 0.8s ease;
+}
+.section-title::after {
+  content: "";
+  width: 60px;
+  height: 3px;
+  background: var(--primary);
+  display: block;
+  margin: 0.5rem auto 0;
+  border-radius: 4px;
+  animation: growWidth 0.8s ease;
 }
 
 .dashboard-grid {
@@ -173,14 +184,12 @@ a:focus {
   padding: 1.5rem;
   text-align: center;
   box-shadow: 0 2px 10px var(--shadow-light);
-  transition: transform var(--transition), box-shadow var(--transition);
-  opacity: 0;
   transform: translateY(20px);
-  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+  animation: fadeUp 0.7s forwards;
 }
-
 .dashboard-card:hover {
-  transform: translateY(-4px);
+  transform: scale(1.03);
   box-shadow: 0 6px 18px var(--shadow-light);
 }
 
@@ -190,43 +199,41 @@ a:focus {
   color: var(--primary);
 }
 
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
 }
 
-/* Forms */
-.task-form {
-  background: #fff;
-  border-radius: var(--radius);
-  padding: 2rem;
-  box-shadow: 0 4px 12px var(--shadow-light);
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-.task-form label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-.task-form input,
-.task-form textarea {
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: var(--radius);
-  font-size: 1rem;
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.task-form input:focus,
-.task-form textarea:focus {
-  border-color: var(--primary);
-  outline: none;
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes slideUpFade {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes growWidth {
+  from { width: 0; }
+  to   { width: 60px; }
+}
+
+/* Buttons */
 .btn {
   display: inline-block;
   padding: 0.75rem 1.5rem;
@@ -238,20 +245,42 @@ a:focus {
   cursor: pointer;
   transition: background var(--transition), transform var(--transition);
 }
-
 .btn:hover {
   background: #3a78c2;
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
 }
 
-/* Collapsible Panels */
+/* Forms */
+.task-form {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 4px 12px var(--shadow-light);
+  animation: fadeIn 1s ease;
+}
+.task-form input,
+.task-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+}
+.task-form input:focus,
+.task-form textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 6px rgba(74,144,226,0.4);
+  outline: none;
+}
+
+/* Collapsible */
 .collapsible {
   border: 1px solid var(--primary);
   border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: 1rem;
+  animation: fadeIn 1s ease;
 }
-
 .collapsible-header {
   background: var(--secondary);
   color: var(--text-light);
@@ -260,26 +289,22 @@ a:focus {
   position: relative;
   font-weight: bold;
 }
-
 .collapsible-header::after {
   content: '▸';
   position: absolute;
   right: 1rem;
   transition: transform var(--transition);
 }
-
 .collapsible.open .collapsible-header::after {
   transform: rotate(90deg);
 }
-
 .collapsible-body {
   max-height: 0;
   padding: 0 1rem;
   overflow: hidden;
   background: #fff;
-  transition: max-height 0.4s ease;
+  transition: max-height 0.4s ease, padding 0.4s ease;
 }
-
 .collapsible.open .collapsible-body {
   max-height: 1000px;
   padding: 1rem;
@@ -293,6 +318,7 @@ footer {
   padding: 1.25rem 0;
   margin-top: auto;
   font-size: 0.9rem;
+  animation: fadeIn 2s ease;
 }
 
 /* Dark Mode */
@@ -300,18 +326,15 @@ body.dark {
   background: var(--bg-dark);
   color: var(--text-light);
 }
-
 body.dark .site-header,
 body.dark footer {
   background: #23232f;
 }
-
 body.dark .dashboard-card,
 body.dark .task-form {
   background: #2a2a3c;
   box-shadow: 0 4px 12px var(--shadow-dark);
 }
-
 body.dark input,
 body.dark textarea {
   background: #3a3a4a;
