@@ -6,150 +6,92 @@
   <title>Baylis-Propertys</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <link rel="stylesheet" href="style.css" />
-  <style>
-    html {
-      scroll-behavior: smooth;
-    }
-    body {
-      animation: fadeInPage 0.8s ease;
-    }
-    @keyframes fadeInPage {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    header.hero {
-      background: linear-gradient(to right, #2d3e50, #4a90e2);
-      color: white;
-      padding: 4rem 2rem;
-      text-align: center;
-      border-bottom: 4px solid #4a90e2;
-      animation: slideIn 1s ease;
-    }
-    @keyframes slideIn {
-      from { transform: translateY(-30px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
-    }
-    .hero h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
-    .hero p {
-      font-size: 1.25rem;
-      opacity: 0.9;
-    }
-    figure img {
-      border-radius: 8px;
-      transition: transform 0.4s ease;
-    }
-    figure img:hover {
-      transform: scale(1.03);
-    }
-    section.container {
-      animation: fadeInSection 0.8s ease-in-out;
-    }
-    @keyframes fadeInSection {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    footer {
-      margin-top: 3rem;
-      padding: 2rem 0;
-      background-color: #2d3e50;
-      color: white;
-      text-align: center;
-      border-top: 5px solid #4a90e2;
-    }
-    .subscribe {
-      background: #f1f5f9;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-      animation: fadeIn 1s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-  </style>
 </head>
 <body>
 
-<!-- Nav -->
 <nav class="container-fluid">
   <ul>
     <li><strong>Baylis-Propertys</strong></li>
   </ul>
-  <ul>
+  <ul id="navLinks">
     <li><a href="#dashboard">Dashboard</a></li>
     <li><a href="#community">Community</a></li>
-    <li><a href="#contact" role="button">Contact</a></li>
+    <li><a href="#login" id="loginToggle" aria-expanded="false">Login ▼</a></li>
   </ul>
 </nav>
 
-<!-- Hero -->
-<header class="hero">
-  <h1>Welcome to Baylis-Propertys</h1>
-  <p>Modern landlord & tenant communication made simple.</p>
-</header>
-
-<!-- Dashboard Section -->
 <main class="container">
   <div class="grid">
     <section>
       <hgroup>
-        <h2 id="dashboard">Landlord & Resident Dashboard</h2>
-        <h3>Effortless property scheduling and requests</h3>
+        <h2 id="dashboard">Dashboard</h2>
+        <h3>Manage properties, repairs & cleaning</h3>
       </hgroup>
-      <p>Baylis-Propertys lets landlords manage cleaning appointments while residents can easily request repairs, deep cleans, and communicate directly.</p>
-      <figure>
-        <img src="https://source.unsplash.com/featured/?cleaning,housekeeping" alt="Landlord scheduling cleaning" />
-        <figcaption><a href="https://unsplash.com" target="_blank">Image courtesy of Unsplash</a></figcaption>
-      </figure>
-
-      <h3>Resident Repair Requests</h3>
-      <p>Residents can quickly submit repair requests through a user-friendly form with updates directly to landlords.</p>
-
-      <h3>Deep Cleaning Scheduling</h3>
-      <p>Request a one-time deep cleaning or schedule recurring services directly from your dashboard.</p>
+      <form id="repairForm">
+        <h3>Repair Request</h3>
+        <input id="repairName" placeholder="Name" required />
+        <input id="repairAddress" placeholder="Address" required />
+        <input id="repairIssue" placeholder="Issue Description" required />
+        <button type="submit">Submit Repair</button>
+      </form>
+      <form id="cleaningForm">
+        <h3>Cleaning Schedule</h3>
+        <input id="cleaningName" placeholder="Name" required />
+        <input id="cleaningAddress" placeholder="Address" required />
+        <input id="cleaningDate" placeholder="Date" required type="date" />
+        <button type="submit">Schedule Cleaning</button>
+      </form>
     </section>
   </div>
 </main>
 
-<!-- Subscribe Section -->
-<section class="container subscribe" aria-label="Stay Connected">
-  <div class="container">
-    <article>
-      <hgroup>
-        <h2>Stay Updated</h2>
-        <h3>Get notified about property or community updates</h3>
-      </hgroup>
-      <form class="grid">
-        <input type="text" id="firstname" name="firstname" placeholder="First Name" aria-label="First Name" required />
-        <input type="email" id="email" name="email" placeholder="Email" aria-label="Email" required />
-        <button type="submit" onclick="event.preventDefault()">Subscribe</button>
-      </form>
-    </article>
-  </div>
-</section>
-
-<!-- Community Section -->
 <section class="container">
-  <h2 id="community">Community Board</h2>
-  <div class="grid">
-    <figure>
-      <img src="https://source.unsplash.com/featured/?roommates,livingroom" alt="Residents talking in shared living room" />
-      <figcaption><a href="https://unsplash.com" target="_blank">Shared house conversations</a></figcaption>
-    </figure>
-    <div>
-      <p>Each house includes a shared community board to ask questions, leave notes, or organize social activities. Stay connected and create a cooperative living experience.</p>
-    </div>
-  </div>
+  <h2 id="community">Community Arena</h2>
+  <ul id="communityPosts"></ul>
+  <form id="communityPostForm">
+    <input id="posterName" placeholder="Your name" required />
+    <textarea id="posterMessage" placeholder="Say something..." required></textarea>
+    <button type="submit">Post</button>
+  </form>
 </section>
 
-<!-- Footer -->
+<!-- Login/Register Modals -->
+<div class="modal hidden" id="loginModal">
+  <div class="modal-content">
+    <button class="close" data-modal="loginModal">×</button>
+    <form id="loginForm">
+      <input id="loginEmail" placeholder="Email" required />
+      <input id="loginPassword" type="password" placeholder="Password" required />
+      <select id="loginRole">
+        <option value="resident">Resident</option>
+        <option value="landlord">Landlord</option>
+      </select>
+      <button type="submit">Login</button>
+      <p><a href="#" id="showRegister">Need an account?</a></p>
+    </form>
+  </div>
+</div>
+
+<div class="modal hidden" id="registerModal">
+  <div class="modal-content">
+    <button class="close" data-modal="registerModal">×</button>
+    <form id="registerForm">
+      <input id="registerEmail" placeholder="Email" required />
+      <input id="registerPassword" type="password" placeholder="Password" required />
+      <input id="registerConfirm" type="password" placeholder="Confirm Password" required />
+      <select id="registerRole">
+        <option value="resident">Resident</option>
+        <option value="landlord">Landlord</option>
+      </select>
+      <button type="submit">Register</button>
+    </form>
+  </div>
+</div>
+
 <footer class="container">
-  <small><a href="#">Terms</a> • <a href="#">Privacy</a> • <a href="#top">Back to top</a></small>
+  <small>© 2025 Baylis-Propertys • <a href="#">Terms</a> • <a href="#">Privacy</a></small>
 </footer>
 
+<script src="script.js"></script>
 </body>
 </html>
