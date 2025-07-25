@@ -5,8 +5,10 @@
   --danger: #e74c3c;
   --text-dark: #1c1c1c;
   --text-light: #fff;
-  --radius: 8px;
+
+  --radius: 10px;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 12px 36px rgba(0, 0, 0, 0.15);
   --transition: 0.3s ease-in-out;
 }
 
@@ -21,21 +23,24 @@ body {
 
 @keyframes fadeInBody {
   from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Images */
 img {
   border-radius: var(--radius);
   max-height: 280px;
   object-fit: cover;
   width: 100%;
-  transition: transform 0.4s ease;
+  transition: transform 0.4s ease, box-shadow 0.3s ease;
 }
 
 img:hover {
-  transform: scale(1.03);
+  transform: scale(1.04);
+  box-shadow: var(--shadow-hover);
 }
 
+/* Headings */
 h2, h3 {
   color: var(--secondary);
 }
@@ -50,6 +55,7 @@ hgroup h2 {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Layout */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -62,10 +68,11 @@ section {
 }
 
 @keyframes fadeInSection {
-  0%   { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Cards */
 .animated-card {
   background: white;
   border-radius: var(--radius);
@@ -76,22 +83,57 @@ section {
 
 .animated-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Navbar */
+nav.container-fluid {
+  background: linear-gradient(to right, var(--secondary), #1b2a3d);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  animation: navDrop 0.5s ease;
+}
+
+@keyframes navDrop {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
 }
 
 nav strong {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
+  color: var(--text-light);
 }
 
 nav ul li a {
   font-weight: 600;
-  transition: color 0.3s ease;
+  padding: 0.5rem;
+  color: var(--text-light);
+  position: relative;
+  transition: color var(--transition);
+}
+
+nav ul li a::after {
+  content: '';
+  width: 0;
+  height: 2px;
+  background: var(--primary);
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transition: width 0.3s ease;
 }
 
 nav ul li a:hover {
-  color: var(--primary);
+  color: #cdd7e1;
 }
 
+nav ul li a:hover::after {
+  width: 100%;
+}
+
+/* Forms */
 form input,
 form textarea {
   padding: 0.75rem;
@@ -104,10 +146,11 @@ form textarea {
 form input:focus,
 form textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.2);
   outline: none;
 }
 
+/* Buttons */
 button[type="submit"] {
   background: var(--primary);
   color: white;
@@ -116,33 +159,43 @@ button[type="submit"] {
   border-radius: var(--radius);
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.3s ease;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 
 button[type="submit"]:hover {
   background: #357abd;
-  transform: scale(1.02);
+  transform: scale(1.03);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
+/* Footer */
 footer {
   background: var(--secondary);
   color: var(--text-light);
   text-align: center;
   padding: 1.5rem 0;
-  border-top: 5px solid var(--primary);
+  border-top: 4px solid var(--primary);
   font-size: 0.9rem;
+  animation: fadeInFooter 1.5s ease;
 }
 
+@keyframes fadeInFooter {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   hgroup h2 {
     font-size: 1.6rem;
   }
+
   .grid {
     grid-template-columns: 1fr;
   }
+
   nav ul {
     flex-direction: column;
     gap: 1rem;
   }
 }
-
