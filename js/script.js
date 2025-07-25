@@ -1,89 +1,65 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const fadeIn = (el, duration = 300) => {
-    el.style.opacity = 0;
-    el.style.display = '';
-    el.style.transition = `opacity ${duration}ms`;
-    requestAnimationFrame(() => (el.style.opacity = 1));
-    setTimeout(() => (el.style.transition = ''), duration);
-  };
-
-  const fadeOut = (el, duration = 300) => {
-    el.style.opacity = 1;
-    el.style.transition = `opacity ${duration}ms`;
-    requestAnimationFrame(() => (el.style.opacity = 0));
-    setTimeout(() => {
-      el.style.display = 'none';
-      el.style.transition = '';
-    }, duration);
-  };
-
   const loginToggle = document.getElementById('loginToggle');
-  const loginModal = document.getElementById('loginModal');
-  const registerModal = document.getElementById('registerModal');
-  const showRegister = document.getElementById('showRegister');
+  const loginMenu = document.getElementById('loginMenu');
+  const loginForm = document.getElementById('loginForm');
 
-  loginToggle?.addEventListener('click', e => {
-    e.preventDefault();
-    loginModal.classList.remove('hidden');
-    fadeIn(loginModal.querySelector('.modal-content'));
-  });
-
-  document.querySelectorAll('.close').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const modal = document.getElementById(btn.dataset.modal);
-      fadeOut(modal.querySelector('.modal-content'));
-      setTimeout(() => modal.classList.add('hidden'), 200);
-    });
-  });
-
-  showRegister?.addEventListener('click', e => {
-    e.preventDefault();
-    loginModal.classList.add('hidden');
-    registerModal.classList.remove('hidden');
-    fadeIn(registerModal.querySelector('.modal-content'));
-  });
-
+  const cleaningForm = document.getElementById('cleaningForm');
+  const repairForm = document.getElementById('repairForm');
   const postForm = document.getElementById('communityPostForm');
   const postList = document.getElementById('communityPosts');
 
-  postForm?.addEventListener('submit', e => {
+  /** Login Dropdown Behavior **/
+  loginToggle?.addEventListener('click', e => {
     e.preventDefault();
-    const name = document.getElementById('posterName').value;
-    const message = document.getElementById('posterMessage').value;
-    const li = document.createElement('li');
-    li.innerHTML = `<strong>${name}</strong>: ${message}`;
-    postList.appendChild(li);
-    postForm.reset();
-  });
-
-  ['repairForm', 'cleaningForm'].forEach(id => {
-    const form = document.getElementById(id);
-    form?.addEventListener('submit', e => {
-      e.preventDefault();
-      alert(`${id === 'repairForm' ? 'Repair' : 'Cleaning'} submitted successfully!`);
-      form.reset();
-    });
-  });
-});
-// Navbar Login Dropdown Toggle
-const loginToggle = document.getElementById('loginToggle');
-const loginMenu = document.getElementById('loginMenu');
-
-if (loginToggle && loginMenu) {
-  loginToggle.addEventListener('click', e => {
-    e.preventDefault();
-    e.stopPropagation();
     const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
     loginToggle.setAttribute('aria-expanded', !expanded);
-    loginMenu.classList.toggle('show');
     loginMenu.classList.toggle('hidden');
+    loginMenu.classList.toggle('show');
   });
 
   document.addEventListener('click', e => {
     if (!loginMenu.contains(e.target) && !loginToggle.contains(e.target)) {
-      loginMenu.classList.remove('show');
       loginMenu.classList.add('hidden');
+      loginMenu.classList.remove('show');
       loginToggle.setAttribute('aria-expanded', 'false');
     }
   });
-}
+
+  /** Form Submissions **/
+  cleaningForm?.addEventListener('submit', e => {
+    e.preventDefault();
+    alert(`Cleaning scheduled for ${cleaningForm.cleaningDate.value}`);
+    cleaningForm.reset();
+  });
+
+  repairForm?.addEventListener('submit', e => {
+    e.preventDefault();
+    alert(`Repair submitted: ${repairForm.repairIssue.value}`);
+    repairForm.reset();
+  });
+
+  loginForm?.addEventListener('submit', e => {
+    e.preventDefault();
+    const email = loginForm.loginEmail.value;
+    alert(`Logging in as ${email}`);
+    loginMenu.classList.add('hidden');
+    loginMenu.classList.remove('show');
+  });
+
+  postForm?.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = postForm.posterName.value.trim();
+    const message = postForm.posterMessage.value.trim();
+    if (!name || !message) return;
+
+    const li = document.createElement('li');
+    li.className = 'animated-card';
+    li.innerHTML = `
+      <strong>${name}</strong><br />
+      <small>${new Date().toLocaleString()}</small>
+      <p>${message}</p>
+    `;
+    postList.prepend(li);
+    postForm.reset();
+  });
+});
