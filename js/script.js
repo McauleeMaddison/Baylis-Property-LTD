@@ -65,3 +65,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+// Navbar Login Dropdown Toggle
+const loginToggle = document.getElementById('loginToggle');
+const loginMenu = document.getElementById('loginMenu');
+
+if (loginToggle && loginMenu) {
+  loginToggle.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
+    loginToggle.setAttribute('aria-expanded', !expanded);
+    loginMenu.classList.toggle('show');
+    loginMenu.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', e => {
+    if (!loginMenu.contains(e.target) && !loginToggle.contains(e.target)) {
+      loginMenu.classList.remove('show');
+      loginMenu.classList.add('hidden');
+      loginToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
