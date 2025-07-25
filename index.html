@@ -3,133 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Baylis Property Management</title>
+  <title>Baylis Propertys</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-<!-- Navigation -->
 <nav class="container-fluid">
   <ul>
-    <li><strong>Baylis-Propertys</strong></li>
+    <li><strong>Baylis Propertys</strong></li>
   </ul>
   <ul id="navLinks">
-    <li><a href="#hero">Home</a></li>
     <li><a href="#dashboard">Dashboard</a></li>
     <li><a href="#community">Community</a></li>
     <li class="nav-login-wrapper">
       <a href="#" id="loginToggle" aria-expanded="false">Login ▼</a>
-      <div class="login-dropdown hidden" id="loginMenu">
-        <form id="loginFormDropdown">
+      <div id="loginMenu" class="login-dropdown hidden">
+        <form id="loginForm">
           <input type="email" id="loginEmail" placeholder="Email" required />
           <input type="password" id="loginPassword" placeholder="Password" required />
-          <select id="loginRole" required>
+          <select id="loginRole">
             <option value="resident">Resident</option>
             <option value="landlord">Landlord</option>
           </select>
           <button type="submit">Login</button>
-          <small><a href="#" id="showRegister">Register instead</a></small>
         </form>
       </div>
     </li>
   </ul>
 </nav>
 
-
-<!-- home Section -->
-<header id="home" class="container hero-section">
-  <hgroup>
-    <h1>Welcome to Baylis Property Management</h1>
-    <h3>Effortless living. Seamless services.</h3>
-  </hgroup>
-  <p>Track repairs, schedule cleanings, and connect with your community—all in one place.</p>
-  <a href="#dashboard" class="contrast" role="button">Get Started</a>
-</header>
-
-<!-- Dashboard Section -->
 <main class="container">
-  <div class="grid" id="dashboard">
-    <section class="animated-card">
+  <div class="grid">
+    <section id="dashboard">
       <hgroup>
-        <h2>Repair Request</h2>
-        <h3>Report a repair in seconds</h3>
+        <h2>Welcome to Baylis Propertys</h2>
+        <h3>Manage your properties and requests with ease</h3>
       </hgroup>
-      <form id="repairForm">
-        <input id="repairName" placeholder="Your name" required />
-        <input id="repairAddress" placeholder="Property address" required />
-        <textarea id="repairIssue" placeholder="Describe the issue" required></textarea>
-        <button type="submit">Submit Repair</button>
+      <p>Landlords can schedule cleanings and view repair requests. Residents can submit issues and connect with housemates.</p>
+    </section>
+
+    <section>
+      <h3>Cleaning Request</h3>
+      <form id="cleaningForm">
+        <input type="text" id="cleaningName" placeholder="Full Name" required />
+        <input type="text" id="cleaningAddress" placeholder="Address" required />
+        <input type="date" id="cleaningDate" required />
+        <button type="submit">Schedule Cleaning</button>
       </form>
     </section>
-    <section class="animated-card">
-      <hgroup>
-        <h2>Schedule Cleaning</h2>
-        <h3>Keep your space spotless</h3>
-      </hgroup>
-      <form id="cleaningForm">
-        <input id="cleaningName" placeholder="Your name" required />
-        <input id="cleaningAddress" placeholder="Property address" required />
-        <input id="cleaningDate" type="date" required />
-        <button type="submit">Book Cleaning</button>
+
+    <section>
+      <h3>Repair Request</h3>
+      <form id="repairForm">
+        <input type="text" id="repairName" placeholder="Full Name" required />
+        <input type="text" id="repairAddress" placeholder="Address" required />
+        <textarea id="repairIssue" placeholder="Describe the issue" required></textarea>
+        <button type="submit">Request Repair</button>
       </form>
     </section>
   </div>
 </main>
 
-<!-- Community Section -->
-<section class="container" id="community">
-  <hgroup>
-    <h2>Community Arena</h2>
-    <h3>Join the conversation with your neighbors</h3>
-  </hgroup>
-  <ul id="communityPosts" class="community-list"></ul>
-  <form id="communityPostForm">
-    <input id="posterName" placeholder="Your name" required />
-    <textarea id="posterMessage" placeholder="What’s on your mind?" required></textarea>
+<section class="container">
+  <h2 id="community">Community Board</h2>
+  <form id="communityPostForm" class="grid">
+    <input type="text" id="posterName" placeholder="Your Name" required />
+    <textarea id="posterMessage" placeholder="Share something..." required></textarea>
     <button type="submit">Post</button>
   </form>
+  <ul id="communityPosts"></ul>
 </section>
 
-<!-- Login Modal -->
-<div class="modal hidden" id="loginModal" role="dialog" aria-modal="true">
-  <div class="modal-content">
-    <button class="close" data-modal="loginModal" aria-label="Close login modal">×</button>
-    <h3>Log In</h3>
-    <form id="loginForm">
-      <input id="loginEmail" type="email" placeholder="Email" required />
-      <input id="loginPassword" type="password" placeholder="Password" required />
-      <select id="loginRole" required>
-        <option value="resident">Resident</option>
-        <option value="landlord">Landlord</option>
-      </select>
-      <button type="submit">Login</button>
-      <p><a href="#" id="showRegister">Don't have an account? Register</a></p>
-    </form>
-  </div>
-</div>
-
-<!-- Register Modal -->
-<div class="modal hidden" id="registerModal" role="dialog" aria-modal="true">
-  <div class="modal-content">
-    <button class="close" data-modal="registerModal" aria-label="Close register modal">×</button>
-    <h3>Create Account</h3>
-    <form id="registerForm">
-      <input id="registerEmail" type="email" placeholder="Email" required />
-      <input id="registerPassword" type="password" placeholder="Password" required />
-      <input id="registerConfirm" type="password" placeholder="Confirm Password" required />
-      <select id="registerRole" required>
-        <option value="resident">Resident</option>
-        <option value="landlord">Landlord</option>
-      </select>
-      <button type="submit">Register</button>
-    </form>
-  </div>
-</div>
-
-<!-- Footer -->
 <footer class="container">
-  <small>© 2025 Baylis Property Management • <a href="#">Terms</a> • <a href="#">Privacy</a></small>
+  <small><a href="#">Privacy</a> • <a href="#">Terms</a></small>
 </footer>
 
 <script src="js/script.js"></script>
