@@ -199,3 +199,44 @@ footer {
     gap: 1rem;
   }
 }
+/* Login Dropdown in Navbar */
+.nav-login-wrapper {
+  position: relative;
+}
+
+.login-dropdown {
+  position: absolute;
+  top: 3.2rem;
+  right: 0;
+  background: #fff;
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 260px;
+  z-index: 1000;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.login-dropdown.show {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.login-dropdown input,
+.login-dropdown select,
+.login-dropdown button {
+  margin-bottom: 0.75rem;
+}
+
+.login-dropdown button {
+  width: 100%;
+}
+
+/* Hide with JS class */
+.login-dropdown.hidden {
+  display: none;
+}
