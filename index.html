@@ -6,9 +6,75 @@
   <title>Baylis-Propertys</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      animation: fadeInPage 0.8s ease;
+    }
+    @keyframes fadeInPage {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    header.hero {
+      background: linear-gradient(to right, #2d3e50, #4a90e2);
+      color: white;
+      padding: 4rem 2rem;
+      text-align: center;
+      border-bottom: 4px solid #4a90e2;
+      animation: slideIn 1s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-30px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+    }
+    figure img {
+      border-radius: 8px;
+      transition: transform 0.4s ease;
+    }
+    figure img:hover {
+      transform: scale(1.03);
+    }
+    section.container {
+      animation: fadeInSection 0.8s ease-in-out;
+    }
+    @keyframes fadeInSection {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    footer {
+      margin-top: 3rem;
+      padding: 2rem 0;
+      background-color: #2d3e50;
+      color: white;
+      text-align: center;
+      border-top: 5px solid #4a90e2;
+    }
+    .subscribe {
+      background: #f1f5f9;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 1s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
 
+<!-- Nav -->
 <nav class="container-fluid">
   <ul>
     <li><strong>Baylis-Propertys</strong></li>
@@ -20,6 +86,13 @@
   </ul>
 </nav>
 
+<!-- Hero -->
+<header class="hero">
+  <h1>Welcome to Baylis-Propertys</h1>
+  <p>Modern landlord & tenant communication made simple.</p>
+</header>
+
+<!-- Dashboard Section -->
 <main class="container">
   <div class="grid">
     <section>
@@ -42,12 +115,13 @@
   </div>
 </main>
 
-<section aria-label="Subscribe example">
+<!-- Subscribe Section -->
+<section class="container subscribe" aria-label="Stay Connected">
   <div class="container">
     <article>
       <hgroup>
         <h2>Stay Updated</h2>
-        <h3>Get notified about your community updates</h3>
+        <h3>Get notified about property or community updates</h3>
       </hgroup>
       <form class="grid">
         <input type="text" id="firstname" name="firstname" placeholder="First Name" aria-label="First Name" required />
@@ -58,6 +132,7 @@
   </div>
 </section>
 
+<!-- Community Section -->
 <section class="container">
   <h2 id="community">Community Board</h2>
   <div class="grid">
@@ -66,13 +141,14 @@
       <figcaption><a href="https://unsplash.com" target="_blank">Shared house conversations</a></figcaption>
     </figure>
     <div>
-      <p>Each house includes a shared community board to ask questions, leave notes, or organize social activities.</p>
+      <p>Each house includes a shared community board to ask questions, leave notes, or organize social activities. Stay connected and create a cooperative living experience.</p>
     </div>
   </div>
 </section>
 
+<!-- Footer -->
 <footer class="container">
-  <small><a href="#">Terms</a> • <a href="#">Privacy</a></small>
+  <small><a href="#">Terms</a> • <a href="#">Privacy</a> • <a href="#top">Back to top</a></small>
 </footer>
 
 </body>
