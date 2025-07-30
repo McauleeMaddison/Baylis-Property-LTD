@@ -1,160 +1,67 @@
 // server.js
-import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import helmet from 'helmet';
+const express = require('express');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const session = require('express-session');
+const path = require('path');
 
-import Property from './models/Property.js';
-import session from './middleware/session.js';
-import authRoutes from './auth.js';
-import formRoutes from './forms.js';
-
-dotenv.config();
+const User = require('./models/User');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/baylis';
+const PORT = process.env.PORT || 3000;
 
-// Mongoose setup
-mongoose.set('strictQuery', false);
-
-// Connect to MongoDB
-mongoose.connect(mongoURI, {
+// MongoDB
+mongoose.connect('mongodb://localhost:27017/baylis-auth', {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch(err => {
-  console.error('❌ MongoDB connection error:', err.message);
-  process.exit(1);
-});
+  useUnifiedTopology: true
+}).then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ DB connection error:', err));
 
 // Middleware
-app.use(express.json());
-app.use(cors({
-  origin: [
-    'https://mcauleemaddison.github.io', // Production
-    'http://localhost:5500'              // Development
-  ],
-  credentials: true
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(session({
+  secret: 'keyboard-cat',
+  resave: false,
+  saveUninitialized: false,
 }));
-app.use(helmet());
-
-// Custom session middleware
-if (typeof session === 'function') {
-  app.use(session);
-} else {
-  console.warn('⚠️ Session middleware not loaded correctly');
-}
 
 // Routes
-app.get('/', (req, res) => {
-  res.send('✅ Baylis Property LTD Backend running');
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views/form.html')));
+app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'views/register.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'views/login.html')));
+
+// Handle form submission
+app.post('/submit-form', (req, res) => {
+  console.log('Form Data:', req.body);
+  res.send('Form received!');
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-  });
+// Handle registration
+app.post('/register', async (req, res) => {
+  const { email, password } = req.body;
+  const existing = await User.findOne({ email });
+  if (existing) return res.send('User already exists.');
+  const hash = await bcrypt.hash(password, 10);
+  await User.create({ email, password: hash });
+  res.send('✅ Registered successfully.');
 });
 
-app.use('/api', authRoutes);
-app.use('/api', formRoutes);
-
-// Property route
-app.get('/api/properties', async (req, res) => {
-  try {
-    const properties = await Property.find();
-    res.json(properties);
-  } catch (err) {
-    console.error('❌ Failed to fetch properties:', err);
-    res.status(500).json({ error: 'Failed to fetch properties' });
-  }
+// Handle login
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.send('❌ User not found.');
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.send('❌ Incorrect password.');
+  req.session.user = user;
+  res.send('✅ Logged in successfully.');
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
-// server.js
-import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import helmet from 'helmet';
-
-import Property from './models/Property.js';
-import session from './middleware/session.js';
-import authRoutes from './auth.js';
-import formRoutes from './forms.js';
-
-dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/baylis';
-
-// Mongoose setup
-mongoose.set('strictQuery', false);
-
-// Connect to MongoDB
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch(err => {
-  console.error('❌ MongoDB connection error:', err.message);
-  process.exit(1);
+// Logout
+app.get('/logout', (req, res) => {
+  req.session.destroy();
+  res.redirect('/login');
 });
 
-// Middleware
-app.use(express.json());
-app.use(cors({
-  origin: [
-    'https://mcauleemaddison.github.io', // Production
-    'http://localhost:5500'              // Development
-  ],
-  credentials: true
-}));
-app.use(helmet());
-
-// Custom session middleware
-if (typeof session === 'function') {
-  app.use(session);
-} else {
-  console.warn('⚠️ Session middleware not loaded correctly');
-}
-
-// Routes
-app.get('/', (req, res) => {
-  res.send('✅ Baylis Property LTD Backend running');
-});
-
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-  });
-});
-
-app.use('/api', authRoutes);
-app.use('/api', formRoutes);
-
-// Property route
-app.get('/api/properties', async (req, res) => {
-  try {
-    const properties = await Property.find();
-    res.json(properties);
-  } catch (err) {
-    console.error('❌ Failed to fetch properties:', err);
-    res.status(500).json({ error: 'Failed to fetch properties' });
-  }
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
