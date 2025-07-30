@@ -13,6 +13,7 @@
 }
 
 body {
+  padding-top: 70px;
   font-family: 'Segoe UI', sans-serif;
   background: #f8f9fa;
   color: var(--text-dark);
@@ -88,15 +89,17 @@ img:hover {
   box-shadow: var(--shadow-hover);
 }
 
-/* Navbar */
-nav.container-fluid {
-  background: linear-gradient(to right, var(--secondary), #1b2a3d);
-  padding: 1rem 2rem;
-  position: sticky;
+.navbar {
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 100%;
   z-index: 1000;
-  animation: navDrop 0.5s ease;
+  background: var(--bg-dark); /* or a color you prefer */
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
+
 
 @keyframes navDrop {
   from { transform: translateY(-100%); opacity: 0; }
