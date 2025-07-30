@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server/index.js"
+     "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
     "dotenv": "^17.2.0"
