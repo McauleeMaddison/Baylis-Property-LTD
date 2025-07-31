@@ -1,46 +1,51 @@
 :root {
+  /* Colors */
   --primary: #4a90e2;
   --secondary: #2d3e50;
   --accent: #f1f5f9;
   --danger: #e74c3c;
   --text-dark: #1c1c1c;
-  --text-light: #fff;
+  --text-light: #ffffff;
 
+  /* Effects */
   --radius: 10px;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   --shadow-hover: 0 12px 36px rgba(0, 0, 0, 0.15);
   --transition: 0.3s ease-in-out;
 }
 
-/* Reset & Layout */
+/* Layout */
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 html, body {
   height: 100%;
   font-family: 'Segoe UI', sans-serif;
-  background: #f8f9fa;
+  background-color: #f8f9fa;
   color: var(--text-dark);
+  scroll-behavior: smooth;
   display: flex;
   flex-direction: column;
-  scroll-behavior: smooth;
 }
 
 body {
-  padding-top: 70px;
   line-height: 1.6;
+  padding-top: 70px;
   animation: fadeInBody 0.8s ease;
 }
 
 main {
   flex: 1;
   padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Header */
+/* Navbar */
 .navbar {
   position: fixed;
   top: 0;
@@ -58,7 +63,8 @@ main {
 }
 
 .navbar strong {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
 }
 
 .nav-links {
@@ -68,7 +74,7 @@ main {
 }
 
 .nav-links li {
-  display: inline;
+  display: inline-block;
 }
 
 .nav-links a,
@@ -78,35 +84,36 @@ main {
   color: var(--text-light);
   text-decoration: none;
   border: none;
-  background: none;
+  background: transparent;
   cursor: pointer;
   border-radius: var(--radius);
-  transition: background 0.3s ease;
+  transition: background-color var(--transition), transform var(--transition);
 }
 
 .nav-links a:hover,
 .logout-btn:hover {
   background-color: #1a2733;
+  transform: translateY(-2px);
 }
 
-/* Logout button */
+/* Logout Button */
 .logout-btn {
-  background: var(--danger);
+  background-color: var(--danger);
 }
 
 .logout-btn:hover {
-  background: #c0392b;
+  background-color: #c0392b;
 }
 
-/* Cards */
+/* Cards/Grid */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2rem;
 }
 
 .animated-card {
-  background: white;
+  background-color: #fff;
   border-radius: var(--radius);
   padding: 2rem;
   box-shadow: var(--shadow);
@@ -118,41 +125,68 @@ main {
   box-shadow: var(--shadow-hover);
 }
 
-h2 {
+/* Typography */
+h1, h2, h3 {
   color: var(--secondary);
   margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 p {
   color: var(--text-dark);
+  margin-bottom: 1rem;
+  line-height: 1.6;
 }
 
 /* Footer */
 footer {
-  background: var(--secondary);
+  background-color: var(--secondary);
   color: var(--text-light);
   text-align: center;
-  padding: 1.5rem 0;
-  border-top: 4px solid var(--primary);
+  padding: 1.5rem 1rem;
   font-size: 0.9rem;
+  border-top: 4px solid var(--primary);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
   animation: fadeInFooter 1.5s ease;
 }
 
 /* Animations */
 @keyframes fadeInBody {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeInFooter {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .nav-links {
     flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .navbar {
+    flex-direction: column;
     align-items: flex-start;
+  }
+
+  main {
+    padding: 1.5rem 1rem;
   }
 }
