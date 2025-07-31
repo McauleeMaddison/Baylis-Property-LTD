@@ -3,82 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Baylis Propertys</title>
+  <title>Baylis Properties</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-<nav class="container-fluid">
-  <ul>
-    <li><strong>Baylis Propertys</strong></li>
-  </ul>
-  <ul id="navLinks">
-    <li><a href="#dashboard">Dashboard</a></li>
-    <li><a href="#community">Community</a></li>
-    <li class="nav-login-wrapper">
-      <a href="#" id="loginToggle" aria-expanded="false">Login ▼</a>
-      <div id="loginMenu" class="login-dropdown hidden">
-        <form id="loginForm">
-          <input type="email" id="loginEmail" placeholder="Email" required />
-          <input type="password" id="loginPassword" placeholder="Password" required />
-          <select id="loginRole">
-            <option value="resident">Resident</option>
-            <option value="landlord">Landlord</option>
-          </select>
-          <button type="submit">Login</button>
+  <!-- Navigation -->
+  <nav class="container-fluid">
+    <ul>
+      <li><strong>Baylis Properties</strong></li>
+    </ul>
+    <ul id="navLinks">
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#community">Community</a></li>
+      <li class="nav-login-wrapper">
+        <a href="#" id="loginToggle" aria-expanded="false">Login ▼</a>
+        <div id="loginMenu" class="login-dropdown hidden" role="region" aria-label="Login Form">
+          <form id="loginForm" autocomplete="on">
+            <input type="email" id="loginEmail" placeholder="Email" required />
+            <input type="password" id="loginPassword" placeholder="Password" required />
+            <select id="loginRole" required>
+              <option value="resident">Resident</option>
+              <option value="landlord">Landlord</option>
+            </select>
+            <button type="submit">Login</button>
+          </form>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="grid">
+      <!-- Dashboard Section -->
+      <section id="dashboard">
+        <hgroup>
+          <h2>Welcome to Baylis Properties</h2>
+          <h3>Manage your properties and requests with ease</h3>
+        </hgroup>
+        <p>Landlords can schedule cleanings and manage repair requests. Residents can submit issues and connect with housemates.</p>
+      </section>
+
+      <!-- Cleaning Request Form -->
+      <section>
+        <h3>Cleaning Request</h3>
+        <form id="cleaningForm">
+          <input type="text" id="cleaningName" placeholder="Full Name" required />
+          <input type="text" id="cleaningAddress" placeholder="Address" required />
+          <input type="date" id="cleaningDate" required />
+          <button type="submit">Schedule Cleaning</button>
         </form>
-      </div>
-    </li>
-  </ul>
-</nav>
+      </section>
 
-<main class="container">
-  <div class="grid">
-    <section id="dashboard">
-      <hgroup>
-        <h2>Welcome to Baylis Propertys</h2>
-        <h3>Manage your properties and requests with ease</h3>
-      </hgroup>
-      <p>Landlords can schedule cleanings and view repair requests. Residents can submit issues and connect with housemates.</p>
-    </section>
+      <!-- Repair Request Form -->
+      <section>
+        <h3>Repair Request</h3>
+        <form id="repairForm">
+          <input type="text" id="repairName" placeholder="Full Name" required />
+          <input type="text" id="repairAddress" placeholder="Address" required />
+          <textarea id="repairIssue" placeholder="Describe the issue" required></textarea>
+          <button type="submit">Request Repair</button>
+        </form>
+      </section>
+    </div>
+  </main>
 
-    <section>
-      <h3>Cleaning Request</h3>
-      <form id="cleaningForm">
-        <input type="text" id="cleaningName" placeholder="Full Name" required />
-        <input type="text" id="cleaningAddress" placeholder="Address" required />
-        <input type="date" id="cleaningDate" required />
-        <button type="submit">Schedule Cleaning</button>
-      </form>
-    </section>
+  <!-- Community Section -->
+  <section class="container">
+    <h2 id="community">Community Board</h2>
+    <form id="communityPostForm" class="grid">
+      <input type="text" id="posterName" placeholder="Your Name" required />
+      <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
+      <button type="submit">Post</button>
+    </form>
+    <ul id="communityPosts" aria-live="polite"></ul>
+  </section>
 
-    <section>
-      <h3>Repair Request</h3>
-      <form id="repairForm">
-        <input type="text" id="repairName" placeholder="Full Name" required />
-        <input type="text" id="repairAddress" placeholder="Address" required />
-        <textarea id="repairIssue" placeholder="Describe the issue" required></textarea>
-        <button type="submit">Request Repair</button>
-      </form>
-    </section>
-  </div>
-</main>
+  <!-- Footer -->
+  <footer class="container">
+    <small>
+      <a href="#">Privacy Policy</a> • 
+      <a href="#">Terms & Conditions</a>
+    </small>
+  </footer>
 
-<section class="container">
-  <h2 id="community">Community Board</h2>
-  <form id="communityPostForm" class="grid">
-    <input type="text" id="posterName" placeholder="Your Name" required />
-    <textarea id="posterMessage" placeholder="Share something..." required></textarea>
-    <button type="submit">Post</button>
-  </form>
-  <ul id="communityPosts"></ul>
-</section>
-
-<footer class="container">
-  <small><a href="#">Privacy</a> • <a href="#">Terms</a></small>
-</footer>
-
-<script src="js/script.js"></script>
+  <!-- Scripts -->
+  <script src="js/script.js"></script>
 </body>
 </html>
