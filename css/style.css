@@ -1,5 +1,5 @@
 :root {
-  /* Colors */
+  /* Color Palette */
   --primary: #4a90e2;
   --secondary: #2d3e50;
   --accent: #f1f5f9;
@@ -7,14 +7,14 @@
   --text-dark: #1c1c1c;
   --text-light: #ffffff;
 
-  /* Effects */
+  /* UI Effects */
   --radius: 10px;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   --shadow-hover: 0 12px 36px rgba(0, 0, 0, 0.15);
   --transition: 0.3s ease-in-out;
 }
 
-/* Layout */
+/* Base Reset & Layout */
 * {
   margin: 0;
   padding: 0;
@@ -32,20 +32,20 @@ html, body {
 }
 
 body {
-  line-height: 1.6;
   padding-top: 70px;
+  line-height: 1.6;
   animation: fadeInBody 0.8s ease;
 }
 
 main {
   flex: 1;
   padding: 2rem;
-  width: 100%;
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
 }
 
-/* Navbar */
+/* NAVIGATION */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -54,12 +54,12 @@ main {
 }
 
 .hamburger {
+  display: none;
   background: none;
   border: none;
   font-size: 1.8rem;
   color: var(--text-light);
   cursor: pointer;
-  display: none;
 }
 
 .nav-links {
@@ -67,15 +67,42 @@ main {
   gap: 1rem;
 }
 
+.nav-links a,
+.logout-btn {
+  text-decoration: none;
+  color: var(--text-light);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: background var(--transition), transform var(--transition);
+}
+
+.nav-links a:hover,
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.logout-btn {
+  background-color: var(--danger);
+  border: none;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Responsive Navbar */
 @media (max-width: 768px) {
   .hamburger {
     display: block;
   }
 
   .nav-links {
+    display: none;
     flex-direction: column;
     width: 100%;
-    display: none;
     margin-top: 1rem;
   }
 
@@ -92,9 +119,14 @@ main {
     width: 100%;
     text-align: left;
   }
+
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
-/* Dashboard Styling */
+/* DASHBOARD */
 .dashboard-section {
   margin-top: 3rem;
   animation: fadeInBody 0.6s ease-in-out;
@@ -140,16 +172,7 @@ main {
   color: var(--text-dark);
 }
 
-/* Logout Button */
-.logout-btn {
-  background-color: var(--danger);
-}
-
-.logout-btn:hover {
-  background-color: #c0392b;
-}
-
-/* Cards/Grid */
+/* GRID / CARD STYLES */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -169,7 +192,7 @@ main {
   box-shadow: var(--shadow-hover);
 }
 
-/* Typography */
+/* TYPOGRAPHY */
 h1, h2, h3 {
   color: var(--secondary);
   margin-bottom: 1rem;
@@ -177,12 +200,11 @@ h1, h2, h3 {
 }
 
 p {
-  color: var(--text-dark);
   margin-bottom: 1rem;
-  line-height: 1.6;
+  color: var(--text-dark);
 }
 
-/* Footer */
+/* FOOTER */
 footer {
   background-color: var(--secondary);
   color: var(--text-light);
@@ -194,7 +216,7 @@ footer {
   animation: fadeInFooter 1.5s ease;
 }
 
-/* Animations */
+/* ANIMATIONS */
 @keyframes fadeInBody {
   from {
     opacity: 0;
@@ -214,23 +236,5 @@ footer {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .nav-links {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.5rem;
-  }
-
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  main {
-    padding: 1.5rem 1rem;
   }
 }
