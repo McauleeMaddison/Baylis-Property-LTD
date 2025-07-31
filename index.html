@@ -9,21 +9,21 @@
 </head>
 <body>
 
-  <!-- Navigation -->
-  <nav class="container-fluid">
-    <ul>
-      <li><strong>Baylis Properties</strong></li>
-    </ul>
-    <ul id="navLinks">
+  <!-- Navbar -->
+<header class="site-header">
+  <nav class="navbar container-fluid" id="mainNavbar">
+    <a href="#" class="logo">Baylis Properties</a>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <ul class="nav-links" id="navLinks">
       <li><a href="#dashboard">Dashboard</a></li>
       <li><a href="#community">Community</a></li>
       <li class="nav-login-wrapper">
         <a href="#" id="loginToggle" aria-expanded="false">Login ▼</a>
-        <div id="loginMenu" class="login-dropdown hidden" role="region" aria-label="Login Form">
-          <form id="loginForm" autocomplete="on">
+        <div id="loginMenu" class="login-dropdown hidden">
+          <form id="loginForm">
             <input type="email" id="loginEmail" placeholder="Email" required />
             <input type="password" id="loginPassword" placeholder="Password" required />
-            <select id="loginRole" required>
+            <select id="loginRole">
               <option value="resident">Resident</option>
               <option value="landlord">Landlord</option>
             </select>
@@ -33,42 +33,32 @@
       </li>
     </ul>
   </nav>
+</header>
 
-  <!-- Main Content -->
-  <main class="container">
-    <div class="grid">
-      <!-- Dashboard Section -->
-      <section id="dashboard">
-        <hgroup>
-          <h2>Welcome to Baylis Properties</h2>
-          <h3>Manage your properties and requests with ease</h3>
-        </hgroup>
-        <p>Landlords can schedule cleanings and manage repair requests. Residents can submit issues and connect with housemates.</p>
-      </section>
-
-      <!-- Cleaning Request Form -->
-      <section>
-        <h3>Cleaning Request</h3>
-        <form id="cleaningForm">
-          <input type="text" id="cleaningName" placeholder="Full Name" required />
-          <input type="text" id="cleaningAddress" placeholder="Address" required />
-          <input type="date" id="cleaningDate" required />
-          <button type="submit">Schedule Cleaning</button>
-        </form>
-      </section>
-
-      <!-- Repair Request Form -->
-      <section>
-        <h3>Repair Request</h3>
-        <form id="repairForm">
-          <input type="text" id="repairName" placeholder="Full Name" required />
-          <input type="text" id="repairAddress" placeholder="Address" required />
-          <textarea id="repairIssue" placeholder="Describe the issue" required></textarea>
-          <button type="submit">Request Repair</button>
-        </form>
-      </section>
+<!-- Dashboard -->
+<main class="container">
+  <section id="dashboard" class="dashboard-section">
+    <hgroup>
+      <h2 class="dashboard-title">Dashboard Overview</h2>
+      <p class="dashboard-subtext">Track and manage your property interactions efficiently</p>
+    </hgroup>
+    <div class="dashboard-cards">
+      <div class="dashboard-card">
+        <h3>Cleaning Requests</h3>
+        <p>View and schedule property cleaning dates submitted by residents.</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>Repair Requests</h3>
+        <p>Manage repair issues and receive updates on work progress.</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>Community Board</h3>
+        <p>Stay informed on announcements and posts from residents.</p>
+      </div>
     </div>
-  </main>
+  </section>
+</main>
+
 
   <!-- Community Section -->
   <section class="container">
