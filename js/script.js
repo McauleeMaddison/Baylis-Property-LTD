@@ -5,18 +5,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginToggle = document.getElementById('loginToggle');
   const loginMenu = document.getElementById('loginMenu');
   const loginForm = document.getElementById('loginForm');
-  const logoutBtn = document.getElementById('logoutBtn');
   const logoutSection = document.getElementById('logoutSection');
-  const loginSection = document.getElementById('loginSection');
-  const landlordDashboard = document.getElementById('landlordDashboard');
-  const residentDashboard = document.getElementById('dashboard');
-  const darkModeToggle = document.getElementById('darkModeToggle');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const darkToggle = document.getElementById('darkModeToggle');
 
-  // ===== Navbar Collapse on Scroll =====
+  /** Sticky header hide on scroll down **/
   let lastScroll = 0;
   window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
-    if (currentScroll > lastScroll && currentScroll > 60) {
+    const currentScroll = window.scrollY;
+    if (currentScroll > lastScroll && currentScroll > 80) {
       header.classList.add('hide-nav');
     } else {
       header.classList.remove('hide-nav');
@@ -24,20 +21,32 @@ document.addEventListener('DOMContentLoaded', () => {
     lastScroll = currentScroll;
   });
 
-  // ===== Mobile Menu Toggle =====
+  /** Hamburger toggle for mobile **/
   hamburgerBtn?.addEventListener('click', () => {
     navLinks.classList.toggle('show');
-    const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-    hamburgerBtn.setAttribute('aria-expanded', String(!expanded));
+    hamburgerBtn.setAttribute(
+      'aria-expanded',
+      navLinks.classList.contains('show')
+    );
   });
 
-  // ===== Login Dropdown Toggle =====
+  /** Dark Mode Toggle **/
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark');
+    darkToggle.checked = true;
+  }
+
+  darkToggle?.addEventListener('change', () => {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+  });
+
+  /** Login Dropdown Behavior **/
   loginToggle?.addEventListener('click', (e) => {
     e.preventDefault();
     const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
-    loginToggle.setAttribute('aria-expanded', String(!expanded));
+    loginToggle.setAttribute('aria-expanded', !expanded);
     loginMenu.classList.toggle('hidden');
-    loginMenu.classList.toggle('show');
   });
 
   document.addEventListener('click', (e) => {
@@ -47,115 +56,65 @@ document.addEventListener('DOMContentLoaded', () => {
       !loginToggle.contains(e.target)
     ) {
       loginMenu.classList.add('hidden');
-      loginMenu.classList.remove('show');
       loginToggle.setAttribute('aria-expanded', 'false');
     }
   });
 
-  // ===== Login Form =====
+  /** Login Submission **/
   loginForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = loginForm.loginEmail.value;
     const role = loginForm.loginRole.value;
-
-    alert(`✅ Logged in as ${email} (${role})`);
-
+    const name = loginForm.loginEmail.value.split('@')[0];
+    alert(`🔐 Welcome ${name}! Logged in as ${role}`);
     loginMenu.classList.add('hidden');
-    loginMenu.classList.remove('show');
-    loginSection.classList.add('hidden');
+    loginToggle.classList.add('hidden');
     logoutSection.classList.remove('hidden');
-
-    if (role === 'landlord') {
-      landlordDashboard.classList.remove('hidden');
-      residentDashboard.classList.add('hidden');
-    } else {
-      landlordDashboard.classList.add('hidden');
-      residentDashboard.classList.remove('hidden');
-    }
-
-    loginForm.reset();
   });
 
-  // ===== Logout =====
+  /** Logout **/
   logoutBtn?.addEventListener('click', () => {
-    alert('👋 Logged out');
-    loginSection.classList.remove('hidden');
+    alert("👋 You have been logged out.");
+    loginToggle.classList.remove('hidden');
     logoutSection.classList.add('hidden');
-    landlordDashboard.classList.add('hidden');
-    residentDashboard.classList.remove('hidden');
   });
 
-  // ===== Cleaning Form =====
+  /** Forms - Cleaning & Repair **/
   const cleaningForm = document.getElementById('cleaningForm');
   cleaningForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = cleaningForm.cleaningName.value.trim();
-    const date = cleaningForm.cleaningDate.value;
-    const type = cleaningForm.cleaningType.value;
-
-    alert(`🧼 Cleaning scheduled for ${name} on ${date} [${type}]`);
+    alert(`✅ Cleaning scheduled for ${cleaningForm.cleaningName.value} on ${cleaningForm.cleaningDate.value}`);
     cleaningForm.reset();
   });
 
-  // ===== Repair Form =====
   const repairForm = document.getElementById('repairForm');
   repairForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = repairForm.repairName.value.trim();
-    const issue = repairForm.repairIssue.value.trim();
-
-    alert(`🔧 Repair request submitted by ${name}: ${issue}`);
+    alert(`🛠️ Repair issue submitted by ${repairForm.repairName.value}`);
     repairForm.reset();
   });
 
-  // ===== Landlord Cleaning Form =====
-  const landlordCleaningForm = document.getElementById('landlordCleaningForm');
-  landlordCleaningForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = landlordCleaningForm.landlordCleaningName.value.trim();
-    const date = landlordCleaningForm.landlordCleaningDate.value;
-    const type = landlordCleaningForm.landlordCleaningType.value;
-
-    alert(`🗓️ Cleaning scheduled for ${name} on ${date} (${type})`);
-    landlordCleaningForm.reset();
-  });
-
-  // ===== Community Post Form =====
+  /** Community Post **/
   const postForm = document.getElementById('communityPostForm');
   const postList = document.getElementById('communityPosts');
 
   postForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = postForm.posterName.value.trim();
-    const message = postForm.posterMessage.value.trim();
-    if (!name || !message) return;
+    const msg = postForm.posterMessage.value.trim();
+    if (!name || !msg) return;
 
-    const post = document.createElement('li');
-    post.className = 'animated-card';
-    post.innerHTML = `
-      <div class="post-header">
-        <strong>${name}</strong>
-        <small>${new Date().toLocaleString()}</small>
-      </div>
-      <p>${message}</p>
+    const li = document.createElement('li');
+    li.className = 'animated-card';
+    li.innerHTML = `
+      <strong>${name}</strong> <small>${new Date().toLocaleString()}</small>
+      <p>${msg}</p>
       <div class="reactions">
         <button class="reaction">👍</button>
         <button class="reaction">❤️</button>
         <button class="reaction">😂</button>
       </div>
     `;
-    postList.prepend(post);
+    postList.prepend(li);
     postForm.reset();
-  });
-
-  // ===== Dark Mode Toggle =====
-  if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('dark');
-    darkModeToggle.checked = true;
-  }
-
-  darkModeToggle?.addEventListener('change', () => {
-    document.body.classList.toggle('dark');
-    localStorage.setItem('darkMode', document.body.classList.contains('dark'));
   });
 });
