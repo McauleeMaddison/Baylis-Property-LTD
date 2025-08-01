@@ -1,24 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // DOM Elements
-  const loginToggle = document.getElementById('loginToggle');
-  const loginMenu = document.getElementById('loginMenu');
-  const loginForm = document.getElementById('loginForm');
-
-  const cleaningForm = document.getElementById('cleaningForm');
-  const repairForm = document.getElementById('repairForm');
-  const postForm = document.getElementById('communityPostForm');
-  const postList = document.getElementById('communityPosts');
-
-  const darkToggle = document.getElementById('darkModeToggle');
-  const darkIcon = document.getElementById('darkModeIcon');
-
-  const logoutBtn = document.getElementById('logoutBtn');
-  const loginSection = document.getElementById('loginSection');
-  const logoutSection = document.getElementById('logoutSection');
-
-  // Hamburger Menu Toggle
+  // Navbar Collapsible
   const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const navLinks = document.getElementById('navLinks');
+  const navLinks = document.querySelector('.nav-links');
 
   if (hamburgerBtn && navLinks) {
     hamburgerBtn.addEventListener('click', () => {
@@ -28,7 +11,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Login Dropdown Toggle
+  // Collapsible Forms
+  const collapsibles = document.querySelectorAll('.collapsible-toggle');
+
+  collapsibles.forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      const content = toggle.nextElementSibling;
+      toggle.classList.toggle('active');
+      content.classList.toggle('show');
+    });
+  });
+
+  // Login Dropdown
+  const loginToggle = document.getElementById('loginToggle');
+  const loginMenu = document.getElementById('loginMenu');
+  const loginForm = document.getElementById('loginForm');
+
   if (loginToggle && loginMenu) {
     loginToggle.addEventListener('click', (e) => {
       e.preventDefault();
@@ -47,88 +45,72 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Cleaning Form Submit
+  // Forms: Cleaning
+  const cleaningForm = document.getElementById('cleaningForm');
   if (cleaningForm) {
     cleaningForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = cleaningForm.cleaningName?.value.trim();
       const date = cleaningForm.cleaningDate?.value;
-      alert(`✅ Cleaning scheduled for ${name} on ${date}`);
+      const type = cleaningForm.cleaningType?.value;
+      alert(`✅ Cleaning scheduled for ${name} on ${date} as ${type}`);
       cleaningForm.reset();
     });
   }
 
-  // Repair Form Submit
+  // Forms: Repair
+  const repairForm = document.getElementById('repairForm');
   if (repairForm) {
     repairForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      const name = repairForm.repairName?.value.trim();
       const issue = repairForm.repairIssue?.value.trim();
-      alert(`🛠️ Repair submitted:\n${issue}`);
+      alert(`🛠️ Repair submitted by ${name}:\n${issue}`);
       repairForm.reset();
     });
   }
 
-  // Community Post Form Submit
+  // Forms: Community
+  const postForm = document.getElementById('communityPostForm');
+  const postList = document.getElementById('communityPosts');
+
   if (postForm && postList) {
     postForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = postForm.posterName?.value.trim();
-      const message = postForm.posterMessage?.value.trim();
+      const name = postForm.posterName.value.trim();
+      const message = postForm.posterMessage.value.trim();
       if (!name || !message) return;
 
       const post = document.createElement('li');
       post.className = 'animated-card';
       post.innerHTML = `
-        <strong>${name}</strong><br />
-        <small>${new Date().toLocaleString()}</small>
+        <div class="post-header">
+          <strong>${name}</strong>
+          <small>${new Date().toLocaleString()}</small>
+        </div>
         <p>${message}</p>
+        <div class="reactions">
+          <button class="reaction">👍</button>
+          <button class="reaction">❤️</button>
+          <button class="reaction">😂</button>
+        </div>
       `;
       postList.prepend(post);
       postForm.reset();
     });
   }
 
-  // Dark Mode Init
+  // Dark Mode Toggle
+  const darkToggle = document.getElementById('darkModeToggle');
   const isDarkMode = localStorage.getItem('darkMode') === 'true';
+
   if (isDarkMode) {
     document.body.classList.add('dark');
     darkToggle.checked = true;
-    if (darkIcon) darkIcon.textContent = '🌙';
   }
 
-  // Dark Mode Toggle
   darkToggle?.addEventListener('change', () => {
-    const isDark = darkToggle.checked;
-    document.body.classList.toggle('dark', isDark);
-    localStorage.setItem('darkMode', isDark);
-    if (darkIcon) darkIcon.textContent = isDark ? '🌙' : '☀️';
+    document.body.classList.toggle('dark');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark'));
   });
-
-  // Login State Simulation
-  const handleLogin = (email, role) => {
-    loginSection.classList.add('hidden');
-    logoutSection.classList.remove('hidden');
-    alert(`🔐 Logged in as ${role}: ${email}`);
-  };
-
-  if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = loginForm.loginEmail?.value.trim();
-      const role = loginForm.loginRole?.value;
-      handleLogin(email, role);
-      loginMenu.classList.add('hidden');
-      loginMenu.classList.remove('show');
-      loginToggle.setAttribute('aria-expanded', 'false');
-      loginForm.reset();
-    });
-  }
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      loginSection.classList.remove('hidden');
-      logoutSection.classList.add('hidden');
-      alert('✅ You have been logged out.');
-    });
-  }
 });
