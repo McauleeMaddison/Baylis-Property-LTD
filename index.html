@@ -9,93 +9,98 @@
 </head>
 <body>
 
-  <!-- Navbar -->
-  <header class="site-header">
-    <nav class="navbar container-fluid" id="mainNavbar">
-      <a href="#" class="logo"><strong>Baylis Properties</strong></a>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation" aria-expanded="false">☰</button>
-
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#dashboard">Dashboard</a></li>
-        <li><a href="#community">Community</a></li>
-
-        <!-- Dark Mode Toggle -->
-        <li class="theme-toggle">
-          <input type="checkbox" id="darkModeToggle" aria-label="Toggle dark mode" />
-          <label for="darkModeToggle" class="switch">
-            <span class="slider"></span>
-            <span class="icon" id="darkModeIcon">☀️</span>
-          </label>
-        </li>
-
-        <!-- Login Dropdown -->
-        <li class="nav-login-wrapper" id="loginSection">
-          <a href="#" id="loginToggle" aria-expanded="false">Login ▼</a>
-          <div id="loginMenu" class="login-dropdown hidden">
-            <form id="loginForm">
-              <input type="email" id="loginEmail" placeholder="Email" required />
-              <input type="password" id="loginPassword" placeholder="Password" required />
-              <select id="loginRole">
-                <option value="resident">Resident</option>
-                <option value="landlord">Landlord</option>
-              </select>
-              <button type="submit">Login</button>
-            </form>
-          </div>
-        </li>
-
-        <!-- Logout Button -->
-        <li id="logoutSection" class="hidden">
-          <button id="logoutBtn" class="logout-btn">Log Out</button>
-        </li>
-      </ul>
-    </nav>
-  </header>
-
-  <!-- Dashboard Section -->
-  <main class="container">
-    <section id="dashboard" class="dashboard-section">
-      <hgroup>
-        <h2 class="dashboard-title">Dashboard Overview</h2>
-        <p class="dashboard-subtext">Track and manage your property interactions efficiently</p>
-      </hgroup>
-      <div class="dashboard-cards">
-        <div class="dashboard-card">
-          <h3>Cleaning Requests</h3>
-          <p>View and schedule property cleaning dates submitted by residents.</p>
+<header class="site-header">
+  <nav class="navbar container-fluid" id="mainNavbar">
+    <a href="#" class="logo">Baylis Properties</a>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <ul id="navLinks" class="nav-links">
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#community">Community</a></li>
+      <li class="theme-toggle">
+        <input type="checkbox" id="darkModeToggle" aria-label="Toggle dark mode" />
+        <label for="darkModeToggle" class="switch">
+          <span class="slider"></span>
+          <span class="icon" id="darkModeIcon">☀️</span>
+        </label>
+      </li>
+      <li id="loginSection">
+        <a href="#" id="loginToggle" aria-expanded="false">Login ▼</a>
+        <div id="loginMenu" class="login-dropdown hidden">
+          <form id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" required />
+            <input type="password" id="loginPassword" placeholder="Password" required />
+            <select id="loginRole">
+              <option value="resident">Resident</option>
+              <option value="landlord">Landlord</option>
+            </select>
+            <button type="submit">Login</button>
+          </form>
         </div>
-        <div class="dashboard-card">
-          <h3>Repair Requests</h3>
-          <p>Manage repair issues and receive updates on work progress.</p>
-        </div>
-        <div class="dashboard-card">
-          <h3>Community Board</h3>
-          <p>Stay informed on announcements and posts from residents.</p>
-        </div>
+      </li>
+      <li id="logoutSection" class="hidden">
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<main class="container">
+  <section id="dashboard" class="dashboard-section">
+    <hgroup>
+      <h2 class="dashboard-title">Dashboard Overview</h2>
+      <p class="dashboard-subtext">Track and manage your property interactions efficiently</p>
+    </hgroup>
+    <div class="dashboard-cards">
+      <div class="dashboard-card">
+        <h3>Cleaning Requests</h3>
+        <p>View and schedule property cleaning dates submitted by residents.</p>
       </div>
-    </section>
-  </main>
-
-  <!-- Community Board Section -->
-  <section class="container">
-    <h2 id="community">Community Board</h2>
-    <form id="communityPostForm" class="grid">
-      <input type="text" id="posterName" placeholder="Your Name" required />
-      <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
-      <button type="submit">Post</button>
-    </form>
-    <ul id="communityPosts" aria-live="polite"></ul>
+      <div class="dashboard-card">
+        <h3>Repair Requests</h3>
+        <p>Manage repair issues and receive updates on work progress.</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>Community Board</h3>
+        <p>Stay informed on announcements and posts from residents.</p>
+      </div>
+    </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="container">
-    <small>
-      <a href="#">Privacy Policy</a> • 
-      <a href="#">Terms & Conditions</a>
-    </small>
-  </footer>
+  <section id="landlordDashboard" class="dashboard-section hidden">
+    <hgroup>
+      <h2 class="dashboard-title">Landlord Portal</h2>
+      <p class="dashboard-subtext">Schedule cleanings and handle repair requests directly</p>
+    </hgroup>
+    <form id="cleaningForm" class="grid">
+      <input type="text" id="cleaningName" placeholder="Resident Name" required />
+      <input type="date" id="cleaningDate" required />
+      <select id="cleaningType" required>
+        <option value="Move Out Clean">Move Out Clean</option>
+        <option value="Deep Clean">Deep Clean</option>
+        <option value="Light Clean">Light Clean</option>
+      </select>
+      <button type="submit">Schedule Cleaning</button>
+    </form>
+  </section>
+</main>
 
-  <!-- Scripts -->
-  <script src="js/script.js"></script>
+<section class="container">
+  <h2 id="community">Community Board</h2>
+  <form id="communityPostForm" class="grid">
+    <input type="text" id="posterName" placeholder="Your Name" required />
+    <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
+    <button type="submit">Post</button>
+  </form>
+  <ul id="communityPosts" aria-live="polite"></ul>
+</section>
+
+<footer class="container">
+  <small>
+    <a href="#">Privacy Policy</a> • 
+    <a href="#">Terms & Conditions</a>
+  </small>
+</footer>
+
+<script src="js/script.js"></script>
 </body>
 </html>
