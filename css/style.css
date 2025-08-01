@@ -5,7 +5,6 @@
   --danger: #e74c3c;
   --text-dark: #1c1c1c;
   --text-light: #ffffff;
-
   --radius: 10px;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   --shadow-hover: 0 12px 36px rgba(0, 0, 0, 0.15);
@@ -42,20 +41,20 @@ main {
   margin: 0 auto;
 }
 
-/* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  background: var(--secondary);
+  background-color: var(--secondary);
   color: var(--text-light);
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 1rem 2rem;
   position: fixed;
-  width: 100%;
   top: 0;
-  z-index: 1000;
+  width: 100%;
+  z-index: 999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: top 0.3s ease;
 }
 
 .hamburger {
@@ -70,53 +69,43 @@ main {
 .nav-links {
   display: flex;
   gap: 1rem;
-  list-style: none;
 }
 
-.nav-links a,
-.logout-btn {
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  color: var(--text-light);
-  text-decoration: none;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: background 0.3s ease;
+.nav-links.collapsed {
+  display: none;
 }
 
-.nav-links a:hover,
-.logout-btn:hover {
-  background-color: #1a2733;
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .nav-links li {
+    width: 100%;
+  }
+
+  .nav-links a,
+  .logout-btn {
+    width: 100%;
+    text-align: left;
+  }
 }
 
-.logout-btn {
-  background: var(--danger);
-  color: #fff;
+form.collapsible {
+  display: none;
+  margin-top: 1rem;
 }
 
-.logout-btn:hover {
-  background-color: #c0392b;
+form.collapsible.show {
+  display: block;
 }
 
-/* Dark mode */
-body.dark {
-  background-color: #121212;
-  color: var(--text-light);
-}
-
-body.dark .navbar {
-  background: #1f1f1f;
-}
-
-body.dark .dashboard-card,
-body.dark .animated-card {
-  background: #1e1e2f;
-  color: var(--text-light);
-}
-
-/* Dashboard Styling */
 .dashboard-section {
   margin-top: 3rem;
   animation: fadeInBody 0.6s ease-in-out;
@@ -162,25 +151,14 @@ body.dark .animated-card {
   color: var(--text-dark);
 }
 
-/* Community */
-.community-board {
-  margin-top: 3rem;
+.logout-btn {
+  background-color: var(--danger);
 }
 
-.post-feed li {
-  margin-bottom: 1rem;
-  border-left: 4px solid var(--primary);
-  padding: 1rem;
-  background: white;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+.logout-btn:hover {
+  background-color: #c0392b;
 }
 
-body.dark .post-feed li {
-  background: #1e1e2f;
-}
-
-/* Cards/Grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -200,7 +178,6 @@ body.dark .post-feed li {
   box-shadow: var(--shadow-hover);
 }
 
-/* Typography */
 h1, h2, h3 {
   color: var(--secondary);
   margin-bottom: 1rem;
@@ -213,7 +190,6 @@ p {
   line-height: 1.6;
 }
 
-/* Footer */
 footer {
   background-color: var(--secondary);
   color: var(--text-light);
@@ -225,7 +201,6 @@ footer {
   animation: fadeInFooter 1.5s ease;
 }
 
-/* Animations */
 @keyframes fadeInBody {
   from {
     opacity: 0;
@@ -248,7 +223,6 @@ footer {
   }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .nav-links {
     flex-direction: column;
@@ -263,17 +237,5 @@ footer {
 
   main {
     padding: 1.5rem 1rem;
-  }
-
-  .hamburger {
-    display: block;
-  }
-
-  .nav-links {
-    display: none;
-  }
-
-  .nav-links.show {
-    display: flex;
   }
 }
