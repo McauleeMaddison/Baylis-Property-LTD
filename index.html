@@ -10,122 +10,126 @@
 </head>
 <body>
 
-<header id="mainHeader" class="site-header">
-  <nav class="navbar container-fluid">
-    <a href="#" class="logo">🏠 Baylis</a>
-    <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">
-      <i class="fas fa-bars"></i>
-    </button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="#dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-      <li><a href="#community"><i class="fas fa-comments"></i> Community</a></li>
+  <!-- Header / Navbar -->
+  <header class="site-header" id="mainHeader">
+    <nav class="navbar container-fluid">
+      <a href="#" class="logo"><i class="fas fa-home"></i> Baylis Properties</a>
+      <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
-      <!-- Dark mode -->
-      <li class="theme-toggle">
-        <label for="darkModeToggle" class="switch">
-          <input type="checkbox" id="darkModeToggle" />
-          <span class="slider"></span>
-          <i id="darkModeIcon" class="fas fa-sun"></i>
-        </label>
-      </li>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="#community"><i class="fas fa-users"></i> Community</a></li>
 
-      <!-- Login dropdown -->
-      <li id="loginSection">
-        <a href="#" id="loginToggle" aria-expanded="false"><i class="fas fa-user-lock"></i> Login ▼</a>
-        <div id="loginMenu" class="login-dropdown hidden">
-          <form id="loginForm">
-            <input type="email" id="loginEmail" placeholder="Email" required />
-            <input type="password" id="loginPassword" placeholder="Password" required />
-            <select id="loginRole">
-              <option value="resident">Resident</option>
-              <option value="landlord">Landlord</option>
+        <!-- Dark mode toggle -->
+        <li class="theme-toggle">
+          <input type="checkbox" id="darkModeToggle" aria-label="Toggle dark mode" />
+          <label for="darkModeToggle" class="switch">
+            <span class="slider"></span>
+            <span class="icon" id="darkModeIcon">🌞</span>
+          </label>
+        </li>
+
+        <!-- Login -->
+        <li id="loginSection">
+          <a href="#" id="loginToggle" aria-expanded="false"><i class="fas fa-sign-in-alt"></i> Login ▼</a>
+          <div id="loginMenu" class="login-dropdown hidden">
+            <form id="loginForm">
+              <input type="email" id="loginEmail" placeholder="Email" required />
+              <input type="password" id="loginPassword" placeholder="Password" required />
+              <select id="loginRole">
+                <option value="resident">Resident</option>
+                <option value="landlord">Landlord</option>
+              </select>
+              <button type="submit">Login</button>
+            </form>
+          </div>
+        </li>
+
+        <!-- Logout -->
+        <li id="logoutSection" class="hidden">
+          <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <section id="dashboard" class="dashboard-section">
+      <hgroup>
+        <h2 class="dashboard-title">Dashboard Overview</h2>
+        <p class="dashboard-subtext">Manage your property interactions effectively.</p>
+      </hgroup>
+      <div class="dashboard-cards">
+        <div class="dashboard-card">
+          <h3><i class="fas fa-broom"></i> Cleaning Request</h3>
+          <form id="cleaningForm">
+            <input type="text" id="cleaningName" name="cleaningName" placeholder="Your Name" required />
+            <input type="text" id="cleaningAddress" name="cleaningAddress" placeholder="Property Address" required />
+            <input type="date" id="cleaningDate" name="cleaningDate" required />
+            <select id="cleaningType" name="cleaningType" required>
+              <option value="Move Out Clean">Move Out Clean</option>
+              <option value="Deep Clean">Deep Clean</option>
+              <option value="Light Clean">Light Clean</option>
             </select>
-            <button type="submit">Login</button>
+            <button type="submit">Schedule Cleaning</button>
           </form>
         </div>
-      </li>
-
-      <!-- Logout -->
-      <li id="logoutSection" class="hidden">
-        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-      </li>
-    </ul>
-  </nav>
-</header>
-
-
-<main class="container">
-  <section id="dashboard" class="dashboard-section">
-    <hgroup>
-      <h2 class="dashboard-title">Dashboard Overview</h2>
-      <p class="dashboard-subtext">Track and manage your property interactions efficiently</p>
-    </hgroup>
-    <div class="dashboard-cards">
-      <div class="dashboard-card">
-        <h3>Cleaning Request</h3>
-        <form id="cleaningForm">
-          <input type="text" id="cleaningName" name="cleaningName" placeholder="Your Name" required />
-          <input type="text" id="cleaningAddress" name="cleaningAddress" placeholder="Property Address" required />
-          <input type="date" id="cleaningDate" name="cleaningDate" required />
-          <select id="cleaningType" name="cleaningType" required>
-            <option value="Move Out Clean">Move Out Clean</option>
-            <option value="Deep Clean">Deep Clean</option>
-            <option value="Light Clean">Light Clean</option>
-          </select>
-          <button type="submit">Schedule Cleaning</button>
-        </form>
+        <div class="dashboard-card">
+          <h3><i class="fas fa-tools"></i> Repair Request</h3>
+          <form id="repairForm">
+            <input type="text" id="repairName" name="repairName" placeholder="Your Name" required />
+            <input type="text" id="repairAddress" name="repairAddress" placeholder="Property Address" required />
+            <textarea id="repairIssue" name="repairIssue" placeholder="Describe the issue..." required></textarea>
+            <button type="submit">Submit Repair</button>
+          </form>
+        </div>
+        <div class="dashboard-card">
+          <h3><i class="fas fa-comments"></i> Community Posts</h3>
+          <p>View community updates and discussions below.</p>
+        </div>
       </div>
-      <div class="dashboard-card">
-        <h3>Repair Request</h3>
-        <form id="repairForm">
-          <input type="text" id="repairName" name="repairName" placeholder="Your Name" required />
-          <input type="text" id="repairAddress" name="repairAddress" placeholder="Property Address" required />
-          <textarea id="repairIssue" name="repairIssue" placeholder="Describe the issue..." required></textarea>
-          <button type="submit">Submit Repair Request</button>
-        </form>
-      </div>
-      <div class="dashboard-card">
-        <h3>Community Board</h3>
-        <p>Stay informed on announcements and posts from residents.</p>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="landlordDashboard" class="dashboard-section hidden">
-    <hgroup>
-      <h2 class="dashboard-title">Landlord Portal</h2>
-      <p class="dashboard-subtext">Schedule cleanings and handle repair requests directly</p>
-    </hgroup>
-    <form id="landlordCleaningForm" class="grid">
-      <input type="text" id="landlordCleaningName" placeholder="Resident Name" required />
-      <input type="date" id="landlordCleaningDate" required />
-      <select id="landlordCleaningType" required>
-        <option value="Move Out Clean">Move Out Clean</option>
-        <option value="Deep Clean">Deep Clean</option>
-        <option value="Light Clean">Light Clean</option>
-      </select>
-      <button type="submit">Schedule Cleaning</button>
+    <!-- Landlord Only Section -->
+    <section id="landlordDashboard" class="dashboard-section hidden">
+      <hgroup>
+        <h2 class="dashboard-title">Landlord Portal</h2>
+        <p class="dashboard-subtext">Manage scheduled cleanings and resident repairs.</p>
+      </hgroup>
+      <form id="landlordCleaningForm" class="grid">
+        <input type="text" id="landlordCleaningName" placeholder="Resident Name" required />
+        <input type="date" id="landlordCleaningDate" required />
+        <select id="landlordCleaningType" required>
+          <option value="Move Out Clean">Move Out Clean</option>
+          <option value="Deep Clean">Deep Clean</option>
+          <option value="Light Clean">Light Clean</option>
+        </select>
+        <button type="submit">Schedule Cleaning</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Community Section -->
+  <section class="container community-board">
+    <h2 id="community"><i class="fas fa-bullhorn"></i> Community Arena</h2>
+    <form id="communityPostForm" class="grid">
+      <input type="text" id="posterName" placeholder="Your Name" required />
+      <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
+      <button type="submit">Post</button>
     </form>
+    <ul id="communityPosts" class="post-feed" aria-live="polite"></ul>
   </section>
-</main>
 
-<section class="container community-board">
-  <h2 id="community">Community Arena</h2>
-  <form id="communityPostForm" class="grid">
-    <input type="text" id="posterName" placeholder="Your Name" required />
-    <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
-    <button type="submit">Post</button>
-  </form>
-  <ul id="communityPosts" aria-live="polite" class="post-feed"></ul>
-</section>
+  <!-- Footer -->
+  <footer class="container">
+    <small>
+      <a href="#">Privacy Policy</a> • 
+      <a href="#">Terms & Conditions</a>
+    </small>
+  </footer>
 
-<footer class="container">
-  <small>
-    <a href="#">Privacy Policy</a> • 
-    <a href="#">Terms & Conditions</a>
-  </small>
-</footer>
-
-<script src="js/script.js"></script>
+  <!-- Script -->
+  <script src="js/script.js"></script>
 </body>
 </html>
