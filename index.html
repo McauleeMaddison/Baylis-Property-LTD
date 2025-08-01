@@ -53,12 +53,27 @@
     </hgroup>
     <div class="dashboard-cards">
       <div class="dashboard-card">
-        <h3>Cleaning Requests</h3>
-        <p>View and schedule property cleaning dates submitted by residents.</p>
+        <h3>Cleaning Request</h3>
+        <form id="cleaningForm">
+          <input type="text" id="cleaningName" name="cleaningName" placeholder="Your Name" required />
+          <input type="text" id="cleaningAddress" name="cleaningAddress" placeholder="Property Address" required />
+          <input type="date" id="cleaningDate" name="cleaningDate" required />
+          <select id="cleaningType" name="cleaningType" required>
+            <option value="Move Out Clean">Move Out Clean</option>
+            <option value="Deep Clean">Deep Clean</option>
+            <option value="Light Clean">Light Clean</option>
+          </select>
+          <button type="submit">Schedule Cleaning</button>
+        </form>
       </div>
       <div class="dashboard-card">
-        <h3>Repair Requests</h3>
-        <p>Manage repair issues and receive updates on work progress.</p>
+        <h3>Repair Request</h3>
+        <form id="repairForm">
+          <input type="text" id="repairName" name="repairName" placeholder="Your Name" required />
+          <input type="text" id="repairAddress" name="repairAddress" placeholder="Property Address" required />
+          <textarea id="repairIssue" name="repairIssue" placeholder="Describe the issue..." required></textarea>
+          <button type="submit">Submit Repair Request</button>
+        </form>
       </div>
       <div class="dashboard-card">
         <h3>Community Board</h3>
@@ -72,10 +87,10 @@
       <h2 class="dashboard-title">Landlord Portal</h2>
       <p class="dashboard-subtext">Schedule cleanings and handle repair requests directly</p>
     </hgroup>
-    <form id="cleaningForm" class="grid">
-      <input type="text" id="cleaningName" placeholder="Resident Name" required />
-      <input type="date" id="cleaningDate" required />
-      <select id="cleaningType" required>
+    <form id="landlordCleaningForm" class="grid">
+      <input type="text" id="landlordCleaningName" placeholder="Resident Name" required />
+      <input type="date" id="landlordCleaningDate" required />
+      <select id="landlordCleaningType" required>
         <option value="Move Out Clean">Move Out Clean</option>
         <option value="Deep Clean">Deep Clean</option>
         <option value="Light Clean">Light Clean</option>
