@@ -11,6 +11,7 @@
   --transition: 0.3s ease-in-out;
 }
 
+/* Base */
 * {
   margin: 0;
   padding: 0;
@@ -23,52 +24,36 @@ html, body {
   background-color: #f8f9fa;
   color: var(--text-dark);
   scroll-behavior: smooth;
-  display: flex;
-  flex-direction: column;
 }
 
 body {
-  line-height: 1.6;
   padding-top: 70px;
+  line-height: 1.6;
   animation: fadeInBody 0.8s ease;
 }
 
-main {
-  flex: 1;
-  padding: 2rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Header */
+/* Header & Navbar */
 .site-header {
   position: fixed;
   top: 0;
-  left: 0;
   width: 100%;
   background: var(--secondary);
+  z-index: 999;
+  transition: top 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: top 0.3s ease-in-out;
-  z-index: 1000;
 }
 
 .navbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  background-color: var(--secondary);
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
   color: var(--text-light);
-  padding: 1rem 2rem;
-  width: 100%;
-  z-index: 999;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: top 0.3s ease;
 }
 
 .logo {
   font-size: 1.4rem;
+  font-weight: bold;
   color: var(--text-light);
   text-decoration: none;
 }
@@ -76,8 +61,8 @@ main {
 .hamburger {
   background: none;
   border: none;
-  font-size: 1.8rem;
   color: var(--text-light);
+  font-size: 1.5rem;
   cursor: pointer;
   display: none;
 }
@@ -85,24 +70,36 @@ main {
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 1.5rem;
-  transition: max-height 0.3s ease;
+  align-items: center;
+  gap: 1rem;
 }
 
 .nav-links a {
-  text-decoration: none;
   color: var(--text-light);
-  font-weight: 600;
+  text-decoration: none;
+  font-weight: 500;
 }
 
-.nav-links.collapsed {
-  display: none;
+.logout-btn {
+  background-color: var(--danger);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color var(--transition);
 }
 
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Hide on scroll */
 .hide-nav {
   top: -100px;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .hamburger {
     display: block;
@@ -110,13 +107,14 @@ main {
 
   .nav-links {
     flex-direction: column;
-    background: var(--secondary);
     position: absolute;
-    top: 60px;
+    top: 100%;
     right: 0;
+    background: var(--secondary);
     width: 100%;
     max-height: 0;
     overflow: hidden;
+    transition: max-height var(--transition);
   }
 
   .nav-links.show {
@@ -125,33 +123,19 @@ main {
 
   .nav-links li {
     width: 100%;
-    padding: 1rem;
+    text-align: right;
+    padding: 0.75rem 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
-
-  .nav-links a,
-  .logout-btn {
-    width: 100%;
-    text-align: left;
-  }
-
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  main {
-    padding: 1.5rem 1rem;
-  }
 }
 
-form.collapsible {
-  display: none;
-  margin-top: 1rem;
-}
-
-form.collapsible.show {
-  display: block;
+/* Dashboard */
+main {
+  flex: 1;
+  padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .dashboard-section {
@@ -182,7 +166,7 @@ form.collapsible.show {
   border-radius: var(--radius);
   padding: 1.5rem;
   box-shadow: var(--shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 
 .dashboard-card:hover {
@@ -195,22 +179,41 @@ form.collapsible.show {
   color: var(--secondary);
 }
 
-.dashboard-card p {
-  color: var(--text-dark);
+/* Forms */
+form {
+  margin-top: 1rem;
 }
 
-.logout-btn {
-  background-color: var(--danger);
+input, select, textarea, button {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  margin-bottom: 1rem;
 }
 
-.logout-btn:hover {
-  background-color: #c0392b;
+button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+button:hover {
+  background: #357ABD;
+}
+
+/* Community Board */
+.community-board {
+  margin-top: 4rem;
+}
+
+.post-feed {
+  list-style: none;
+  padding: 0;
+  margin-top: 2rem;
 }
 
 .animated-card {
@@ -218,7 +221,8 @@ form.collapsible.show {
   border-radius: var(--radius);
   padding: 2rem;
   box-shadow: var(--shadow);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transition: transform var(--transition), box-shadow var(--transition);
+  margin-bottom: 1rem;
 }
 
 .animated-card:hover {
@@ -226,18 +230,27 @@ form.collapsible.show {
   box-shadow: var(--shadow-hover);
 }
 
-h1, h2, h3 {
-  color: var(--secondary);
-  margin-bottom: 1rem;
-  font-weight: 600;
+.reactions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
-p {
-  color: var(--text-dark);
-  margin-bottom: 1rem;
-  line-height: 1.6;
+.reaction {
+  background: #eee;
+  border: none;
+  border-radius: 50px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background var(--transition);
 }
 
+.reaction:hover {
+  background: var(--accent);
+}
+
+/* Footer */
 footer {
   background-color: var(--secondary);
   color: var(--text-light);
@@ -249,6 +262,7 @@ footer {
   animation: fadeInFooter 1.5s ease;
 }
 
+/* Animations */
 @keyframes fadeInBody {
   from {
     opacity: 0;
