@@ -6,6 +6,7 @@
   <title>Baylis Properties</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <link rel="stylesheet" href="css/style.css" />
+  <script src="https://kit.fontawesome.com/a2e0e6f87e.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -84,14 +85,14 @@
   </section>
 </main>
 
-<section class="container">
-  <h2 id="community">Community Board</h2>
+<section class="container community-board">
+  <h2 id="community">Community Arena</h2>
   <form id="communityPostForm" class="grid">
     <input type="text" id="posterName" placeholder="Your Name" required />
     <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
     <button type="submit">Post</button>
   </form>
-  <ul id="communityPosts" aria-live="polite"></ul>
+  <ul id="communityPosts" aria-live="polite" class="post-feed"></ul>
 </section>
 
 <footer class="container">
