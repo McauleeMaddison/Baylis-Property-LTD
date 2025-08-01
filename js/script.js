@@ -1,44 +1,41 @@
 document.addEventListener('DOMContentLoaded', () => {
   const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const navLinks = document.getElementById('navLinks');
+  const navLinks = document.querySelector('.nav-links');
   const header = document.getElementById('mainHeader');
+  const collapsibles = document.querySelectorAll('.collapsible-toggle');
+  const loginToggle = document.getElementById('loginToggle');
+  const loginMenu = document.getElementById('loginMenu');
+  const loginForm = document.getElementById('loginForm');
+  const cleaningForm = document.getElementById('cleaningForm');
+  const repairForm = document.getElementById('repairForm');
+  const postForm = document.getElementById('communityPostForm');
+  const postList = document.getElementById('communityPosts');
+  const darkToggle = document.getElementById('darkModeToggle');
 
   // Mobile nav toggle
-  hamburgerBtn?.addEventListener('click', () => {
-    navLinks.classList.toggle('show');
-    const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-    hamburgerBtn.setAttribute('aria-expanded', String(!expanded));
-  });
+  if (hamburgerBtn && navLinks) {
+    hamburgerBtn.addEventListener('click', () => {
+      const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+      hamburgerBtn.setAttribute('aria-expanded', String(!expanded));
+      navLinks.classList.toggle('show');
+    });
+  }
 
   // Collapse navbar on scroll
   let lastScroll = 0;
   window.addEventListener('scroll', () => {
     const currentScroll = window.pageYOffset;
-    if (currentScroll > lastScroll && currentScroll > 60) {
-      header.classList.add('hide-nav');
-    } else {
-      header.classList.remove('hide-nav');
+    if (header) {
+      if (currentScroll > lastScroll && currentScroll > 60) {
+        header.classList.add('hide-nav');
+      } else {
+        header.classList.remove('hide-nav');
+      }
+      lastScroll = currentScroll;
     }
-    lastScroll = currentScroll;
   });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Navbar Collapsible
-  const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const navLinks = document.querySelector('.nav-links');
-
-  if (hamburgerBtn && navLinks) {
-    hamburgerBtn.addEventListener('click', () => {
-      const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-      hamburgerBtn.setAttribute('aria-expanded', !expanded);
-      navLinks.classList.toggle('show');
-    });
-  }
 
   // Collapsible Forms
-  const collapsibles = document.querySelectorAll('.collapsible-toggle');
-
   collapsibles.forEach(toggle => {
     toggle.addEventListener('click', () => {
       const content = toggle.nextElementSibling;
@@ -48,10 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Login Dropdown
-  const loginToggle = document.getElementById('loginToggle');
-  const loginMenu = document.getElementById('loginMenu');
-  const loginForm = document.getElementById('loginForm');
-
   if (loginToggle && loginMenu) {
     loginToggle.addEventListener('click', (e) => {
       e.preventDefault();
@@ -70,8 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Forms: Cleaning
-  const cleaningForm = document.getElementById('cleaningForm');
+  // Cleaning Form Submit
   if (cleaningForm) {
     cleaningForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -83,8 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Forms: Repair
-  const repairForm = document.getElementById('repairForm');
+  // Repair Form Submit
   if (repairForm) {
     repairForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -95,10 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Forms: Community
-  const postForm = document.getElementById('communityPostForm');
-  const postList = document.getElementById('communityPosts');
-
+  // Community Post Submit
   if (postForm && postList) {
     postForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -126,12 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Dark Mode Toggle
-  const darkToggle = document.getElementById('darkModeToggle');
   const isDarkMode = localStorage.getItem('darkMode') === 'true';
-
   if (isDarkMode) {
     document.body.classList.add('dark');
-    darkToggle.checked = true;
+    if (darkToggle) darkToggle.checked = true;
   }
 
   darkToggle?.addEventListener('change', () => {
