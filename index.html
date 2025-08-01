@@ -10,15 +10,28 @@
 </head>
 <body>
 
-<header class="site-header" id="mainHeader">
+<header id="mainHeader" class="site-header">
   <nav class="navbar container-fluid">
-    <a href="#" class="logo">🏠 Baylis Properties</a>
-    <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <a href="#" class="logo">🏠 Baylis</a>
+    <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <i class="fas fa-bars"></i>
+    </button>
     <ul class="nav-links" id="navLinks">
-      <li><a href="#dashboard">Dashboard</a></li>
-      <li><a href="#community">Community</a></li>
+      <li><a href="#dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+      <li><a href="#community"><i class="fas fa-comments"></i> Community</a></li>
+
+      <!-- Dark mode -->
+      <li class="theme-toggle">
+        <label for="darkModeToggle" class="switch">
+          <input type="checkbox" id="darkModeToggle" />
+          <span class="slider"></span>
+          <i id="darkModeIcon" class="fas fa-sun"></i>
+        </label>
+      </li>
+
+      <!-- Login dropdown -->
       <li id="loginSection">
-        <a href="#" id="loginToggle" aria-expanded="false">Login ▼</a>
+        <a href="#" id="loginToggle" aria-expanded="false"><i class="fas fa-user-lock"></i> Login ▼</a>
         <div id="loginMenu" class="login-dropdown hidden">
           <form id="loginForm">
             <input type="email" id="loginEmail" placeholder="Email" required />
@@ -31,19 +44,15 @@
           </form>
         </div>
       </li>
+
+      <!-- Logout -->
       <li id="logoutSection" class="hidden">
-        <button class="logout-btn" id="logoutBtn">Logout</button>
-      </li>
-      <li class="theme-toggle">
-        <input type="checkbox" id="darkModeToggle" aria-label="Toggle dark mode" />
-        <label for="darkModeToggle" class="switch">
-          <span class="slider"></span>
-          <span class="icon" id="darkModeIcon">☀️</span>
-        </label>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </li>
     </ul>
   </nav>
 </header>
+
 
 <main class="container">
   <section id="dashboard" class="dashboard-section">
