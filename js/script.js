@@ -1,4 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const navLinks = document.getElementById('navLinks');
+  const header = document.getElementById('mainHeader');
+
+  // Mobile nav toggle
+  hamburgerBtn?.addEventListener('click', () => {
+    navLinks.classList.toggle('show');
+    const expanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+    hamburgerBtn.setAttribute('aria-expanded', String(!expanded));
+  });
+
+  // Collapse navbar on scroll
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 60) {
+      header.classList.add('hide-nav');
+    } else {
+      header.classList.remove('hide-nav');
+    }
+    lastScroll = currentScroll;
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
   // Navbar Collapsible
   const hamburgerBtn = document.getElementById('hamburgerBtn');
   const navLinks = document.querySelector('.nav-links');
