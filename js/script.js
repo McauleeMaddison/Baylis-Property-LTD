@@ -14,39 +14,41 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', () => {
     const currentScroll = window.scrollY;
     if (currentScroll > lastScroll && currentScroll > 80) {
-      header.classList.add('hide-nav');
+      header?.classList.add('hide-nav');
     } else {
-      header.classList.remove('hide-nav');
+      header?.classList.remove('hide-nav');
     }
     lastScroll = currentScroll;
   });
 
-  /** Hamburger toggle for mobile **/
+  /** Hamburger menu toggle **/
   hamburgerBtn?.addEventListener('click', () => {
-    navLinks.classList.toggle('show');
-    hamburgerBtn.setAttribute(
-      'aria-expanded',
-      navLinks.classList.contains('show')
-    );
+    navLinks?.classList.toggle('show');
+    hamburgerBtn.setAttribute('aria-expanded', navLinks?.classList.contains('show'));
   });
 
-  /** Dark Mode Toggle **/
-  if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('dark');
+  /** Dark mode handling **/
+  const enableDarkMode = () => document.body.classList.add('dark');
+  const disableDarkMode = () => document.body.classList.remove('dark');
+  const isDark = localStorage.getItem('darkMode') === 'true';
+
+  if (isDark) {
+    enableDarkMode();
     darkToggle.checked = true;
   }
 
   darkToggle?.addEventListener('change', () => {
-    document.body.classList.toggle('dark');
-    localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+    const enabled = darkToggle.checked;
+    enabled ? enableDarkMode() : disableDarkMode();
+    localStorage.setItem('darkMode', enabled);
   });
 
-  /** Login Dropdown Behavior **/
+  /** Login dropdown toggle **/
   loginToggle?.addEventListener('click', (e) => {
     e.preventDefault();
     const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
     loginToggle.setAttribute('aria-expanded', !expanded);
-    loginMenu.classList.toggle('hidden');
+    loginMenu?.classList.toggle('hidden');
   });
 
   document.addEventListener('click', (e) => {
@@ -60,11 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /** Login Submission **/
+  /** Login submission **/
   loginForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const role = loginForm.loginRole.value;
     const name = loginForm.loginEmail.value.split('@')[0];
+
     alert(`🔐 Welcome ${name}! Logged in as ${role}`);
     loginMenu.classList.add('hidden');
     loginToggle.classList.add('hidden');
@@ -78,22 +81,34 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutSection.classList.add('hidden');
   });
 
-  /** Forms - Cleaning & Repair **/
+  /** Cleaning form submission **/
   const cleaningForm = document.getElementById('cleaningForm');
   cleaningForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    alert(`✅ Cleaning scheduled for ${cleaningForm.cleaningName.value} on ${cleaningForm.cleaningDate.value}`);
+    const name = cleaningForm.cleaningName.value;
+    const date = cleaningForm.cleaningDate.value;
+    alert(`✅ Cleaning scheduled for ${name} on ${date}`);
     cleaningForm.reset();
   });
 
+  /** Repair form submission **/
   const repairForm = document.getElementById('repairForm');
   repairForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    alert(`🛠️ Repair issue submitted by ${repairForm.repairName.value}`);
+    const name = repairForm.repairName.value;
+    alert(`🛠️ Repair issue submitted by ${name}`);
     repairForm.reset();
   });
 
-  /** Community Post **/
+  /** Landlord cleaning scheduler (optional section) **/
+  const landlordForm = document.getElementById('landlordCleaningForm');
+  landlordForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert("📅 Landlord cleaning scheduled successfully.");
+    landlordForm.reset();
+  });
+
+  /** Community Post System **/
   const postForm = document.getElementById('communityPostForm');
   const postList = document.getElementById('communityPosts');
 
