@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoutBtn = document.getElementById('logoutBtn');
   const darkToggle = document.getElementById('darkModeToggle');
 
-  /** Sticky header hide on scroll down **/
   let lastScroll = 0;
   window.addEventListener('scroll', () => {
     const currentScroll = window.scrollY;
@@ -21,13 +20,20 @@ document.addEventListener('DOMContentLoaded', () => {
     lastScroll = currentScroll;
   });
 
-  /** Hamburger menu toggle **/
   hamburgerBtn?.addEventListener('click', () => {
     navLinks?.classList.toggle('show');
     hamburgerBtn.setAttribute('aria-expanded', navLinks?.classList.contains('show'));
   });
 
-  /** Dark mode handling **/
+  navLinks?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        navLinks.classList.remove('show');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+
   const enableDarkMode = () => document.body.classList.add('dark');
   const disableDarkMode = () => document.body.classList.remove('dark');
   const isDark = localStorage.getItem('darkMode') === 'true';
@@ -43,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('darkMode', enabled);
   });
 
-  /** Login dropdown toggle **/
   loginToggle?.addEventListener('click', (e) => {
     e.preventDefault();
     const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
@@ -62,66 +67,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /** Login submission **/
   loginForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const role = loginForm.loginRole.value;
     const name = loginForm.loginEmail.value.split('@')[0];
-
-    alert(`🔐 Welcome ${name}! Logged in as ${role}`);
+    toast(`🔐 Welcome ${name}! Logged in as ${role}`);
     loginMenu.classList.add('hidden');
     loginToggle.classList.add('hidden');
     logoutSection.classList.remove('hidden');
   });
 
-  /** Logout **/
   logoutBtn?.addEventListener('click', () => {
-    alert("👋 You have been logged out.");
+    toast("👋 You have been logged out.");
     loginToggle.classList.remove('hidden');
     logoutSection.classList.add('hidden');
   });
 
-  /** Cleaning form submission **/
   const cleaningForm = document.getElementById('cleaningForm');
   cleaningForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = cleaningForm.cleaningName.value;
-    const date = cleaningForm.cleaningDate.value;
-    alert(`✅ Cleaning scheduled for ${name} on ${date}`);
+    if (!cleaningForm.checkValidity()) return;
+    toast(`✅ Cleaning scheduled for ${cleaningForm.cleaningName.value} on ${cleaningForm.cleaningDate.value}`);
     cleaningForm.reset();
   });
 
-  /** Repair form submission **/
   const repairForm = document.getElementById('repairForm');
   repairForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = repairForm.repairName.value;
-    alert(`🛠️ Repair issue submitted by ${name}`);
+    if (!repairForm.checkValidity()) return;
+    toast(`🛠️ Repair issue submitted by ${repairForm.repairName.value}`);
     repairForm.reset();
   });
 
-  /** Landlord cleaning scheduler (optional section) **/
   const landlordForm = document.getElementById('landlordCleaningForm');
   landlordForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    alert("📅 Landlord cleaning scheduled successfully.");
+    toast("📅 Landlord cleaning scheduled successfully.");
     landlordForm.reset();
   });
 
-  /** Community Post System **/
   const postForm = document.getElementById('communityPostForm');
   const postList = document.getElementById('communityPosts');
 
-  postForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = postForm.posterName.value.trim();
-    const msg = postForm.posterMessage.value.trim();
-    if (!name || !msg) return;
+  const savePost = (post) => {
+    const existing = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+    existing.unshift(post);
+    localStorage.setItem('communityPosts', JSON.stringify(existing.slice(0, 50)));
+  };
 
+  const renderPost = ({ name, msg, date }) => {
     const li = document.createElement('li');
     li.className = 'animated-card';
     li.innerHTML = `
-      <strong>${name}</strong> <small>${new Date().toLocaleString()}</small>
+      <strong>${name}</strong> <small>${date}</small>
       <p>${msg}</p>
       <div class="reactions">
         <button class="reaction">👍</button>
@@ -130,6 +128,37 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
     postList.prepend(li);
+  };
+
+  const renderSavedPosts = () => {
+    const saved = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+    saved.forEach(renderPost);
+  };
+
+  renderSavedPosts();
+
+  postForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = postForm.posterName.value.trim();
+    const msg = postForm.posterMessage.value.trim();
+    const date = new Date().toLocaleString();
+    if (!name || !msg) return;
+    const post = { name, msg, date };
+    renderPost(post);
+    savePost(post);
     postForm.reset();
   });
+
+  /** Toast utility **/
+  const toast = (msg) => {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerText = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.classList.add('show'), 100);
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 300);
+    }, 3000);
+  };
 });
