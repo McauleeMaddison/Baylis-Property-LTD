@@ -14,6 +14,7 @@
   --glass-hover: rgba(255, 255, 255, 0.15);
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.15);
+  --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
   --transition-fast: 0.3s ease;
   --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -25,7 +26,6 @@
   padding: 0;
 }
 
-/* Body */
 body, html {
   height: 100%;
   font-family: 'Segoe UI', sans-serif;
@@ -54,7 +54,6 @@ body, html {
   z-index: 1000;
 }
 
-/* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -71,7 +70,6 @@ body, html {
   text-decoration: none;
 }
 
-/* Hamburger */
 .hamburger {
   display: none;
   font-size: 1.8rem;
@@ -81,7 +79,6 @@ body, html {
   cursor: pointer;
   transition: transform 0.2s ease;
 }
-
 .hamburger:hover {
   transform: scale(1.1);
 }
@@ -92,11 +89,9 @@ body, html {
   gap: 1.2rem;
   list-style: none;
 }
-
 .nav-links li {
   position: relative;
 }
-
 .nav-links a, .nav-links button {
   text-decoration: none;
   color: var(--text-light);
@@ -108,7 +103,6 @@ body, html {
   border: none;
   cursor: pointer;
 }
-
 .nav-links a:hover,
 .nav-links button:hover {
   background: var(--glass-hover);
@@ -119,7 +113,6 @@ body, html {
   .hamburger {
     display: block;
   }
-
   .nav-links {
     position: absolute;
     top: 100%;
@@ -131,11 +124,9 @@ body, html {
     max-height: 0;
     transition: max-height var(--transition-smooth);
   }
-
   .nav-links.show {
     max-height: 500px;
   }
-
   .nav-links li {
     padding: 1rem;
     width: 100%;
@@ -143,75 +134,104 @@ body, html {
   }
 }
 
-/* Forms */
-.form-container {
-  margin-top: 2rem;
-  display: none;
+/* Dashboard Grid */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
 }
 
-.form-container.show {
-  display: block;
-}
-
-.glass-form {
+.dashboard-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  padding: 2rem;
   border-radius: var(--radius);
+  backdrop-filter: blur(12px);
   box-shadow: var(--shadow);
+  padding: 1.5rem;
+  transition: transform 0.3s ease;
+  border-left: 6px solid var(--primary);
+}
+.dashboard-card:hover {
+  transform: translateY(-4px);
+}
+.dashboard-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  max-width: 600px;
-  margin: auto;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* Inputs */
-.glass-form input,
-.glass-form textarea,
-.glass-form select {
-  width: 100%;
-  padding: 0.9rem;
-  border: 1px solid #ccc;
+/* Forms */
+form input,
+form textarea,
+form select {
+  font-size: 0.9rem;
+  padding: 0.6rem;
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.85);
-  font-size: 1rem;
+  border: 1px solid #ccc;
+  background: rgba(255, 255, 255, 0.95);
+  width: 100%;
   transition: border var(--transition-fast), background var(--transition-fast);
 }
-
-.glass-form input:focus,
-.glass-form textarea:focus,
-.glass-form select:focus {
+form input:focus,
+form textarea:focus,
+form select:focus {
   border-color: var(--primary);
   background: #fff;
   outline: none;
 }
 
-/* Form Buttons */
-.glass-form button {
-  background: var(--primary);
-  color: white;
-  padding: 0.9rem;
-  font-size: 1rem;
-  font-weight: 600;
+/* Small Buttons */
+form button {
+  background-color: var(--primary);
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: background var(--transition-smooth), transform var(--transition-fast);
+  transition: background-color var(--transition-fast), transform 0.2s ease;
+  font-weight: 500;
+}
+form button:hover {
+  background-color: #357ab8;
+  transform: scale(1.03);
+}
+form button:active {
+  transform: scale(0.97);
 }
 
-.glass-form button:hover {
-  background: #357ab8;
-  transform: translateY(-2px);
+/* Grid Layout for Form */
+form.grid {
+  display: grid;
+  gap: 1rem;
 }
-
-.glass-form button:active {
-  transform: scale(0.98);
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .glass-form {
-    padding: 1.5rem;
+@media (min-width: 768px) {
+  form.grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
+
+/* Community Posts */
+.post-feed {
+  list-style: none;
+  padding: 0;
+  margin-top: 2rem;
+}
+.post-feed li {
+  background: var(--glass-hover);
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-light);
+}
+
+/* Hidden Class */
+.hidden {
+  display: none !important;
+}
+
+/* Responsive Forms */
+@media (max-width: 600px) {
+  .g
