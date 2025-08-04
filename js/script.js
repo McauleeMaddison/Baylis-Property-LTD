@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoutSection = document.getElementById('logoutSection');
   const logoutBtn = document.getElementById('logoutBtn');
   const darkToggle = document.getElementById('darkModeToggle');
+  const darkIcon = document.getElementById('darkModeIcon');
 
   let lastScroll = 0;
   window.addEventListener('scroll', () => {
@@ -34,10 +35,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  const enableDarkMode = () => document.body.classList.add('dark');
-  const disableDarkMode = () => document.body.classList.remove('dark');
-  const isDark = localStorage.getItem('darkMode') === 'true';
+  const enableDarkMode = () => {
+    document.body.classList.add('dark');
+    darkIcon.textContent = '🌙';
+  };
 
+  const disableDarkMode = () => {
+    document.body.classList.remove('dark');
+    darkIcon.textContent = '🌞';
+  };
+
+  const isDark = localStorage.getItem('darkMode') === 'true';
   if (isDark) {
     enableDarkMode();
     darkToggle.checked = true;
@@ -149,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
     postForm.reset();
   });
 
-  /** Toast utility **/
   const toast = (msg) => {
     const el = document.createElement('div');
     el.className = 'toast';
