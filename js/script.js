@@ -1,171 +1,119 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const header = document.getElementById('mainHeader');
-  const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const navLinks = document.getElementById('navLinks');
-  const loginToggle = document.getElementById('loginToggle');
-  const loginMenu = document.getElementById('loginMenu');
-  const loginForm = document.getElementById('loginForm');
-  const logoutSection = document.getElementById('logoutSection');
-  const logoutBtn = document.getElementById('logoutBtn');
+// script.js
+
+window.addEventListener('DOMContentLoaded', () => {
   const darkToggle = document.getElementById('darkModeToggle');
   const darkIcon = document.getElementById('darkModeIcon');
+  const landlordLoginForm = document.getElementById('landlordLoginForm');
+  const landlordDashboard = document.getElementById('landlordDashboard');
+  const landlordGate = document.getElementById('landlordLoginGate');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-  let lastScroll = 0;
-  window.addEventListener('scroll', () => {
-    const currentScroll = window.scrollY;
-    if (currentScroll > lastScroll && currentScroll > 80) {
-      header?.classList.add('hide-nav');
-    } else {
-      header?.classList.remove('hide-nav');
-    }
-    lastScroll = currentScroll;
-  });
-
-  hamburgerBtn?.addEventListener('click', () => {
-    navLinks?.classList.toggle('show');
-    hamburgerBtn.setAttribute('aria-expanded', navLinks?.classList.contains('show'));
-  });
-
-  navLinks?.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth < 768) {
-        navLinks.classList.remove('show');
-        hamburgerBtn.setAttribute('aria-expanded', 'false');
-      }
+  // Toggle Forms
+  document.querySelectorAll('.toggle-form-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const form = document.getElementById(btn.dataset.target);
+      form.classList.toggle('hidden');
+      form.classList.add('animated');
     });
   });
 
-  const enableDarkMode = () => {
-    document.body.classList.add('dark');
-    darkIcon.textContent = '🌙';
+  // Dark mode toggle
+  const updateDarkMode = (enabled) => {
+    document.body.classList.toggle('dark', enabled);
+    localStorage.setItem('darkMode', enabled);
+    darkIcon.textContent = enabled ? '🌙' : '🌞';
   };
 
-  const disableDarkMode = () => {
-    document.body.classList.remove('dark');
-    darkIcon.textContent = '🌞';
-  };
-
-  const isDark = localStorage.getItem('darkMode') === 'true';
-  if (isDark) {
-    enableDarkMode();
+  if (localStorage.getItem('darkMode') === 'true') {
     darkToggle.checked = true;
+    updateDarkMode(true);
   }
 
-  darkToggle?.addEventListener('change', () => {
-    const enabled = darkToggle.checked;
-    enabled ? enableDarkMode() : disableDarkMode();
-    localStorage.setItem('darkMode', enabled);
+  darkToggle.addEventListener('change', () => {
+    updateDarkMode(darkToggle.checked);
   });
 
-  loginToggle?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const expanded = loginToggle.getAttribute('aria-expanded') === 'true';
-    loginToggle.setAttribute('aria-expanded', !expanded);
-    loginMenu?.classList.toggle('hidden');
+  // Avatar dropdown
+  const avatarToggle = document.querySelector('.avatar-toggle');
+  const userDropdown = document.getElementById('userDropdown');
+  avatarToggle?.addEventListener('click', () => {
+    const expanded = avatarToggle.getAttribute('aria-expanded') === 'true';
+    avatarToggle.setAttribute('aria-expanded', !expanded);
+    userDropdown.classList.toggle('hidden');
   });
 
+  // Hide dropdown on outside click
   document.addEventListener('click', (e) => {
-    if (
-      loginMenu &&
-      !loginMenu.contains(e.target) &&
-      !loginToggle.contains(e.target)
-    ) {
-      loginMenu.classList.add('hidden');
-      loginToggle.setAttribute('aria-expanded', 'false');
+    if (!avatarToggle.contains(e.target) && !userDropdown.contains(e.target)) {
+      userDropdown?.classList.add('hidden');
+      avatarToggle?.setAttribute('aria-expanded', 'false');
     }
   });
 
-  loginForm?.addEventListener('submit', (e) => {
+  // Landlord login
+  landlordLoginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const role = loginForm.loginRole.value;
-    const name = loginForm.loginEmail.value.split('@')[0];
-    toast(`🔐 Welcome ${name}! Logged in as ${role}`);
-    loginMenu.classList.add('hidden');
-    loginToggle.classList.add('hidden');
-    logoutSection.classList.remove('hidden');
+    const username = document.getElementById('landlordUsername').value.trim();
+    const password = document.getElementById('landlordPassword').value.trim();
+
+    if (username === 'admin' && password === 'landlord123') {
+      landlordDashboard.classList.remove('hidden');
+      landlordGate.classList.add('hidden');
+      showToast('🔓 Landlord portal unlocked!');
+    } else {
+      showToast('❌ Invalid credentials');
+    }
   });
 
+  // Logout button
   logoutBtn?.addEventListener('click', () => {
-    toast("👋 You have been logged out.");
-    loginToggle.classList.remove('hidden');
-    logoutSection.classList.add('hidden');
+    showToast('👋 Logged out successfully');
+    window.location.reload();
   });
 
-  const cleaningForm = document.getElementById('cleaningForm');
-  cleaningForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!cleaningForm.checkValidity()) return;
-    toast(`✅ Cleaning scheduled for ${cleaningForm.cleaningName.value} on ${cleaningForm.cleaningDate.value}`);
-    cleaningForm.reset();
-  });
-
-  const repairForm = document.getElementById('repairForm');
-  repairForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!repairForm.checkValidity()) return;
-    toast(`🛠️ Repair issue submitted by ${repairForm.repairName.value}`);
-    repairForm.reset();
-  });
-
-  const landlordForm = document.getElementById('landlordCleaningForm');
-  landlordForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    toast("📅 Landlord cleaning scheduled successfully.");
-    landlordForm.reset();
-  });
-
-  const postForm = document.getElementById('communityPostForm');
-  const postList = document.getElementById('communityPosts');
-
-  const savePost = (post) => {
-    const existing = JSON.parse(localStorage.getItem('communityPosts') || '[]');
-    existing.unshift(post);
-    localStorage.setItem('communityPosts', JSON.stringify(existing.slice(0, 50)));
-  };
-
-  const renderPost = ({ name, msg, date }) => {
+  // Submission utilities
+  const createSubmission = (text) => {
     const li = document.createElement('li');
-    li.className = 'animated-card';
-    li.innerHTML = `
-      <strong>${name}</strong> <small>${date}</small>
-      <p>${msg}</p>
-      <div class="reactions">
-        <button class="reaction">👍</button>
-        <button class="reaction">❤️</button>
-        <button class="reaction">😂</button>
-      </div>
-    `;
-    postList.prepend(li);
+    li.textContent = text;
+    li.classList.add('animated');
+    return li;
   };
 
-  const renderSavedPosts = () => {
-    const saved = JSON.parse(localStorage.getItem('communityPosts') || '[]');
-    saved.forEach(renderPost);
-  };
-
-  renderSavedPosts();
-
-  postForm?.addEventListener('submit', (e) => {
+  document.getElementById('cleaningForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = postForm.posterName.value.trim();
-    const msg = postForm.posterMessage.value.trim();
-    const date = new Date().toLocaleString();
-    if (!name || !msg) return;
-    const post = { name, msg, date };
-    renderPost(post);
-    savePost(post);
-    postForm.reset();
+    const name = document.getElementById('cleaningName').value;
+    const date = document.getElementById('cleaningDate').value;
+    document.getElementById('cleaningSubmissions').prepend(createSubmission(`🧼 ${name} scheduled cleaning on ${date}`));
+    e.target.reset();
   });
 
-  const toast = (msg) => {
-    const el = document.createElement('div');
-    el.className = 'toast';
-    el.innerText = msg;
-    document.body.appendChild(el);
-    setTimeout(() => el.classList.add('show'), 100);
-    setTimeout(() => {
-      el.classList.remove('show');
-      setTimeout(() => el.remove(), 300);
-    }, 3000);
-  };
+  document.getElementById('repairForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('repairName').value;
+    const issue = document.getElementById('repairIssue').value;
+    document.getElementById('repairSubmissions').prepend(createSubmission(`🛠️ ${name} reported: ${issue}`));
+    e.target.reset();
+  });
+
+  // Community Post
+  document.getElementById('communityPostForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('posterName').value;
+    const msg = document.getElementById('posterMessage').value;
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${name}</strong>: ${msg}`;
+    li.classList.add('animated');
+    document.getElementById('communityPosts').prepend(li);
+    e.target.reset();
+  });
+
+  // Toasts
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => toast.remove(), 3500);
+  }
 });
