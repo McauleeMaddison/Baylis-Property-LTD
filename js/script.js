@@ -1,5 +1,3 @@
-// script.js
-
 window.addEventListener('DOMContentLoaded', () => {
   const darkToggle = document.getElementById('darkModeToggle');
   const darkIcon = document.getElementById('darkModeIcon');
@@ -8,7 +6,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const landlordGate = document.getElementById('landlordLoginGate');
   const logoutBtn = document.getElementById('logoutBtn');
 
-  // Toggle Forms
+  // === Toggle Forms ===
   document.querySelectorAll('.toggle-form-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const form = document.getElementById(btn.dataset.target);
@@ -17,7 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Dark mode toggle
+  // === Dark mode ===
   const updateDarkMode = (enabled) => {
     document.body.classList.toggle('dark', enabled);
     localStorage.setItem('darkMode', enabled);
@@ -33,16 +31,16 @@ window.addEventListener('DOMContentLoaded', () => {
     updateDarkMode(darkToggle.checked);
   });
 
-  // Avatar dropdown
+  // === Avatar Dropdown ===
   const avatarToggle = document.querySelector('.avatar-toggle');
   const userDropdown = document.getElementById('userDropdown');
+
   avatarToggle?.addEventListener('click', () => {
     const expanded = avatarToggle.getAttribute('aria-expanded') === 'true';
     avatarToggle.setAttribute('aria-expanded', !expanded);
     userDropdown.classList.toggle('hidden');
   });
 
-  // Hide dropdown on outside click
   document.addEventListener('click', (e) => {
     if (!avatarToggle.contains(e.target) && !userDropdown.contains(e.target)) {
       userDropdown?.classList.add('hidden');
@@ -50,8 +48,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Landlord login
-  landlordLoginForm.addEventListener('submit', (e) => {
+  // === Landlord Login ===
+  landlordLoginForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const username = document.getElementById('landlordUsername').value.trim();
     const password = document.getElementById('landlordPassword').value.trim();
@@ -65,13 +63,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Logout button
+  // === Logout ===
   logoutBtn?.addEventListener('click', () => {
     showToast('👋 Logged out successfully');
     window.location.reload();
   });
 
-  // Submission utilities
+  // === Submission Utility ===
   const createSubmission = (text) => {
     const li = document.createElement('li');
     li.textContent = text;
@@ -79,23 +77,32 @@ window.addEventListener('DOMContentLoaded', () => {
     return li;
   };
 
+  // === Cleaning Form ===
   document.getElementById('cleaningForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('cleaningName').value;
     const date = document.getElementById('cleaningDate').value;
-    document.getElementById('cleaningSubmissions').prepend(createSubmission(`🧼 ${name} scheduled cleaning on ${date}`));
+    const type = document.getElementById('cleaningType').value;
+    document.getElementById('cleaningSubmissions').prepend(
+      createSubmission(`🧼 ${name} requested a "${type}" clean on ${date}`)
+    );
     e.target.reset();
+    showToast("✅ Cleaning request submitted");
   });
 
+  // === Repair Form ===
   document.getElementById('repairForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('repairName').value;
     const issue = document.getElementById('repairIssue').value;
-    document.getElementById('repairSubmissions').prepend(createSubmission(`🛠️ ${name} reported: ${issue}`));
+    document.getElementById('repairSubmissions').prepend(
+      createSubmission(`🛠️ ${name} reported: ${issue}`)
+    );
     e.target.reset();
+    showToast("✅ Repair request submitted");
   });
 
-  // Community Post
+  // === Community Post ===
   document.getElementById('communityPostForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('posterName').value;
@@ -105,9 +112,10 @@ window.addEventListener('DOMContentLoaded', () => {
     li.classList.add('animated');
     document.getElementById('communityPosts').prepend(li);
     e.target.reset();
+    showToast("💬 Post added to community");
   });
 
-  // Toasts
+  // === Toasts ===
   function showToast(msg) {
     const toast = document.createElement('div');
     toast.className = 'toast';
