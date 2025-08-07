@@ -1,3 +1,4 @@
+/* === Root Variables === */
 :root {
   --primary: #2c3e50;
   --secondary: #4a90e2;
@@ -14,6 +15,7 @@
   --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* === Base Reset === */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -35,6 +37,7 @@ html, body {
   padding: 0 1.5rem;
 }
 
+/* === Header and Nav === */
 .site-header {
   position: fixed;
   top: 0;
@@ -122,7 +125,6 @@ html, body {
   .hamburger {
     display: block;
   }
-
   .nav-links {
     position: absolute;
     top: 100%;
@@ -136,11 +138,9 @@ html, body {
     overflow: hidden;
     transition: max-height var(--transition-smooth);
   }
-
   .nav-links.show {
     max-height: 500px;
   }
-
   .nav-links li {
     width: 100%;
     text-align: left;
@@ -148,131 +148,134 @@ html, body {
   }
 }
 
-/* Dashboard Section */
-.dashboard-section {
-  margin-top: 2rem;
-}
-
-.dashboard-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
+/* === Dashboard Sections === */
 .dashboard-card {
   background-color: var(--bg-light);
+  box-shadow: var(--shadow);
   padding: 1.5rem;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  margin-bottom: 1.5rem;
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
 }
-
 .dashboard-card:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
 }
 
-.dashboard-card h3 {
-  margin-bottom: 1rem;
-  color: var(--primary);
-}
-
-/* Forms */
-form {
-  display: grid;
-  gap: 1rem;
-}
-
+/* === Forms === */
 form input,
 form textarea,
 form select {
-  padding: 0.6rem;
+  width: 100%;
+  padding: 0.7rem;
   border-radius: var(--radius);
   border: 1px solid #ccc;
-  width: 100%;
   font-size: 1rem;
+  margin-bottom: 1rem;
 }
 
 form button {
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: var(--radius);
-  background: var(--primary);
+  background-color: var(--primary);
   color: white;
-  font-weight: 500;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: var(--radius);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: background-color var(--transition-fast);
 }
 
 form button:hover {
-  background: var(--secondary);
+  background-color: var(--secondary);
 }
 
-.hidden {
-  display: none !important;
-}
-
+/* === Toast Notifications === */
 .toast {
   position: fixed;
   bottom: 20px;
   left: 50%;
-  transform: translateX(-50%);
-  background: var(--primary);
-  color: white;
-  padding: 0.75rem 1.25rem;
+  transform: translateX(-50%) scale(0.9);
+  background-color: var(--primary);
+  color: #fff;
+  padding: 1rem 1.5rem;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-hover);
   opacity: 0;
-  animation: fadeInOut 3.5s ease forwards;
+  transition: all 0.3s ease;
   z-index: 9999;
+  pointer-events: none;
 }
 
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  10% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
-  }
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
 }
 
-.animated {
-  animation: fadeInUp 0.4s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Community Arena */
-#communityPosts {
-  margin-top: 1rem;
-  list-style: none;
-  padding: 0;
-}
-
-#communityPosts li {
+/* === Community Posts === */
+.post-feed li {
   background: #fff;
   padding: 1rem;
-  margin-bottom: 1rem;
-  border-left: 4px solid var(--primary);
   border-radius: var(--radius);
+  margin-bottom: 1rem;
   box-shadow: var(--shadow);
+}
+
+/* === Avatar Dropdown === */
+.avatar-container {
+  position: relative;
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--secondary);
+}
+.avatar-dropdown {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  background: #fff;
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  display: none;
+  flex-direction: column;
+}
+.avatar-container:hover .avatar-dropdown {
+  display: flex;
+}
+.avatar-dropdown a {
+  padding: 0.5rem 1rem;
+  color: var(--text-dark);
+  text-decoration: none;
+}
+.avatar-dropdown a:hover {
+  background-color: #f0f0f0;
+}
+
+/* === Validation === */
+input:invalid,
+textarea:invalid,
+select:invalid {
+  border-color: var(--danger);
+}
+
+input:valid,
+textarea:valid,
+select:valid {
+  border-color: var(--success);
+}
+
+/* === Landlord Section === */
+#landlordDashboard {
+  border-left: 5px solid var(--secondary);
+  background: #eef3fa;
+  padding: 2rem;
+  border-radius: var(--radius);
+  margin-top: 2rem;
+}
+
+#landlordDashboard h2 {
+  color: var(--primary);
 }
