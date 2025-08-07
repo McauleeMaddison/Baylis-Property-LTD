@@ -20,36 +20,36 @@
         <li><a href="#dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
         <li><a href="#community"><i class="fas fa-users"></i> Community</a></li>
 
+        <!-- Dark Mode Toggle -->
         <li>
           <label for="darkModeToggle" class="switch">
-            <input type="checkbox" id="darkModeToggle">
+            <input type="checkbox" id="darkModeToggle" />
             <span class="slider"></span>
             <span class="icon" id="darkModeIcon">🌞</span>
           </label>
         </li>
 
-        <!-- User Dropdown -->
-        <li class="avatar-dropdown">
-          <button class="avatar-toggle" aria-label="User menu" aria-expanded="false">
-            <i class="fas fa-user-circle fa-lg"></i> ▼
-          </button>
-          <ul class="dropdown-menu hidden" id="userDropdown">
-            <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
-            <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
-            <li><button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
-          </ul>
+        <!-- Avatar Dropdown -->
+        <li class="avatar-container">
+          <img src="https://i.pravatar.cc/40?img=1" class="avatar" alt="User Avatar" />
+          <div class="avatar-dropdown" id="userDropdown">
+            <a href="#"><i class="fas fa-user"></i> Profile</a>
+            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </div>
         </li>
       </ul>
     </nav>
   </header>
 
-  <!-- Main Content -->
+  <!-- Main Dashboard Content -->
   <main class="container">
     <section id="dashboard" class="dashboard-section">
       <hgroup>
         <h2 class="dashboard-title">Resident Dashboard</h2>
         <p class="dashboard-subtext">Manage your property interactions effectively.</p>
       </hgroup>
+
       <div class="dashboard-cards">
         <div class="dashboard-card">
           <button type="button" class="toggle-form-btn" data-target="cleaningForm"><i class="fas fa-broom"></i> Cleaning Request</button>
@@ -66,6 +66,7 @@
           </form>
           <ul id="cleaningSubmissions" class="submission-log"></ul>
         </div>
+
         <div class="dashboard-card">
           <button type="button" class="toggle-form-btn" data-target="repairForm"><i class="fas fa-tools"></i> Repair Request</button>
           <form id="repairForm" class="hidden">
@@ -76,6 +77,7 @@
           </form>
           <ul id="repairSubmissions" class="submission-log"></ul>
         </div>
+
         <div class="dashboard-card">
           <h3><i class="fas fa-comments"></i> Community Posts</h3>
           <p>View community updates and discussions below.</p>
