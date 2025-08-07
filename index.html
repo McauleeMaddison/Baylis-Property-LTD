@@ -42,89 +42,58 @@
     </nav>
   </header>
 
-  <!-- Main Dashboard Content -->
-  <main class="container">
-    <section id="dashboard" class="dashboard-section">
-      <hgroup>
-        <h2 class="dashboard-title">Resident Dashboard</h2>
-        <p class="dashboard-subtext">Manage your property interactions effectively.</p>
-      </hgroup>
+<section id="dashboard" class="dashboard-section">
+  <hgroup>
+    <h2 class="dashboard-title">Resident Dashboard</h2>
+    <p class="dashboard-subtext">Manage your property interactions effectively.</p>
+  </hgroup>
 
-      <div class="dashboard-cards">
-        <div class="dashboard-card">
-          <button type="button" class="toggle-form-btn" data-target="cleaningForm"><i class="fas fa-broom"></i> Cleaning Request</button>
-          <form id="cleaningForm" class="hidden">
-            <input type="text" id="cleaningName" name="cleaningName" placeholder="Your Name" required />
-            <input type="text" id="cleaningAddress" name="cleaningAddress" placeholder="Property Address" required />
-            <input type="date" id="cleaningDate" name="cleaningDate" required />
-            <select id="cleaningType" name="cleaningType" required>
-              <option value="Move Out Clean">Move Out Clean</option>
-              <option value="Deep Clean">Deep Clean</option>
-              <option value="Light Clean">Light Clean</option>
-            </select>
-            <button type="submit">Schedule Cleaning</button>
-          </form>
-          <ul id="cleaningSubmissions" class="submission-log"></ul>
-        </div>
+  <div class="dashboard-buttons">
+    <button type="button" class="toggle-form-btn" data-target="cleaningForm"><i class="fas fa-broom"></i> Cleaning Request</button>
+    <button type="button" class="toggle-form-btn" data-target="repairForm"><i class="fas fa-tools"></i> Repair Request</button>
+    <button type="button" class="toggle-form-btn" data-target="communityPostForm"><i class="fas fa-bullhorn"></i> Post to Community</button>
+  </div>
 
-        <div class="dashboard-card">
-          <button type="button" class="toggle-form-btn" data-target="repairForm"><i class="fas fa-tools"></i> Repair Request</button>
-          <form id="repairForm" class="hidden">
-            <input type="text" id="repairName" name="repairName" placeholder="Your Name" required />
-            <input type="text" id="repairAddress" name="repairAddress" placeholder="Property Address" required />
-            <textarea id="repairIssue" name="repairIssue" placeholder="Describe the issue..." required></textarea>
-            <button type="submit">Submit Repair</button>
-          </form>
-          <ul id="repairSubmissions" class="submission-log"></ul>
-        </div>
-
-        <div class="dashboard-card">
-          <h3><i class="fas fa-comments"></i> Community Posts</h3>
-          <p>View community updates and discussions below.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Landlord Login Gate -->
-    <section id="landlordLoginGate" class="dashboard-section">
-      <h2 class="dashboard-title">Landlord Login</h2>
-      <form id="landlordLoginForm">
-        <input type="text" id="landlordUsername" placeholder="Username" required />
-        <input type="password" id="landlordPassword" placeholder="Password" required />
-        <button type="submit">Enter Landlord Portal</button>
-      </form>
-    </section>
-
-    <!-- Landlord Only Section -->
-    <section id="landlordDashboard" class="dashboard-section hidden">
-      <hgroup>
-        <h2 class="dashboard-title">Landlord Dashboard</h2>
-        <p class="dashboard-subtext">Manage scheduled cleanings and resident repairs.</p>
-      </hgroup>
-      <form id="landlordCleaningForm" class="grid">
-        <input type="text" id="landlordCleaningName" placeholder="Resident Name" required />
-        <input type="date" id="landlordCleaningDate" required />
-        <select id="landlordCleaningType" required>
+  <div class="dashboard-cards">
+    <!-- Cleaning Request -->
+    <div class="dashboard-card hidden" id="cleaningForm">
+      <form>
+        <input type="text" id="cleaningName" name="cleaningName" placeholder="Your Name" required />
+        <input type="text" id="cleaningAddress" name="cleaningAddress" placeholder="Property Address" required />
+        <input type="date" id="cleaningDate" name="cleaningDate" required />
+        <select id="cleaningType" name="cleaningType" required>
           <option value="Move Out Clean">Move Out Clean</option>
           <option value="Deep Clean">Deep Clean</option>
           <option value="Light Clean">Light Clean</option>
         </select>
         <button type="submit">Schedule Cleaning</button>
       </form>
-    </section>
-  </main>
+      <ul id="cleaningSubmissions" class="submission-log"></ul>
+    </div>
 
-  <!-- Community Section -->
-  <section class="container community-board">
-    <h2 id="community"><i class="fas fa-bullhorn"></i> Community Arena</h2>
-    <form id="communityPostForm" class="grid">
-      <input type="text" id="posterName" placeholder="Your Name" required />
-      <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
-      <button type="submit">Post</button>
-    </form>
-    <ul id="communityPosts" class="post-feed" aria-live="polite"></ul>
-  </section>
+    <!-- Repair Request -->
+    <div class="dashboard-card hidden" id="repairForm">
+      <form>
+        <input type="text" id="repairName" name="repairName" placeholder="Your Name" required />
+        <input type="text" id="repairAddress" name="repairAddress" placeholder="Property Address" required />
+        <textarea id="repairIssue" name="repairIssue" placeholder="Describe the issue..." required></textarea>
+        <button type="submit">Submit Repair</button>
+      </form>
+      <ul id="repairSubmissions" class="submission-log"></ul>
+    </div>
 
+    <!-- Community Post -->
+    <div class="dashboard-card hidden" id="communityPostForm">
+      <form>
+        <input type="text" id="posterName" placeholder="Your Name" required />
+        <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
+        <button type="submit">Post</button>
+      </form>
+      <ul id="communityPosts" class="post-feed" aria-live="polite"></ul>
+    </div>
+  </div>
+</section>
+  
   <!-- Footer -->
   <footer class="container">
     <small>
