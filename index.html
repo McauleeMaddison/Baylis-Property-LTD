@@ -13,38 +13,31 @@
   <!-- Header / Navbar -->
   <header class="site-header" id="mainHeader">
     <nav class="navbar container-fluid">
-      <a href="#" class="logo"><i class="fas fa-home"></i> Baylis Properties</a>
+      <a href="#" class="logo"><i class="fas fa-building"></i> Baylis Properties</a>
       <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="#dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
         <li><a href="#community"><i class="fas fa-users"></i> Community</a></li>
 
-        <!-- Dark mode toggle -->
-        <label for="darkModeToggle" class="switch">
-  <span class="slider"></span>
-  <span class="icon" id="darkModeIcon">🌞</span>
-</label>
-
-        <!-- Login -->
-        <li id="loginSection">
-          <a href="#" id="loginToggle" aria-expanded="false"><i class="fas fa-sign-in-alt"></i> Login ▼</a>
-          <div id="loginMenu" class="login-dropdown hidden">
-            <form id="loginForm">
-              <input type="email" id="loginEmail" placeholder="Email" required />
-              <input type="password" id="loginPassword" placeholder="Password" required />
-              <select id="loginRole">
-                <option value="resident">Resident</option>
-                <option value="landlord">Landlord</option>
-              </select>
-              <button type="submit">Login</button>
-            </form>
-          </div>
+        <li>
+          <label for="darkModeToggle" class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+            <span class="icon" id="darkModeIcon">🌞</span>
+          </label>
         </li>
 
-        <!-- Logout -->
-        <li id="logoutSection" class="hidden">
-          <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <!-- User Dropdown -->
+        <li class="avatar-dropdown">
+          <button class="avatar-toggle" aria-label="User menu" aria-expanded="false">
+            <img src="https://i.pravatar.cc/40?img=11" alt="User Avatar" class="avatar" /> ▼
+          </button>
+          <ul class="dropdown-menu hidden" id="userDropdown">
+            <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            <li><button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+          </ul>
         </li>
       </ul>
     </nav>
