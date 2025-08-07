@@ -31,7 +31,7 @@
         <!-- User Dropdown -->
         <li class="avatar-dropdown">
           <button class="avatar-toggle" aria-label="User menu" aria-expanded="false">
-            <img src="https://i.pravatar.cc/40?img=11" alt="User Avatar" class="avatar" /> ▼
+            <i class="fas fa-user-circle fa-lg"></i> ▼
           </button>
           <ul class="dropdown-menu hidden" id="userDropdown">
             <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
@@ -52,8 +52,8 @@
       </hgroup>
       <div class="dashboard-cards">
         <div class="dashboard-card">
-          <h3><i class="fas fa-broom"></i> Cleaning Request</h3>
-          <form id="cleaningForm">
+          <button type="button" class="toggle-form-btn" data-target="cleaningForm"><i class="fas fa-broom"></i> Cleaning Request</button>
+          <form id="cleaningForm" class="hidden">
             <input type="text" id="cleaningName" name="cleaningName" placeholder="Your Name" required />
             <input type="text" id="cleaningAddress" name="cleaningAddress" placeholder="Property Address" required />
             <input type="date" id="cleaningDate" name="cleaningDate" required />
@@ -66,8 +66,8 @@
           </form>
         </div>
         <div class="dashboard-card">
-          <h3><i class="fas fa-tools"></i> Repair Request</h3>
-          <form id="repairForm">
+          <button type="button" class="toggle-form-btn" data-target="repairForm"><i class="fas fa-tools"></i> Repair Request</button>
+          <form id="repairForm" class="hidden">
             <input type="text" id="repairName" name="repairName" placeholder="Your Name" required />
             <input type="text" id="repairAddress" name="repairAddress" placeholder="Property Address" required />
             <textarea id="repairIssue" name="repairIssue" placeholder="Describe the issue..." required></textarea>
@@ -75,28 +75,19 @@
           </form>
         </div>
         <div class="dashboard-card">
-          <h3><i class="fas fa-comments"></i> Community Posts</h3>
-          <p>View community updates and discussions below.</p>
+          <button type="button" class="toggle-form-btn" data-target="landlordCleaningForm"><i class="fas fa-calendar-check"></i> Landlord Cleaning</button>
+          <form id="landlordCleaningForm" class="hidden">
+            <input type="text" id="landlordCleaningName" placeholder="Resident Name" required />
+            <input type="date" id="landlordCleaningDate" required />
+            <select id="landlordCleaningType" required>
+              <option value="Move Out Clean">Move Out Clean</option>
+              <option value="Deep Clean">Deep Clean</option>
+              <option value="Light Clean">Light Clean</option>
+            </select>
+            <button type="submit">Schedule Cleaning</button>
+          </form>
         </div>
       </div>
-    </section>
-
-    <!-- Landlord Only Section -->
-    <section id="landlordDashboard" class="dashboard-section hidden">
-      <hgroup>
-        <h2 class="dashboard-title">Landlord Portal</h2>
-        <p class="dashboard-subtext">Manage scheduled cleanings and resident repairs.</p>
-      </hgroup>
-      <form id="landlordCleaningForm" class="grid">
-        <input type="text" id="landlordCleaningName" placeholder="Resident Name" required />
-        <input type="date" id="landlordCleaningDate" required />
-        <select id="landlordCleaningType" required>
-          <option value="Move Out Clean">Move Out Clean</option>
-          <option value="Deep Clean">Deep Clean</option>
-          <option value="Light Clean">Light Clean</option>
-        </select>
-        <button type="submit">Schedule Cleaning</button>
-       </form>
     </section>
   </main>
 
