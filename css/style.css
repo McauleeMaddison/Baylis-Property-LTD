@@ -279,3 +279,47 @@ select:valid {
 #landlordDashboard h2 {
   color: var(--primary);
 }
+
+/* === Dark Theme Overrides === */
+body.dark {
+  background: #1e1e2f;
+  color: var(--text-light);
+}
+
+body.dark .site-header {
+  background-color: #2c2c3f;
+  box-shadow: var(--shadow);
+  border-bottom: 1px solid #444;
+}
+
+body.dark .dashboard-card,
+body.dark form,
+body.dark .post-feed li,
+body.dark .avatar-dropdown {
+  background-color: #2c2c3f;
+  color: var(--text-light);
+  box-shadow: var(--shadow);
+}
+
+body.dark input,
+body.dark textarea,
+body.dark select {
+  background-color: #3a3a4f;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+body.dark .nav-links a,
+body.dark .nav-links button {
+  color: var(--text-light);
+}
+
+body.dark .nav-links a:hover,
+body.dark .nav-links button:hover {
+  background-color: #3b4c64;
+}
+
+body.dark .toast {
+  background-color: var(--secondary);
+  color: #fff;
+}
