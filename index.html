@@ -11,9 +11,11 @@
   <!-- Header / Navbar -->
   <header class="site-header" id="mainHeader">
     <nav class="navbar container">
-      <a href="#" class="logo">
-        <img src="logo.png" alt="Baylis Logo" class="logo-icon" />
-        Baylis Properties
+      <a href="#" class="logo" aria-label="Baylis Home">
+        <span class="logo-stack">
+          <img src="assets/pixel-house.png" class="logo-icon" />
+          <span class="logo-title">Baylis Properties</span>
+        </span>
       </a>
       <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
       <ul class="nav-links" id="navLinks">
@@ -27,7 +29,9 @@
           </label>
         </li>
         <li class="avatar-container">
-          <img src="logo.png" class="avatar" alt="User Avatar" />
+          <button class="avatar-btn" id="avatarBtn" aria-label="User menu" aria-expanded="false">
+            <img src="assets/pixel-house.png" class="avatar" alt="User Avatar" />
+          </button>
           <div class="avatar-dropdown hidden" id="userDropdown">
             <a href="#">Profile</a>
             <a href="#">Settings</a>
@@ -43,10 +47,8 @@
     <section id="dashboard" class="dashboard-section">
       <h2>Resident Dashboard</h2>
       <p>Easily manage your requests and community.</p>
-
       <div class="dashboard-cards">
-
-        <!-- Cleaning Form Card -->
+        <!-- Cleaning Request Card -->
         <div class="dashboard-card">
           <button class="toggle-form-btn" data-target="cleaningForm">🧼 Cleaning Request</button>
           <div id="cleaningForm" class="form-wrapper hidden">
@@ -64,8 +66,7 @@
             <ul id="cleaningSubmissions"></ul>
           </div>
         </div>
-
-        <!-- Repair Form Card -->
+        <!-- Repair Request Card -->
         <div class="dashboard-card">
           <button class="toggle-form-btn" data-target="repairForm">🛠️ Repair Request</button>
           <div id="repairForm" class="form-wrapper hidden">
@@ -78,7 +79,6 @@
             <ul id="repairSubmissions"></ul>
           </div>
         </div>
-
         <!-- Community Post Card -->
         <div class="dashboard-card">
           <button class="toggle-form-btn" data-target="communityPostForm">💬 Post to Community</button>
@@ -91,7 +91,6 @@
             <ul id="communityPosts"></ul>
           </div>
         </div>
-
       </div>
     </section>
   </main>
