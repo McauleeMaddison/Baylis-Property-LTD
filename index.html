@@ -38,48 +38,60 @@
     </nav>
   </header>
 
-  <!-- Dashboard -->
+  <!-- Dashboard Section -->
   <main class="container">
     <section id="dashboard" class="dashboard-section">
       <h2>Resident Dashboard</h2>
       <p>Easily manage your requests and community.</p>
-      <div class="dashboard-buttons">
-        <button class="toggle-form-btn" data-target="cleaningForm">Cleaning Request</button>
-        <button class="toggle-form-btn" data-target="repairForm">Repair Request</button>
-        <button class="toggle-form-btn" data-target="communityPostForm">Post to Community</button>
-      </div>
+
       <div class="dashboard-cards">
-        <div id="cleaningForm" class="dashboard-card hidden">
-          <form>
-            <input type="text" id="cleaningName" placeholder="Your Name" required />
-            <input type="text" id="cleaningAddress" placeholder="Property Address" required />
-            <input type="date" id="cleaningDate" required />
-            <select id="cleaningType" required>
-              <option>Move Out Clean</option>
-              <option>Deep Clean</option>
-              <option>Light Clean</option>
-            </select>
-            <button type="submit">Schedule</button>
-          </form>
-          <ul id="cleaningSubmissions"></ul>
+
+        <!-- Cleaning Form Card -->
+        <div class="dashboard-card">
+          <button class="toggle-form-btn" data-target="cleaningForm">🧼 Cleaning Request</button>
+          <div id="cleaningForm" class="form-wrapper hidden">
+            <form>
+              <input type="text" id="cleaningName" placeholder="Your Name" required />
+              <input type="text" id="cleaningAddress" placeholder="Property Address" required />
+              <input type="date" id="cleaningDate" required />
+              <select id="cleaningType" required>
+                <option>Move Out Clean</option>
+                <option>Deep Clean</option>
+                <option>Light Clean</option>
+              </select>
+              <button type="submit">Schedule</button>
+            </form>
+            <ul id="cleaningSubmissions"></ul>
+          </div>
         </div>
-        <div id="repairForm" class="dashboard-card hidden">
-          <form>
-            <input type="text" id="repairName" placeholder="Your Name" required />
-            <input type="text" id="repairAddress" placeholder="Property Address" required />
-            <textarea id="repairIssue" placeholder="Issue Description" required></textarea>
-            <button type="submit">Submit</button>
-          </form>
-          <ul id="repairSubmissions"></ul>
+
+        <!-- Repair Form Card -->
+        <div class="dashboard-card">
+          <button class="toggle-form-btn" data-target="repairForm">🛠️ Repair Request</button>
+          <div id="repairForm" class="form-wrapper hidden">
+            <form>
+              <input type="text" id="repairName" placeholder="Your Name" required />
+              <input type="text" id="repairAddress" placeholder="Property Address" required />
+              <textarea id="repairIssue" placeholder="Issue Description" required></textarea>
+              <button type="submit">Submit</button>
+            </form>
+            <ul id="repairSubmissions"></ul>
+          </div>
         </div>
-        <div id="communityPostForm" class="dashboard-card hidden">
-          <form>
-            <input type="text" id="posterName" placeholder="Your Name" required />
-            <textarea id="posterMessage" placeholder="Message" required></textarea>
-            <button type="submit">Post</button>
-          </form>
-          <ul id="communityPosts"></ul>
+
+        <!-- Community Post Card -->
+        <div class="dashboard-card">
+          <button class="toggle-form-btn" data-target="communityPostForm">💬 Post to Community</button>
+          <div id="communityPostForm" class="form-wrapper hidden">
+            <form>
+              <input type="text" id="posterName" placeholder="Your Name" required />
+              <textarea id="posterMessage" placeholder="Message" required></textarea>
+              <button type="submit">Post</button>
+            </form>
+            <ul id="communityPosts"></ul>
+          </div>
         </div>
+
       </div>
     </section>
   </main>
