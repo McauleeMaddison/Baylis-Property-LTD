@@ -7,12 +7,17 @@ window.addEventListener('DOMContentLoaded', () => {
   const logoutBtn = document.getElementById('logoutBtn');
   const header = document.getElementById('mainHeader');
 
-  // === Toggle Forms ===
+  // === Toggle Dashboard Forms (Only one open at a time) ===
   document.querySelectorAll('.toggle-form-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const form = document.getElementById(btn.dataset.target);
-      form?.classList.toggle('hidden');
-      form?.classList.add('animated');
+      const targetId = btn.dataset.target;
+      document.querySelectorAll('.form-wrapper').forEach(form => {
+        if (form.id === targetId) {
+          form.classList.toggle('hidden');
+        } else {
+          form.classList.add('hidden');
+        }
+      });
     });
   });
 
@@ -22,7 +27,6 @@ window.addEventListener('DOMContentLoaded', () => {
     darkIcon.textContent = enabled ? '🌙' : '🌞';
     localStorage.setItem('darkMode', enabled);
   };
-
   const darkEnabled = localStorage.getItem('darkMode') === 'true';
   darkToggle.checked = darkEnabled;
   updateDarkMode(darkEnabled);
@@ -32,20 +36,18 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // === Avatar Dropdown ===
-  const avatarToggle = document.querySelector('.avatar-toggle');
+  const avatarBtn = document.getElementById('avatarBtn');
   const userDropdown = document.getElementById('userDropdown');
-
-  avatarToggle?.addEventListener('click', (e) => {
+  avatarBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    const expanded = avatarToggle.getAttribute('aria-expanded') === 'true';
-    avatarToggle.setAttribute('aria-expanded', !expanded);
+    const expanded = avatarBtn.getAttribute('aria-expanded') === 'true';
+    avatarBtn.setAttribute('aria-expanded', !expanded);
     userDropdown?.classList.toggle('hidden');
   });
-
   document.addEventListener('click', (e) => {
-    if (!avatarToggle?.contains(e.target) && !userDropdown?.contains(e.target)) {
+    if (!userDropdown?.contains(e.target) && !avatarBtn?.contains(e.target)) {
       userDropdown?.classList.add('hidden');
-      avatarToggle?.setAttribute('aria-expanded', 'false');
+      avatarBtn?.setAttribute('aria-expanded', 'false');
     }
   });
 
@@ -77,9 +79,10 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // === Logout ===
-  logoutBtn?.addEventListener('click', () => {
+  logoutBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
     showToast('👋 Logged out successfully');
-    setTimeout(() => window.location.reload(), 1000);
+    setTimeout(() => window.location.reload(), 1200);
   });
 
   // === Toasts ===
@@ -101,7 +104,8 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   // === Cleaning Form ===
-  document.getElementById('cleaningForm')?.addEventListener('submit', (e) => {
+  const cleaningForm = document.querySelector('#cleaningForm form');
+  cleaningForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('cleaningName')?.value;
     const date = document.getElementById('cleaningDate')?.value;
@@ -116,7 +120,8 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // === Repair Form ===
-  document.getElementById('repairForm')?.addEventListener('submit', (e) => {
+  const repairForm = document.querySelector('#repairForm form');
+  repairForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('repairName')?.value;
     const issue = document.getElementById('repairIssue')?.value;
@@ -130,7 +135,8 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // === Community Post ===
-  document.getElementById('communityPostForm')?.addEventListener('submit', (e) => {
+  const communityForm = document.querySelector('#communityPostForm form');
+  communityForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('posterName')?.value;
     const msg = document.getElementById('posterMessage')?.value;
