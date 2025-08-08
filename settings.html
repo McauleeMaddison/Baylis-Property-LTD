@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings | Baylis Properties</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/settings.js"></script>
+</head>
+<body>
+  <header class="site-header" id="mainHeader"></header>
+  <main class="container">
+    <h2>Settings</h2>
+    <form id="settingsForm" class="settings-form">
+      <label>
+        <input type="checkbox" id="darkModeSetting" />
+        Enable dark mode by default
+      </label>
+      <label>
+        <input type="checkbox" id="showTips" />
+        Show tips and onboarding
+      </label>
+      <button type="submit">Save Settings</button>
+    </form>
+    <div id="settingsMsg"></div>
+  </main>
+</body>
+</html>
