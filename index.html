@@ -3,24 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Baylis Properties</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+  <title>Baylis Properties Dashboard</title>
   <link rel="stylesheet" href="css/style.css" />
-  <script src="https://kit.fontawesome.com/a2e0e6f87e.js" crossorigin="anonymous"></script>
+  <script defer src="js/script.js"></script>
 </head>
 <body>
-
   <!-- Header / Navbar -->
   <header class="site-header" id="mainHeader">
-    <nav class="navbar container-fluid">
-      <a href="#" class="logo"><i class="fas fa-building"></i> Baylis Properties</a>
+    <nav class="navbar container">
+      <a href="#" class="logo">
+        <img src="assets/pixel-house.png" alt="Baylis Logo" class="logo-icon" />
+        Baylis Properties
+      </a>
       <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
-
       <ul class="nav-links" id="navLinks">
-        <li><a href="#dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-        <li><a href="#community"><i class="fas fa-users"></i> Community</a></li>
-
-        <!-- Dark Mode Toggle -->
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#community">Community</a></li>
         <li>
           <label for="darkModeToggle" class="switch">
             <input type="checkbox" id="darkModeToggle" />
@@ -28,81 +26,67 @@
             <span class="icon" id="darkModeIcon">🌞</span>
           </label>
         </li>
-
-        <!-- Avatar Dropdown -->
         <li class="avatar-container">
-          <img src="https://i.pravatar.cc/40?img=1" class="avatar" alt="User Avatar" />
-          <div class="avatar-dropdown" id="userDropdown">
-            <a href="#"><i class="fas fa-user"></i> Profile</a>
-            <a href="#"><i class="fas fa-cog"></i> Settings</a>
-            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          <img src="assets/pixel-user.png" class="avatar" alt="User Avatar" />
+          <div class="avatar-dropdown hidden" id="userDropdown">
+            <a href="#">Profile</a>
+            <a href="#">Settings</a>
+            <a href="#" id="logoutBtn">Logout</a>
           </div>
         </li>
       </ul>
     </nav>
   </header>
 
-<section id="dashboard" class="dashboard-section">
-  <hgroup>
-    <h2 class="dashboard-title">Resident Dashboard</h2>
-    <p class="dashboard-subtext">Manage your property interactions effectively.</p>
-  </hgroup>
+  <!-- Dashboard -->
+  <main class="container">
+    <section id="dashboard" class="dashboard-section">
+      <h2>Resident Dashboard</h2>
+      <p>Easily manage your requests and community.</p>
+      <div class="dashboard-buttons">
+        <button class="toggle-form-btn" data-target="cleaningForm">Cleaning Request</button>
+        <button class="toggle-form-btn" data-target="repairForm">Repair Request</button>
+        <button class="toggle-form-btn" data-target="communityPostForm">Post to Community</button>
+      </div>
+      <div class="dashboard-cards">
+        <div id="cleaningForm" class="dashboard-card hidden">
+          <form>
+            <input type="text" id="cleaningName" placeholder="Your Name" required />
+            <input type="text" id="cleaningAddress" placeholder="Property Address" required />
+            <input type="date" id="cleaningDate" required />
+            <select id="cleaningType" required>
+              <option>Move Out Clean</option>
+              <option>Deep Clean</option>
+              <option>Light Clean</option>
+            </select>
+            <button type="submit">Schedule</button>
+          </form>
+          <ul id="cleaningSubmissions"></ul>
+        </div>
+        <div id="repairForm" class="dashboard-card hidden">
+          <form>
+            <input type="text" id="repairName" placeholder="Your Name" required />
+            <input type="text" id="repairAddress" placeholder="Property Address" required />
+            <textarea id="repairIssue" placeholder="Issue Description" required></textarea>
+            <button type="submit">Submit</button>
+          </form>
+          <ul id="repairSubmissions"></ul>
+        </div>
+        <div id="communityPostForm" class="dashboard-card hidden">
+          <form>
+            <input type="text" id="posterName" placeholder="Your Name" required />
+            <textarea id="posterMessage" placeholder="Message" required></textarea>
+            <button type="submit">Post</button>
+          </form>
+          <ul id="communityPosts"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <div class="dashboard-buttons">
-    <button type="button" class="toggle-form-btn" data-target="cleaningForm"><i class="fas fa-broom"></i> Cleaning Request</button>
-    <button type="button" class="toggle-form-btn" data-target="repairForm"><i class="fas fa-tools"></i> Repair Request</button>
-    <button type="button" class="toggle-form-btn" data-target="communityPostForm"><i class="fas fa-bullhorn"></i> Post to Community</button>
-  </div>
-
-  <div class="dashboard-cards">
-    <!-- Cleaning Request -->
-    <div class="dashboard-card hidden" id="cleaningForm">
-      <form>
-        <input type="text" id="cleaningName" name="cleaningName" placeholder="Your Name" required />
-        <input type="text" id="cleaningAddress" name="cleaningAddress" placeholder="Property Address" required />
-        <input type="date" id="cleaningDate" name="cleaningDate" required />
-        <select id="cleaningType" name="cleaningType" required>
-          <option value="Move Out Clean">Move Out Clean</option>
-          <option value="Deep Clean">Deep Clean</option>
-          <option value="Light Clean">Light Clean</option>
-        </select>
-        <button type="submit">Schedule Cleaning</button>
-      </form>
-      <ul id="cleaningSubmissions" class="submission-log"></ul>
-    </div>
-
-    <!-- Repair Request -->
-    <div class="dashboard-card hidden" id="repairForm">
-      <form>
-        <input type="text" id="repairName" name="repairName" placeholder="Your Name" required />
-        <input type="text" id="repairAddress" name="repairAddress" placeholder="Property Address" required />
-        <textarea id="repairIssue" name="repairIssue" placeholder="Describe the issue..." required></textarea>
-        <button type="submit">Submit Repair</button>
-      </form>
-      <ul id="repairSubmissions" class="submission-log"></ul>
-    </div>
-
-    <!-- Community Post -->
-    <div class="dashboard-card hidden" id="communityPostForm">
-      <form>
-        <input type="text" id="posterName" placeholder="Your Name" required />
-        <textarea id="posterMessage" placeholder="Share something with your housemates..." required></textarea>
-        <button type="submit">Post</button>
-      </form>
-      <ul id="communityPosts" class="post-feed" aria-live="polite"></ul>
-    </div>
-  </div>
-</section>
-  
   <!-- Footer -->
   <footer class="container">
-    <small>
-      <a href="#">Privacy Policy</a> • 
-      <a href="#">Terms & Conditions</a>
-    </small>
+    <small>&copy; 2025 Baylis Properties</small>
   </footer>
-
-  <!-- Script -->
-  <script src="js/script.js"></script>
 </body>
 </html>
