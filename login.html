@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login | Baylis Properties</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Set your API base (change for production deploys) -->
+  <script>window.API_BASE = 'http://localhost:4000/api';</script>
+  <!-- Page script -->
+  <script defer src="js/login.js"></script>
+</head>
+<body class="auth-body">
+  <main class="auth-shell">
+    <section class="auth-grid">
+      <!-- Brand / Left Panel -->
+      <aside class="brand-panel">
+        <img src="assets/logo.png" alt="Baylis Logo" class="brand-logo" />
+        <h1>Baylis Properties</h1>
+        <p class="brand-tagline">Manage your home life with confidence.</p>
+        <ul class="brand-points">
+          <li>Cleaning & Repairs</li>
+          <li>Community Updates</li>
+          <li>Landlord Tools</li>
+        </ul>
+      </aside>
+
+      <!-- Card / Right Panel -->
+      <section class="auth-card">
+        <h2>Welcome back</h2>
+        <p class="muted">Sign in to continue</p>
+
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" placeholder="e.g. mac.baylis" required />
+            <small class="hint">We’ll remember this if you choose.</small>
+          </div>
+
+          <div class="field">
+            <label for="role">Role (optional)</label>
+            <select id="role" name="role">
+              <option value="">Select role…</option>
+              <option value="resident">Resident</option>
+              <option value="landlord">Landlord</option>
+            </select>
+            <small class="hint">Not required — we detect your role after login.</small>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-group">
+              <input id="password" name="password" type="password" placeholder="Your password" required />
+              <button type="button" id="togglePw" class="icon-btn" aria-label="Show password" aria-pressed="false">👁️</button>
+            </div>
+            <div class="pw-meter" aria-hidden="true">
+              <div class="pw-bar" id="pwBar"></div>
+              <small id="pwLabel" class="pw-label">Strength: —</small>
+            </div>
+            <small class="hint">
+              Demo passwords: <code>resident123</code> or <code>landlord123</code>
+            </small>
+          </div>
+
+          <div class="field-row">
+            <label class="checkbox">
+              <input type="checkbox" id="rememberMe" />
+              <span>Remember me</span>
+            </label>
+            <a href="#" class="muted">Forgot password?</a>
+          </div>
+
+          <button type="submit" id="loginBtn" class="btn btn-primary">
+            <span class="btn-label">Sign in</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+
+          <div id="loginMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </form>
+
+        <div class="quick-demo">
+          <button class="btn btn-ghost" data-demo="resident">Quick demo: Resident</button>
+          <button class="btn btn-ghost" data-demo="landlord">Quick demo: Landlord</button>
+        </div>
+
+        <p class="muted" style="margin-top:1rem;">
+          New here? <a href="register.html">Create an account</a>
+        </p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

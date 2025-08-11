@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register | Baylis Properties</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script>window.API_BASE = 'http://localhost:4000/api';</script>
+  <script defer src="js/register.js"></script>
+</head>
+<body class="auth-body">
+  <main class="auth-shell">
+    <section class="auth-grid">
+      <!-- Brand side -->
+      <aside class="brand-panel">
+        <img src="assets/logo.png" alt="Baylis Logo" class="brand-logo" />
+        <h1>Create your account</h1>
+        <p class="brand-tagline">Join Baylis Properties and start managing your home life.</p>
+        <ul class="brand-points">
+          <li>Resident or Landlord roles</li>
+          <li>Requests & community posts</li>
+          <li>Dark mode, profile & settings</li>
+        </ul>
+      </aside>
+
+      <!-- Card -->
+      <section class="auth-card">
+        <h2>Register</h2>
+        <p class="muted">It’s quick and secure.</p>
+
+        <form id="registerForm" novalidate>
+          <div class="field">
+            <label for="regUsername">Username</label>
+            <input id="regUsername" name="username" type="text" placeholder="e.g. mac.baylis" required minlength="3"/>
+          </div>
+
+          <div class="field">
+            <label for="regRole">Role</label>
+            <select id="regRole" name="role" required>
+              <option value="">Select role…</option>
+              <option value="resident">Resident</option>
+              <option value="landlord">Landlord</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="regPassword">Password</label>
+            <div class="input-group">
+              <input id="regPassword" name="password" type="password" placeholder="Min 6 characters" required minlength="6"/>
+              <button type="button" id="togglePw" class="icon-btn" aria-label="Show password" aria-pressed="false">👁️</button>
+            </div>
+            <div class="pw-meter" aria-hidden="true">
+              <div class="pw-bar" id="pwBar"></div>
+              <small id="pwLabel" class="pw-label">Strength: —</small>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="regConfirm">Confirm Password</label>
+            <input id="regConfirm" type="password" placeholder="Repeat your password" required />
+          </div>
+
+          <label class="checkbox" style="margin:.5rem 0 1rem;">
+            <input type="checkbox" id="acceptTos" required />
+            <span>I agree to the Terms & Privacy</span>
+          </label>
+
+          <button type="submit" id="registerBtn" class="btn btn-primary">
+            <span class="btn-label">Create account</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+
+          <div id="registerMsg" class="form-msg" role="status" aria-live="polite"></div>
+
+          <p class="muted" style="margin-top:1rem;">
+            Already have an account? <a href="login.html">Sign in</a>
+          </p>
+        </form>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
