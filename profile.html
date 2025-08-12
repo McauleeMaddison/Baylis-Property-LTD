@@ -3,19 +3,208 @@
 <head>
   <meta charset="UTF-8" />
   <title>Profile | Baylis Properties</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Styles -->
   <link rel="stylesheet" href="css/style.css" />
-  <script defer src="js/common.js"></script>
+
+  <!-- API base (adjust for production) -->
+  <script>window.API_BASE='http://localhost:4000/api';</script>
+
+  <!-- Shared app script (nav, dark mode, auth guard, toast, etc.) -->
+  <script defer src="js/script.js"></script>
+  <!-- Page-specific logic (avatar, profile fields, activity feed) -->
+  <script defer src="js/profile.js"></script>
 </head>
-<body>
-  <header class="site-header" id="mainHeader"></header>
-  <main class="container">
-    <div class="profile-card">
-      <img src="assets/pixel-user.png" alt="Avatar" class="avatar profile-avatar"/>
-      <h2 id="profileName"></h2>
-      <div id="profileRole"></div>
-      <div id="profileDetails"></div>
-      <a href="settings.html" class="profile-settings-btn">Settings</a>
-    </div>
+<body data-required-role="resident,landlord">
+  <!-- Header / Navbar -->
+  <header class="site-header" id="mainHeader">
+    <nav class="navbar container">
+      <a href="index.html" class="logo" aria-label="Baylis Home">
+        <span class="logo-stack">
+          <img src="assets/logo.png" class="logo-icon" alt="Baylis Logo" />
+          <span class="logo-title">Baylis Properties</span>
+        </span>
+      </a>
+
+      <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Dashboard</a></li>
+        <li class="active"><a href="profile.html">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+
+        <li>
+          <label for="darkModeToggle" class="switch">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="slider"></span>
+            <span class="icon" id="darkModeIcon">🌞</span>
+          </label>
+        </li>
+
+        <li class="avatar-container">
+          <button class="avatar-btn" id="avatarBtn" aria-label="User menu" aria-expanded="false">
+            <img src="assets/logo.png" class="avatar" alt="User Avatar" />
+          </button>
+          <div class="avatar-dropdown hidden" id="userDropdown">
+            <a href="profile.html">Profile</a>
+            <a href="settings.html">Settings</a>
+            <a href="#" id="logoutBtn">Logout</a>
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main class="container" style="margin-top:1rem;">
+    <!-- Profile Header Card -->
+    <section class="profile-card" aria-label="Profile">
+      <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+        <div>
+          <img id="profileAvatar" src="assets/pixel-user.png" alt="Avatar" class="avatar profile-avatar"/>
+          <div style="margin-top:.5rem;">
+            <label class="btn btn-ghost" for="avatarInput">Change avatar</label>
+            <input id="avatarInput" type="file" accept="image/*" style="display:none" />
+          </div>
+        </div>
+
+        <div style="flex:1 1 280px;">
+          <h2 id="profileName" style="margin-bottom:.25rem;">Your Name</h2>
+          <div id="profileRole" class="muted">Role</div>
+
+          <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem;">
+            <span class="badge" id="statRole">—</span>
+            <span class="badge" id="statRequests">Requests: 0</span>
+            <span class="badge" id="statPosts">Posts: 0</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:.5rem;">
+          <a class="btn btn-ghost" href="index.html">Go to Dashboard</a>
+          <a class="btn btn-primary" href="settings.html">Open Settings</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Layout: Left (About/Contact/Prefs), Right (Activity) -->
+    <section style="display:grid; grid-template-columns: 1.1fr 1fr; gap:1rem; margin-top:1rem;">
+      <!-- Left Column -->
+      <div style="display:grid; gap:1rem;">
+        <!-- About -->
+        <section class="dashboard-card" aria-labelledby="aboutTitle">
+          <h3 id="aboutTitle">About</h3>
+          <form id="aboutForm" style="margin-top:.6rem;">
+            <div class="grid-2">
+              <label class="field">
+                <span>Display name</span>
+                <input id="aboutDisplayName" type="text" placeholder="e.g. Mac Baylis" />
+              </label>
+              <label class="field">
+                <span>Unit / Property</span>
+                <input id="aboutUnit" type="text" placeholder="e.g. Flat 3B" />
+              </label>
+            </div>
+            <label class="field" style="margin-top:.6rem;">
+              <span>Bio</span>
+              <textarea id="aboutBio" placeholder="Tell others a little about you…"></textarea>
+            </label>
+            <button type="submit" class="btn btn-primary" style="margin-top:.6rem;">Save About</button>
+            <div id="aboutMsg" class="form-msg" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+
+        <!-- Contact -->
+        <section class="dashboard-card" aria-labelledby="contactTitle">
+          <h3 id="contactTitle">Contact</h3>
+          <form id="contactForm" style="margin-top:.6rem;">
+            <div class="grid-2">
+              <label class="field">
+                <span>Email</span>
+                <input id="contactEmail" type="email" placeholder="your@email.com" />
+              </label>
+              <label class="field">
+                <span>Phone</span>
+                <input id="contactPhone" type="tel" placeholder="+44 7123 456789" />
+              </label>
+            </div>
+            <label class="field" style="margin-top:.6rem;">
+              <span>Preferred contact method</span>
+              <select id="contactPref">
+                <option value="email">Email</option>
+                <option value="phone">Phone</option>
+                <option value="none">Do not contact</option>
+              </select>
+            </label>
+            <button type="submit" class="btn btn-primary" style="margin-top:.6rem;">Save Contact</button>
+            <div id="contactMsg" class="form-msg" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+
+        <!-- Preferences (quick) -->
+        <section class="dashboard-card" aria-labelledby="prefsTitle">
+          <h3 id="prefsTitle">Preferences</h3>
+          <form id="prefsForm" style="margin-top:.6rem;">
+            <div class="grid-2">
+              <label class="checkbox">
+                <input type="checkbox" id="prefEmailUpdates" />
+                <span>Email updates</span>
+              </label>
+              <label class="checkbox">
+                <input type="checkbox" id="prefCommunityVisible" />
+                <span>Show my name on community posts</span>
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:.6rem;">Save Preferences</button>
+            <div id="prefsMsg" class="form-msg" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+      </div>
+
+      <!-- Right Column -->
+      <aside class="dashboard-card" aria-labelledby="activityTitle">
+        <h3 id="activityTitle">Recent Activity</h3>
+        <p class="muted">Latest requests and posts you’ve made.</p>
+
+        <div style="margin-top:.6rem;">
+          <h4 class="list-title">Requests</h4>
+          <ul id="activityRequests" class="submission-log">
+            <li class="muted">No activity yet.</li>
+          </ul>
+        </div>
+
+        <div style="margin-top:.6rem;">
+          <h4 class="list-title">Community Posts</h4>
+          <ul id="activityPosts" class="post-feed">
+            <li class="muted">No posts yet.</li>
+          </ul>
+        </div>
+
+        <div style="display:flex; gap:.5rem; margin-top:.8rem;">
+          <a href="index.html#cleaningForm" class="btn btn-ghost">New Cleaning</a>
+          <a href="index.html#repairForm" class="btn btn-ghost">New Repair</a>
+          <a href="index.html#communityPostForm" class="btn btn-primary">New Post</a>
+        </div>
+      </aside>
+    </section>
   </main>
+
+  <footer class="container" style="margin-top:1rem;">
+    <small>&copy; 2025 Baylis Properties</small>
+  </footer>
+
+  <!-- Fallback for name/role if script.js is delayed -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const name = localStorage.getItem('username') || 'User';
+      const role = (localStorage.getItem('role') || 'resident');
+      const cap = role.charAt(0).toUpperCase() + role.slice(1);
+
+      document.getElementById('profileName').textContent = name;
+      document.getElementById('profileRole').textContent = cap;
+      document.getElementById('statRole').textContent = `Role: ${cap}`;
+      document.title = `Profile • ${name} | Baylis Properties`;
+    });
+  </script>
 </body>
 </html>
