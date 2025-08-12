@@ -83,6 +83,11 @@ textarea:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 
 .muted { color: var(--text-muted); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+.spacer-xs { height: .25rem; }
+.spacer-sm { height: .5rem; }
+.spacer   { height: 1rem; }
+.spacer-lg{ height: 1.5rem; }
+
 /* =========================================
    Header / Navbar
 ========================================= */
@@ -124,8 +129,6 @@ textarea:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 
   padding: 0.55rem 1rem; border: none; background: transparent; border-radius: var(--radius-sm);
   font-size: 0.98rem; font-weight: 500; color: var(--text-dark); cursor: pointer; transition: background var(--transition-fast), color var(--transition-fast);
 }
-.nav-links a:hover,
-.nav-links button:hover { background: rgba(74, 144, 226, 0.08); color: var(--primary); }
 
 /* Active underline indicator */
 .nav-links a.active::after {
@@ -149,8 +152,6 @@ textarea:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 
   background: none; border: none; text-align: left; width: 100%;
   padding: .6rem .7rem; border-radius: var(--radius-sm); cursor: pointer; color: var(--text-dark);
 }
-.avatar-dropdown a:hover,
-.avatar-dropdown button:hover { background: rgba(74, 144, 226, 0.1); }
 
 /* Mobile nav */
 @media (max-width: 768px) {
@@ -174,8 +175,9 @@ textarea:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 
 }
 .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
 .btn:active { transform: translateY(0); }
+.btn:disabled, .btn[disabled] { opacity: .6; cursor: not-allowed; box-shadow: none; transform: none; }
 
-.btn-primary { --btn-bg: var(--secondary); --btn-fg: #fff; --btn-bd: var(--secondary-600); }
+.btn-primary { --btn-bg: var(--secondary); --btn-fg: #fff; --btn-bd: var(--secondary-600); color: var(--text-light); }
 .btn-ghost { --btn-bg: transparent; --btn-fg: var(--text-dark); --btn-bd: var(--border); }
 .btn-danger { --btn-bg: var(--danger); --btn-fg: #fff; --btn-bd: #c0392b; }
 .btn-success { --btn-bg: var(--success); --btn-fg: #fff; --btn-bd: #1f8a36; }
@@ -218,6 +220,13 @@ form select:disabled,
 form textarea:disabled { opacity: .6; cursor: not-allowed; }
 
 form .help { font-size: .9rem; color: var(--text-muted); margin-top: .25rem; }
+
+/* Inline validation hints */
+.input-row { position: relative; }
+.input-row .hint {
+  position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
+  font-size: .9rem; color: var(--text-muted);
+}
 
 /* Submit */
 form button[type="submit"] {
@@ -280,6 +289,10 @@ input:valid,   select:valid,   textarea:valid   { border-color: var(--success); 
   display: inline-block; padding: .15rem .5rem; border-radius: var(--radius-full);
   background: #eef2ff; color: #374151; font-size: .78rem; border: 1px solid #e0e7ff;
 }
+.badge.success { background: #e7f6ec; border-color: #c9e9d1; color: #165b2e; }
+.badge.warn    { background: #fff6e5; border-color: #ffe6b8; color: #7a4f00; }
+.badge.danger  { background: #ffe9e7; border-color: #ffc9c3; color: #7a1e14; }
+
 .chip {
   display: inline-block; padding: .15rem .55rem; border-radius: var(--radius-full);
   background: #eef2f7; font-size: .8rem; color: #374151; border: 1px solid #e5e7eb;
@@ -288,7 +301,19 @@ input:valid,   select:valid,   textarea:valid   { border-color: var(--success); 
 .chip.repair   { background: #fff2e6; border-color: #ffe0c2; }
 
 /* =========================================
-   Toasts (with progress)
+   Tables (optional use)
+========================================= */
+.table {
+  width: 100%; border-collapse: collapse; background: var(--bg-elevated);
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+}
+.table th, .table td { padding: .75rem 1rem; border-bottom: 1px solid var(--border); text-align: left; }
+.table thead th { background: #f8fafc; font-weight: 700; }
+body.dark .table thead th { background: #212642; }
+.table tr:hover td { background: rgba(74, 144, 226, 0.06); }
+
+/* =========================================
+   Toasts (with progress + variants)
 ========================================= */
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(12px);
@@ -298,6 +323,9 @@ input:valid,   select:valid,   textarea:valid   { border-color: var(--success); 
   transition: transform var(--transition-smooth), opacity var(--transition-smooth);
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast[data-variant="success"] { background: var(--success); }
+.toast[data-variant="danger"]  { background: var(--danger); }
+.toast[data-variant="warn"]    { background: var(--warning); }
 .toast::after {
   content: ""; display: block; height: 3px; width: 100%; margin-top: .6rem; border-radius: 2px;
   background: rgba(255, 255, 255, 0.45);
@@ -312,7 +340,6 @@ input:valid,   select:valid,   textarea:valid   { border-color: var(--success); 
 .animated { animation: fadeInUp .35s ease; }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
 
-/* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
@@ -343,8 +370,8 @@ input:valid,   select:valid,   textarea:valid   { border-color: var(--success); 
 .kc-label { font-size: .95rem; color: var(--text-dark); }
 .kc-actions { display: flex; gap: .4rem; justify-content: flex-end; margin-top: .35rem; }
 .btn-mini { font-size: .78rem; border: 1px solid var(--border); border-radius: 8px; background: transparent; padding: .22rem .5rem; cursor: pointer; }
-.btn-mini:hover { background: rgba(74, 144, 226, 0.1); }
 
+/* Dark tweaks for Kanban */
 body.dark .kanban-col,
 body.dark .kanban-card { background: var(--bg-elevated); border-color: var(--border); }
 body.dark .kanban-header .pill { background: #3b4c64; color: #fff; }
@@ -359,115 +386,4 @@ body.dark .kanban-header .pill { background: #3b4c64; color: #fff; }
   .kanban { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
-  .dashboard-cards { grid-template-columns: 1fr; }
-}
-
-/* =========================================
-   Scrollbar (optional)
-========================================= */
-*::-webkit-scrollbar { width: 10px; height: 10px; }
-*::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-body.dark *::-webkit-scrollbar-thumb { background: #475569; }
-
-/* =========================================
-   Footer
-========================================= */
-footer.container { padding: 1.25rem 0 2rem; color: var(--text-muted); font-size: .95rem; }
-
-/* =========================
-   Accent Themes (data-accent on <html>)
-========================= */
-
-/* Utilities so UI picks up the accent */
-:root {
-  --accent-soft-bg: rgba(74, 144, 226, 0.12);   /* default matches Blue */
-  --accent-soft-bd: rgba(74, 144, 226, 0.28);
-}
-
-/* Use the soft bg wherever you highlight hover states */
-.nav-links a:hover,
-.nav-links button:hover { background: var(--accent-soft-bg); color: var(--secondary); }
-.btn-mini:hover { background: var(--accent-soft-bg); }
-.avatar-dropdown a:hover,
-.avatar-dropdown button:hover { background: var(--accent-soft-bg); }
-
-/* Chips use accent soft by default (optional) */
-.chip { background: var(--accent-soft-bg); border-color: var(--accent-soft-bd); }
-
-/* ==== BLUE (default) ==== */
-html[data-accent="blue"] {
-  --secondary: #4a90e2;
-  --secondary-600: #3b78bf;
-  --ring: 0 0 0 3px rgba(74, 144, 226, 0.25);
-  --accent-soft-bg: rgba(74, 144, 226, 0.12);
-  --accent-soft-bd: rgba(74, 144, 226, 0.28);
-}
-
-/* ==== OCEAN (teal) ==== */
-html[data-accent="ocean"] {
-  --secondary: #14b8a6;
-  --secondary-600: #0d9488;
-  --ring: 0 0 0 3px rgba(20, 184, 166, 0.28);
-  --accent-soft-bg: rgba(20, 184, 166, 0.12);
-  --accent-soft-bd: rgba(20, 184, 166, 0.28);
-}
-
-/* ==== EMERALD (green) ==== */
-html[data-accent="emerald"] {
-  --secondary: #22c55e;
-  --secondary-600: #16a34a;
-  --ring: 0 0 0 3px rgba(34, 197, 94, 0.28);
-  --accent-soft-bg: rgba(34, 197, 94, 0.12);
-  --accent-soft-bd: rgba(34, 197, 94, 0.28);
-}
-
-/* ==== PURPLE ==== */
-html[data-accent="purple"] {
-  --secondary: #8b5cf6;
-  --secondary-600: #7c3aed;
-  --ring: 0 0 0 3px rgba(139, 92, 246, 0.30);
-  --accent-soft-bg: rgba(139, 92, 246, 0.14);
-  --accent-soft-bd: rgba(139, 92, 246, 0.30);
-}
-
-/* ==== AMBER ==== */
-html[data-accent="amber"] {
-  --secondary: #f59e0b;
-  --secondary-600: #d97706;
-  --ring: 0 0 0 3px rgba(245, 158, 11, 0.30);
-  --accent-soft-bg: rgba(245, 158, 11, 0.14);
-  --accent-soft-bd: rgba(245, 158, 11, 0.30);
-}
-
-/* ==== ROSE ==== */
-html[data-accent="rose"] {
-  --secondary: #f43f5e;
-  --secondary-600: #e11d48;
-  --ring: 0 0 0 3px rgba(244, 63, 94, 0.30);
-  --accent-soft-bg: rgba(244, 63, 94, 0.14);
-  --accent-soft-bd: rgba(244, 63, 94, 0.30);
-}
-
-/* ==== SLATE (cool gray) ==== */
-html[data-accent="slate"] {
-  --secondary: #64748b;
-  --secondary-600: #475569;
-  --ring: 0 0 0 3px rgba(100, 116, 139, 0.30);
-  --accent-soft-bg: rgba(100, 116, 139, 0.14);
-  --accent-soft-bd: rgba(100, 116, 139, 0.30);
-}
-
-/* Optional: tiny swatch styles if you use the picker buttons */
-.accent-picker { display:flex; gap:.45rem; align-items:center; }
-.accent-swatch {
-  width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border);
-  display:inline-block; cursor:pointer; transition: transform .15s ease, box-shadow .15s ease;
-}
-.accent-swatch:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
-.swatch-blue { background:#4a90e2; }
-.swatch-ocean { background:#14b8a6; }
-.swatch-emerald { background:#22c55e; }
-.swatch-purple { background:#8b5cf6; }
-.swatch-amber { background:#f59e0b; }
-.swatch-rose { background:#f43f5e; }
-.swatch-slate { background:#64748b; }
+  .dashboard-cards { grid
