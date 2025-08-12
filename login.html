@@ -2,93 +2,151 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Login | Baylis Properties</title>
+  <title>Sign In | Baylis Properties</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Shared styles -->
+
+  <!-- Styles -->
   <link rel="stylesheet" href="css/style.css" />
-  <!-- Set your API base (change for production deploys) -->
-  <script>window.API_BASE = 'http://localhost:4000/api';</script>
-  <!-- Page script -->
+
+  <!-- API base (adjust for production) -->
+  <script>window.API_BASE='http://localhost:4000/api';</script>
+
+  <!-- If already logged in, bounce to default landing -->
+  <script>
+    (function(){
+      try {
+        if (localStorage.getItem('token')) {
+          const s = JSON.parse(localStorage.getItem('appSettings')||'{}');
+          const to = s?.general?.defaultLanding || (localStorage.getItem('role')==='landlord' ? 'landlord.html' : 'index.html');
+          window.location.replace(to);
+        }
+      } catch(e){}
+    })();
+  </script>
+
+  <!-- Global (dark mode toggle, toast) -->
+  <script defer src="js/script.js"></script>
+  <!-- Login logic with validation, lockout, OTP, remember-me -->
   <script defer src="js/login.js"></script>
+
+  <style>
+    /* Minimal auth layout helpers (uses your variables) */
+    .auth-wrap { min-height: calc(100dvh - 70px); display:grid; place-items:center; padding:1rem; }
+    .auth-card { width:100%; max-width: 520px; }
+    .brand-row { display:flex; gap:.6rem; align-items:center; justify-content:center; margin-bottom:.6rem; }
+    .brand-row .logo-icon { width:28px; height:28px; object-fit:contain; }
+    .auth-title { text-align:center; margin: .2rem 0 .4rem; }
+    .auth-sub { text-align:center; color:#6b7280; margin-bottom:.8rem; }
+    .actions-row { display:flex; justify-content:space-between; align-items:center; gap:.6rem; flex-wrap:wrap; }
+    .inline-btn { border:none; background:transparent; cursor:pointer; padding:0; font-size:.95rem; color:var(--secondary); }
+    .error, .success { margin-top:.5rem; font-size:.95rem; }
+    .error { color: var(--danger); }
+    .success { color: var(--success); }
+    .hidden { display:none !important; }
+    .is-invalid { border-color: var(--danger) !important; }
+    .hint { font-size: .85rem; color:#6b7280; }
+    .otp-grid { display:grid; gap:.6rem; grid-template-columns: 1fr; }
+    .role-row { display:flex; gap:.6rem; }
+    .role-row select { flex:1; }
+    body.dark .auth-sub, body.dark .hint { color:#c9cdd4; }
+    /* Button loading state (from login.js) */
+    #submitBtn[data-loading="1"] { opacity:.8; pointer-events:none; }
+  </style>
 </head>
-<body class="auth-body">
-  <main class="auth-shell">
-    <section class="auth-grid">
-      <!-- Brand / Left Panel -->
-      <aside class="brand-panel">
-        <img src="assets/logo.png" alt="Baylis Logo" class="brand-logo" />
-        <h1>Baylis Properties</h1>
-        <p class="brand-tagline">Manage your home life with confidence.</p>
-        <ul class="brand-points">
-          <li>Cleaning & Repairs</li>
-          <li>Community Updates</li>
-          <li>Landlord Tools</li>
-        </ul>
-      </aside>
 
-      <!-- Card / Right Panel -->
-      <section class="auth-card">
-        <h2>Welcome back</h2>
-        <p class="muted">Sign in to continue</p>
+<body>
+  <!-- Simple header with logo + dark toggle -->
+  <header class="site-header" id="mainHeader">
+    <nav class="navbar container">
+      <a href="login.html" class="logo" aria-label="Baylis Home">
+        <span class="logo-stack">
+          <img src="assets/logo.png" class="logo-icon" alt="Baylis Logo" />
+          <span class="logo-title">Baylis Properties</span>
+        </span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li>
+          <label for="darkModeToggle" class="switch">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="slider"></span>
+            <span class="icon" id="darkModeIcon">🌞</span>
+          </label>
+        </li>
+      </ul>
+    </nav>
+  </header>
 
-        <form id="loginForm" novalidate>
-          <div class="field">
-            <label for="username">Username</label>
-            <input id="username" name="username" type="text" placeholder="e.g. mac.baylis" required />
-            <small class="hint">We’ll remember this if you choose.</small>
+  <main class="container auth-wrap">
+    <section class="dashboard-card auth-card" aria-label="Sign in">
+      <div class="brand-row">
+        <img src="assets/logo.png" class="logo-icon" alt="Baylis Logo small" />
+        <strong>Baylis Properties</strong>
+      </div>
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-sub">Sign in to manage properties, requests, and your community.</p>
+
+      <!-- LOGIN STEP -->
+      <form id="loginForm" novalidate>
+        <label class="field">
+          <span>Username</span>
+          <input id="username" type="text" placeholder="e.g. mac.baylis" autocomplete="username" required />
+        </label>
+
+        <label class="field" style="margin-top:.5rem;">
+          <span>
+            Password
+            <small id="capsWarning" class="hint" style="display:none;">(Caps Lock is ON)</small>
+          </span>
+          <div style="display:flex; gap:.4rem;">
+            <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required style="flex:1;" />
+            <button id="showPasswordBtn" class="btn btn-ghost" type="button" aria-pressed="false">Show</button>
           </div>
+        </label>
 
-          <div class="field">
-            <label for="role">Role (optional)</label>
-            <select id="role" name="role">
-              <option value="">Select role…</option>
+        <div class="role-row" style="margin-top:.5rem;">
+          <label class="field" style="flex:1;">
+            <span>Role</span>
+            <select id="roleSelect">
               <option value="resident">Resident</option>
               <option value="landlord">Landlord</option>
             </select>
-            <small class="hint">Not required — we detect your role after login.</small>
-          </div>
+          </label>
 
-          <div class="field">
-            <label for="password">Password</label>
-            <div class="input-group">
-              <input id="password" name="password" type="password" placeholder="Your password" required />
-              <button type="button" id="togglePw" class="icon-btn" aria-label="Show password" aria-pressed="false">👁️</button>
-            </div>
-            <div class="pw-meter" aria-hidden="true">
-              <div class="pw-bar" id="pwBar"></div>
-              <small id="pwLabel" class="pw-label">Strength: —</small>
-            </div>
-            <small class="hint">
-              Demo passwords: <code>resident123</code> or <code>landlord123</code>
-            </small>
-          </div>
-
-          <div class="field-row">
-            <label class="checkbox">
-              <input type="checkbox" id="rememberMe" />
-              <span>Remember me</span>
-            </label>
-            <a href="#" class="muted">Forgot password?</a>
-          </div>
-
-          <button type="submit" id="loginBtn" class="btn btn-primary">
-            <span class="btn-label">Sign in</span>
-            <span class="btn-spinner" aria-hidden="true"></span>
-          </button>
-
-          <div id="loginMsg" class="form-msg" role="status" aria-live="polite"></div>
-        </form>
-
-        <div class="quick-demo">
-          <button class="btn btn-ghost" data-demo="resident">Quick demo: Resident</button>
-          <button class="btn btn-ghost" data-demo="landlord">Quick demo: Landlord</button>
+          <label class="checkbox" style="align-self:flex-end;">
+            <input type="checkbox" id="rememberMe" />
+            <span>Remember me</span>
+          </label>
         </div>
 
-        <p class="muted" style="margin-top:1rem;">
-          New here? <a href="register.html">Create an account</a>
+        <div class="actions-row" style="margin-top:.6rem;">
+          <a href="#" id="forgotPassword" class="inline-btn">Forgot password?</a>
+          <button id="submitBtn" type="submit" class="btn btn-primary">Sign in</button>
+        </div>
+
+        <div id="loginMsg" role="status" aria-live="polite" style="min-height:1.25rem; margin-top:.3rem;"></div>
+
+        <p class="hint" style="margin-top:.4rem;">
+          Tip: demo credentials — Resident: <code>resident123</code>, Landlord: <code>landlord123</code>.
         </p>
+      </form>
+
+      <!-- OTP STEP (hidden by default; shown if backend requests 2FA) -->
+      <section id="otpSection" class="hidden" aria-label="Two-step verification">
+        <h3>Verify it’s you</h3>
+        <p class="hint">Enter the 6-digit code we sent to your email/phone.</p>
+        <div class="otp-grid">
+          <input id="otpCode" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" />
+          <div class="actions-row">
+            <button id="otpBackBtn" type="button" class="btn btn-ghost">Back</button>
+            <button id="otpSubmitBtn" type="button" class="btn btn-primary">Verify</button>
+          </div>
+        </div>
       </section>
     </section>
   </main>
+
+  <footer class="container" style="margin-top:1rem;">
+    <small>&copy; 2025 Baylis Properties</small>
+  </footer>
 </body>
 </html>
