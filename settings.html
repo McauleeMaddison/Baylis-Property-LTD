@@ -3,25 +3,233 @@
 <head>
   <meta charset="UTF-8" />
   <title>Settings | Baylis Properties</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
+  <script>window.API_BASE='http://localhost:4000/api';</script>
+  <script defer src="js/script.js"></script>
   <script defer src="js/settings.js"></script>
 </head>
-<body>
-  <header class="site-header" id="mainHeader"></header>
-  <main class="container">
+<body data-required-role="resident,landlord">
+  <!-- Header / Navbar -->
+  <header class="site-header" id="mainHeader">
+    <nav class="navbar container">
+      <a href="index.html" class="logo" aria-label="Baylis Home">
+        <span class="logo-stack">
+          <img src="assets/logo.png" class="logo-icon" alt="Baylis Logo" />
+          <span class="logo-title">Baylis Properties</span>
+        </span>
+      </a>
+      <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li class="active"><a href="settings.html">Settings</a></li>
+
+        <li>
+          <label for="darkModeToggle" class="switch">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="slider"></span>
+            <span class="icon" id="darkModeIcon">🌞</span>
+          </label>
+        </li>
+
+        <li class="avatar-container">
+          <button class="avatar-btn" id="avatarBtn" aria-label="User menu" aria-expanded="false">
+            <img src="assets/logo.png" class="avatar" alt="User Avatar" />
+          </button>
+          <div class="avatar-dropdown hidden" id="userDropdown">
+            <a href="profile.html">Profile</a>
+            <a href="settings.html">Settings</a>
+            <a href="#" id="logoutBtn">Logout</a>
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main class="container" style="margin-top: 1rem;">
     <h2>Settings</h2>
-    <form id="settingsForm" class="settings-form">
-      <label>
-        <input type="checkbox" id="darkModeSetting" />
-        Enable dark mode by default
-      </label>
-      <label>
-        <input type="checkbox" id="showTips" />
-        Show tips and onboarding
-      </label>
-      <button type="submit">Save Settings</button>
+    <p class="muted">Tune your experience. Changes to appearance are previewed live.</p>
+
+    <!-- Quick tabs (anchor style, no extra JS needed) -->
+    <nav class="dashboard-buttons" aria-label="Settings Sections" style="margin-top:.75rem;">
+      <a class="btn-chip" href="#general">General</a>
+      <a class="btn-chip" href="#appearance">Appearance</a>
+      <a class="btn-chip" href="#notifications">Notifications</a>
+      <a class="btn-chip" href="#security">Security & Privacy</a>
+    </nav>
+
+    <!-- Live Preview Card -->
+    <section class="dashboard-card" aria-live="polite" aria-label="Theme preview" style="margin-top:1rem;">
+      <div id="previewCard">
+        <h3 id="previewTitle" style="margin-bottom:.4rem;">Preview: Baylis Card</h3>
+        <p class="muted">Buttons and card surfaces will reflect your appearance choices below.</p>
+        <div style="display:flex; gap:.5rem; margin-top:.6rem;">
+          <button class="btn btn-primary" id="previewBtnPrimary">Primary</button>
+          <button class="btn btn-ghost" id="previewBtnGhost">Ghost</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings Form -->
+    <form id="settingsForm" class="settings-form" style="margin-top:1rem;">
+      <!-- GENERAL -->
+      <section id="general" class="dashboard-card">
+        <h3>General</h3>
+        <p class="muted">Basic preferences for your account on this device.</p>
+
+        <label class="checkbox" style="margin-top:.6rem;">
+          <input type="checkbox" id="showTips" />
+          <span>Show onboarding tips</span>
+        </label>
+
+        <div class="grid-2" style="margin-top:.6rem;">
+          <label class="field">
+            <span>Default landing page</span>
+            <select id="defaultLanding">
+              <option value="index.html">Resident Dashboard</option>
+              <option value="landlord.html">Landlord Dashboard</option>
+              <option value="profile.html">Profile</option>
+              <option value="settings.html" selected>Settings</option>
+            </select>
+            <small class="muted">Used when you sign in.</small>
+          </label>
+
+          <label class="field">
+            <span>Time format</span>
+            <select id="timeFormat">
+              <option value="24h" selected>24-hour</option>
+              <option value="12h">12-hour (AM/PM)</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <!-- APPEARANCE -->
+      <section id="appearance" class="dashboard-card">
+        <h3>Appearance</h3>
+        <p class="muted">Color, density, and theme preferences.</p>
+
+        <label class="checkbox" style="margin-top:.6rem;">
+          <input type="checkbox" id="darkModeSetting" />
+          <span>Enable dark mode by default</span>
+        </label>
+
+        <div class="grid-2" style="margin-top:.6rem;">
+          <label class="field">
+            <span>Accent color</span>
+            <input type="color" id="accentColor" value="#4a90e2" />
+            <small class="muted">Affects highlights and focus states.</small>
+          </label>
+
+          <label class="field">
+            <span>UI density</span>
+            <select id="uiDensity">
+              <option value="comfortable" selected>Comfortable</option>
+              <option value="compact">Compact</option>
+              <option value="spacious">Spacious</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid-2" style="margin-top:.6rem;">
+          <label class="field">
+            <span>Base font size</span>
+            <select id="baseFontSize">
+              <option value="14">14px</option>
+              <option value="16" selected>16px</option>
+              <option value="18">18px</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Corner radius</span>
+            <input type="range" id="cornerRadius" min="6" max="18" value="12" />
+            <small class="muted">Controls rounded corners on components.</small>
+          </label>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section id="notifications" class="dashboard-card">
+        <h3>Notifications</h3>
+        <p class="muted">Stay in the loop about your properties and community.</p>
+
+        <div class="grid-2" style="margin-top:.6rem;">
+          <label class="checkbox">
+            <input type="checkbox" id="notifRequests" checked />
+            <span>Request updates (cleaning & repair)</span>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" id="notifCommunity" />
+            <span>Community post replies</span>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" id="notifDigest" />
+            <span>Weekly activity digest</span>
+          </label>
+          <label class="field">
+            <span>Digest day</span>
+            <select id="digestDay">
+              <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+              <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <!-- SECURITY & PRIVACY -->
+      <section id="security" class="dashboard-card">
+        <h3>Security & Privacy</h3>
+        <p class="muted">Manage your password and privacy options.</p>
+
+        <details style="margin-top:.6rem;">
+          <summary><strong>Change password</strong></summary>
+          <div class="grid-2" style="margin-top:.6rem;">
+            <input type="password" id="currentPassword" placeholder="Current password" />
+            <input type="password" id="newPassword" placeholder="New password" />
+          </div>
+          <input type="password" id="confirmNewPassword" placeholder="Confirm new password" style="margin-top:.6rem;" />
+          <button type="button" id="changePasswordBtn" class="btn btn-primary" style="margin-top:.6rem;">Update password</button>
+          <small class="muted">Password change requires backend endpoint; button is ready to wire.</small>
+        </details>
+
+        <div class="grid-2" style="margin-top:.8rem;">
+          <label class="checkbox">
+            <input type="checkbox" id="twoFA" />
+            <span>Enable 2-Step Verification (coming soon)</span>
+          </label>
+          <button type="button" id="signOutAllBtn" class="btn btn-ghost">Sign out of all devices</button>
+        </div>
+
+        <div style="margin-top:.8rem;">
+          <button type="button" id="exportDataBtn" class="btn btn-ghost">Export my data</button>
+          <button type="button" id="clearLocalBtn" class="btn" style="background:#ef4444; color:#fff;">Clear local data</button>
+        </div>
+      </section>
+
+      <!-- Form actions -->
+      <div class="dashboard-card" style="display:flex; gap:.6rem; align-items:center; justify-content:flex-end;">
+        <button type="button" id="resetDefaults" class="btn btn-ghost">Reset to defaults</button>
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+      </div>
+
+      <div id="settingsMsg" class="form-msg" role="status" aria-live="polite"></div>
     </form>
-    <div id="settingsMsg"></div>
   </main>
+
+  <footer class="container" style="margin-top:1rem;">
+    <small>&copy; 2025 Baylis Properties</small>
+  </footer>
+
+  <!-- helper to prefill current user (purely UI) -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const name = localStorage.getItem('username');
+      if (name) document.title = `Settings • ${name} | Baylis Properties`;
+    });
+  </script>
 </body>
 </html>
