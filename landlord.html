@@ -3,20 +3,277 @@
 <head>
   <meta charset="UTF-8" />
   <title>Landlord Dashboard | Baylis Properties</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
-  <script defer src="js/common.js"></script>
+  <script>window.API_BASE='http://localhost:4000/api';</script>
+  <script defer src="js/script.js"></script>
 </head>
-<body>
+<body data-required-role="landlord">
+  <!-- Header / Navbar -->
   <header class="site-header" id="mainHeader">
-    <!-- Navbar HTML here -->
+    <nav class="navbar container">
+      <a href="landlord.html" class="logo" aria-label="Baylis Home">
+        <span class="logo-stack">
+          <img src="assets/logo.png" class="logo-icon" alt="Baylis Logo" />
+          <span class="logo-title">Baylis Properties</span>
+        </span>
+      </a>
+
+      <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li class="active"><a href="landlord.html">Dashboard</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+
+        <li>
+          <label for="darkModeToggle" class="switch">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="slider"></span>
+            <span class="icon" id="darkModeIcon">🌞</span>
+          </label>
+        </li>
+
+        <li class="avatar-container">
+          <button class="avatar-btn" id="avatarBtn" aria-label="User menu" aria-expanded="false">
+            <img src="assets/logo.png" class="avatar" alt="User Avatar" />
+          </button>
+          <div class="avatar-dropdown hidden" id="userDropdown">
+            <a href="profile.html">Profile</a>
+            <a href="settings.html">Settings</a>
+            <a href="#" id="logoutBtn">Logout</a>
+          </div>
+        </li>
+      </ul>
+    </nav>
   </header>
-  <main class="container">
-    <h2>Landlord Dashboard</h2>
-    <p>Welcome, <span id="userWelcome"></span>!</p>
-    <!-- Resident request management here -->
+
+  <!-- Main -->
+  <main class="container" style="margin-top:1rem;">
+    <header style="margin-bottom:.6rem;">
+      <h2>Landlord Dashboard</h2>
+      <p class="muted">Welcome, <strong id="userWelcome">Landlord</strong>. Review requests, update statuses, and monitor community activity.</p>
+    </header>
+
+    <!-- Overview Metrics -->
+    <section class="dashboard-cards" aria-label="Overview">
+      <div class="dashboard-card">
+        <h3>Open Requests</h3>
+        <div style="font-size:1.8rem; font-weight:700;" id="metricOpen">—</div>
+        <p class="muted">Requests not yet started</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>In Progress</h3>
+        <div style="font-size:1.8rem; font-weight:700;" id="metricInProgress">—</div>
+        <p class="muted">Work currently underway</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>Completed</h3>
+        <div style="font-size:1.8rem; font-weight:700;" id="metricDone">—</div>
+        <p class="muted">Resolved and closed</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>Community Posts (7d)</h3>
+        <div style="font-size:1.8rem; font-weight:700;" id="metricPosts">—</div>
+        <p class="muted">Recent resident updates</p>
+      </div>
+    </section>
+
+    <!-- Toolbar -->
+    <section class="dashboard-card" aria-label="Tools">
+      <div class="grid-2" style="gap: .6rem;">
+        <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+          <input id="reqSearch" type="search" placeholder="Search requests by name, issue or type…" />
+          <select id="filterType" title="Filter by type">
+            <option value="all" selected>All types</option>
+            <option value="cleaning">Cleaning</option>
+            <option value="repair">Repair</option>
+          </select>
+          <select id="filterStatus" title="Filter by status">
+            <option value="all" selected>All status</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:.5rem; justify-content:flex-end; flex-wrap:wrap;">
+          <button type="button" id="btnRefresh" class="btn btn-ghost">Refresh</button>
+          <button type="button" id="btnExport" class="btn btn-ghost">Export CSV</button>
+        </div>
+      </div>
+      <small class="muted" style="display:block; margin-top:.4rem;">
+        Tip: Use the status dropdown on each item and click <em>Save</em> to update.
+      </small>
+    </section>
+
+    <!-- Requests Panels -->
+    <section class="dashboard-cards" aria-label="Requests">
+      <div class="dashboard-card">
+        <h3>Cleaning Requests</h3>
+        <ul id="allCleaningRequests" class="submission-log">
+          <li class="muted">Loading…</li>
+        </ul>
+      </div>
+      <div class="dashboard-card">
+        <h3>Repair Requests</h3>
+        <ul id="allRepairRequests" class="submission-log">
+          <li class="muted">Loading…</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Community Posts -->
+    <section class="dashboard-card" aria-label="Community Posts" style="margin-top:1rem;">
+      <h3>Community Posts</h3>
+      <ul id="allCommunityPosts" class="post-feed">
+        <li class="muted">Loading…</li>
+      </ul>
+    </section>
   </main>
-  <footer class="container">
+
+  <footer class="container" style="margin-top:1rem;">
     <small>&copy; 2025 Baylis Properties</small>
   </footer>
+
+  <!-- Optional in-page helpers (filtering & export) -->
+  <script>
+    // These helpers run AFTER js/script.js has populated the lists.
+    window.addEventListener('DOMContentLoaded', () => {
+      const ulClean  = document.getElementById('allCleaningRequests');
+      const ulRepair = document.getElementById('allRepairRequests');
+      const ulPosts  = document.getElementById('allCommunityPosts');
+
+      const metricOpen = document.getElementById('metricOpen');
+      const metricInProgress = document.getElementById('metricInProgress');
+      const metricDone = document.getElementById('metricDone');
+      const metricPosts = document.getElementById('metricPosts');
+
+      const search = document.getElementById('reqSearch');
+      const filterType = document.getElementById('filterType');
+      const filterStatus = document.getElementById('filterStatus');
+      const btnRefresh = document.getElementById('btnRefresh');
+      const btnExport = document.getElementById('btnExport');
+
+      // Recompute metrics from list items that script.js renders
+      function recomputeMetrics() {
+        const allLis = [...(ulClean?.children || []), ...(ulRepair?.children || [])];
+        const statusCounts = { open:0, in_progress:0, done:0 };
+        allLis.forEach(li => {
+          // script.js injects: <span class="badge">Status: X</span>
+          const badge = li.querySelector('.badge')?.textContent || '';
+          const s = badge.toLowerCase();
+          if (s.includes('open')) statusCounts.open++;
+          if (s.includes('in progress')) statusCounts.in_progress++;
+          if (s.includes('done')) statusCounts.done++;
+        });
+        if (metricOpen) metricOpen.textContent = statusCounts.open || 0;
+        if (metricInProgress) metricInProgress.textContent = statusCounts.in_progress || 0;
+        if (metricDone) metricDone.textContent = statusCounts.done || 0;
+
+        // posts in past 7d (best-effort based on presence; your API could add timestamps)
+        if (metricPosts) {
+          const count = (ulPosts?.children?.length || 0);
+          metricPosts.textContent = count;
+        }
+      }
+
+      // Filter logic (client-side best-effort using rendered text)
+      function applyFilters() {
+        const q = (search?.value || '').toLowerCase();
+        const t = (filterType?.value || 'all');
+        const s = (filterStatus?.value || 'all');
+
+        function filterList(ul, typeLabel) {
+          if (!ul) return;
+          [...ul.children].forEach(li => {
+            const text = li.textContent.toLowerCase();
+            let ok = true;
+            if (q && !text.includes(q)) ok = false;
+            if (t !== 'all') {
+              // type is implied by list we're filtering
+              if (t !== typeLabel) ok = false;
+            }
+            if (s !== 'all') {
+              const badge = li.querySelector('.badge')?.textContent.toLowerCase() || '';
+              if (!badge.includes(s.replace('_',' '))) ok = false;
+            }
+            li.style.display = ok ? '' : 'none';
+          });
+        }
+
+        filterList(ulClean,  'cleaning');
+        filterList(ulRepair, 'repair');
+      }
+
+      // Export CSV of currently visible items
+      function exportCSV() {
+        const rows = [['Type','Name','Details','Date/Info','Status']];
+        function harvest(ul, type) {
+          if (!ul) return;
+          [...ul.children].forEach(li => {
+            if (li.style.display === 'none') return;
+            const text = li.textContent.trim();
+            // crude parse based on script.js structure
+            // examples:
+            // cleaning: 🧼 Name – "Deep Clean" on 2025-08-10 [open]
+            // repair:   🛠️ Name – Issue [in_progress]
+            const mStatus = text.match(/\[(open|in progress|done)\]/i);
+            const status = mStatus ? mStatus[1] : '';
+            let name=''; let info=''; let date='';
+            const mSplit = text.split('–');
+            if (mSplit[0]) name = mSplit[0].replace(/[🧼🛠️]/g,'').trim();
+            if (type === 'cleaning') {
+              const mClean = text.match(/"(.+?)"/);
+              const mDate = text.match(/on\s+([0-9-]+)/i);
+              info = mClean ? mClean[1] : '';
+              date = mDate ? mDate[1] : '';
+            } else {
+              info = (mSplit[1] || '').replace(/\[(.*?)\]/,'').trim();
+            }
+            rows.push([type, name, info, date, status]);
+          });
+        }
+        harvest(ulClean, 'cleaning');
+        harvest(ulRepair, 'repair');
+
+        const csv = rows.map(r => r.map(escapeCSV).join(',')).join('\n');
+        downloadFile(csv, `baylis-requests-${Date.now()}.csv`, 'text/csv');
+      }
+
+      function escapeCSV(v) {
+        const s = String(v ?? '');
+        if (/[",\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+        return s;
+      }
+
+      function downloadFile(content, filename, type) {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement('a'), { href:url, download:filename });
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=> URL.revokeObjectURL(url), 500);
+      }
+
+      // Wire events
+      search?.addEventListener('input', applyFilters);
+      filterType?.addEventListener('change', applyFilters);
+      filterStatus?.addEventListener('change', applyFilters);
+      btnRefresh?.addEventListener('click', () => window.location.reload());
+      btnExport?.addEventListener('click', exportCSV);
+
+      // Recompute metrics after script.js loads data
+      const observer = new MutationObserver(() => {
+        applyFilters();
+        recomputeMetrics();
+      });
+      if (ulClean)  observer.observe(ulClean,  { childList:true, subtree:true });
+      if (ulRepair) observer.observe(ulRepair, { childList:true, subtree:true });
+      if (ulPosts)  observer.observe(ulPosts,  { childList:true, subtree:true });
+
+      // Initial pass (in case data is already there)
+      applyFilters();
+      recomputeMetrics();
+    });
+  </script>
 </body>
 </html>
