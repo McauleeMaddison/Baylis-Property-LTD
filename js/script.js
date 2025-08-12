@@ -84,6 +84,33 @@ window.addEventListener("DOMContentLoaded", () => {
     try { localStorage.setItem("darkMode", enabled ? "true" : "false"); } catch {}
   };
 
+   /* ===== Accent theme ===== */
+const applyAccent = (name) => {
+  if (!name || name === 'blue') {
+    document.documentElement.setAttribute('data-accent', 'blue'); // explicit default
+  } else {
+    document.documentElement.setAttribute('data-accent', name);
+  }
+  try { localStorage.setItem('accent', name); } catch {}
+};
+
+applyAccent(localStorage.getItem('accent') || 'blue');
+
+// Click handlers for swatches
+document.querySelectorAll('[data-accent-option]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const choice = btn.getAttribute('data-accent-option');
+    applyAccent(choice);
+    if (window.showToast) showToast(`🎨 Accent set to ${choice}`);
+  });
+});
+
+// Sync across tabs
+window.addEventListener('storage', (e) => {
+  if (e.key === 'accent') applyAccent(e.newValue || 'blue');
+});
+
+
   const darkEnabled = localStorage.getItem("darkMode") === "true";
   if (darkToggle) {
     darkToggle.checked = darkEnabled;
