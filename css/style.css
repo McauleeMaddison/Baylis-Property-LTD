@@ -373,3 +373,101 @@ body.dark *::-webkit-scrollbar-thumb { background: #475569; }
    Footer
 ========================================= */
 footer.container { padding: 1.25rem 0 2rem; color: var(--text-muted); font-size: .95rem; }
+
+/* =========================
+   Accent Themes (data-accent on <html>)
+========================= */
+
+/* Utilities so UI picks up the accent */
+:root {
+  --accent-soft-bg: rgba(74, 144, 226, 0.12);   /* default matches Blue */
+  --accent-soft-bd: rgba(74, 144, 226, 0.28);
+}
+
+/* Use the soft bg wherever you highlight hover states */
+.nav-links a:hover,
+.nav-links button:hover { background: var(--accent-soft-bg); color: var(--secondary); }
+.btn-mini:hover { background: var(--accent-soft-bg); }
+.avatar-dropdown a:hover,
+.avatar-dropdown button:hover { background: var(--accent-soft-bg); }
+
+/* Chips use accent soft by default (optional) */
+.chip { background: var(--accent-soft-bg); border-color: var(--accent-soft-bd); }
+
+/* ==== BLUE (default) ==== */
+html[data-accent="blue"] {
+  --secondary: #4a90e2;
+  --secondary-600: #3b78bf;
+  --ring: 0 0 0 3px rgba(74, 144, 226, 0.25);
+  --accent-soft-bg: rgba(74, 144, 226, 0.12);
+  --accent-soft-bd: rgba(74, 144, 226, 0.28);
+}
+
+/* ==== OCEAN (teal) ==== */
+html[data-accent="ocean"] {
+  --secondary: #14b8a6;
+  --secondary-600: #0d9488;
+  --ring: 0 0 0 3px rgba(20, 184, 166, 0.28);
+  --accent-soft-bg: rgba(20, 184, 166, 0.12);
+  --accent-soft-bd: rgba(20, 184, 166, 0.28);
+}
+
+/* ==== EMERALD (green) ==== */
+html[data-accent="emerald"] {
+  --secondary: #22c55e;
+  --secondary-600: #16a34a;
+  --ring: 0 0 0 3px rgba(34, 197, 94, 0.28);
+  --accent-soft-bg: rgba(34, 197, 94, 0.12);
+  --accent-soft-bd: rgba(34, 197, 94, 0.28);
+}
+
+/* ==== PURPLE ==== */
+html[data-accent="purple"] {
+  --secondary: #8b5cf6;
+  --secondary-600: #7c3aed;
+  --ring: 0 0 0 3px rgba(139, 92, 246, 0.30);
+  --accent-soft-bg: rgba(139, 92, 246, 0.14);
+  --accent-soft-bd: rgba(139, 92, 246, 0.30);
+}
+
+/* ==== AMBER ==== */
+html[data-accent="amber"] {
+  --secondary: #f59e0b;
+  --secondary-600: #d97706;
+  --ring: 0 0 0 3px rgba(245, 158, 11, 0.30);
+  --accent-soft-bg: rgba(245, 158, 11, 0.14);
+  --accent-soft-bd: rgba(245, 158, 11, 0.30);
+}
+
+/* ==== ROSE ==== */
+html[data-accent="rose"] {
+  --secondary: #f43f5e;
+  --secondary-600: #e11d48;
+  --ring: 0 0 0 3px rgba(244, 63, 94, 0.30);
+  --accent-soft-bg: rgba(244, 63, 94, 0.14);
+  --accent-soft-bd: rgba(244, 63, 94, 0.30);
+}
+
+/* ==== SLATE (cool gray) ==== */
+html[data-accent="slate"] {
+  --secondary: #64748b;
+  --secondary-600: #475569;
+  --ring: 0 0 0 3px rgba(100, 116, 139, 0.30);
+  --accent-soft-bg: rgba(100, 116, 139, 0.14);
+  --accent-soft-bd: rgba(100, 116, 139, 0.30);
+}
+
+/* Optional: tiny swatch styles if you use the picker buttons */
+.accent-picker { display:flex; gap:.45rem; align-items:center; }
+.accent-swatch {
+  width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border);
+  display:inline-block; cursor:pointer; transition: transform .15s ease, box-shadow .15s ease;
+}
+.accent-swatch:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.swatch-blue { background:#4a90e2; }
+.swatch-ocean { background:#14b8a6; }
+.swatch-emerald { background:#22c55e; }
+.swatch-purple { background:#8b5cf6; }
+.swatch-amber { background:#f59e0b; }
+.swatch-rose { background:#f43f5e; }
+.swatch-slate { background:#64748b; }
