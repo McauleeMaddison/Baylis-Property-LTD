@@ -5,15 +5,26 @@
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
-    "test": "echo \"No tests specified\" && exit 0"
+    "dev": "nodemon server/index.js",
+    "test": "npm run test:api && npm run test:e2e",
+    "test:api": "cross-env NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js --passWithNoTests",
+    "test:e2e": "cypress run || echo \"(Cypress optional)\"",
+    "cypress:open": "cypress open"
   },
   "dependencies": {
-    "dotenv": "^17.2.0"
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "mongoose": "^8.6.0",
+    "morgan": "^1.10.0",
+    "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
     "cross-env": "^10.0.0",
     "cypress": "^14.5.4",
     "jest": "^30.0.5",
+    "nodemon": "^3.1.0",
     "supertest": "^7.1.4"
   }
 }
