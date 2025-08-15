@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const path = require('path');
 
-const User = require('./models/User');
+const User = require('../server/models/User');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
