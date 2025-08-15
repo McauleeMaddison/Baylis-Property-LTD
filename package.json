@@ -9,5 +9,11 @@
   },
   "dependencies": {
     "dotenv": "^17.2.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.0.0",
+    "cypress": "^14.5.4",
+    "jest": "^30.0.5",
+    "supertest": "^7.1.4"
   }
 }
