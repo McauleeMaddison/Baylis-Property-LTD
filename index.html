@@ -1,103 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <!-- Meta -->
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Baylis Properties Dashboard</title>
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Baylis Property LTD – Resident dashboard for repairs, cleaning, and community posts." />
+
+  <title>Dashboard • Baylis Property LTD</title>
+
+  <!-- Assets: root-relative so they work on every page -->
+  <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
-  <script defer src="js/script.js"></script>
+  <script defer src="js/app.js"></script>
+
+  <!-- Prefetch other key pages for snappier nav -->
+  <link rel="prefetch" href="resident.html" />
+  <link rel="prefetch" href="landlord.html" />
 </head>
-<body>
-  <!-- Header / Navbar -->
+<body class="page page--dashboard">
+  <!-- Header / Navbar (shared across pages) -->
   <header class="site-header" id="mainHeader">
-    <nav class="navbar container">
-      <a href="#" class="logo" aria-label="Baylis Home">
-        <span class="logo-stack">
-          <img src="assets/logo.png" class="logo-icon" />
-          <span class="logo-title">Baylis Properties</span>
-        </span>
-      </a>
-      <button id="hamburgerBtn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#resident.html">Dashboard</a></li>
-        <li><a href="#community">Community</a></li>
-        <li>
-          <label for="darkModeToggle" class="switch">
-            <input type="checkbox" id="darkModeToggle" />
-            <span class="slider"></span>
-            <span class="icon" id="darkModeIcon">🌞</span>
-          </label>
-        </li>
-        <li class="avatar-container">
-          <button class="avatar-btn" id="avatarBtn" aria-label="User menu" aria-expanded="false">
-            <img src="assets/logo.png" class="avatar" alt="User Avatar" />
-          </button>
-          <div class="avatar-dropdown hidden" id="userDropdown">
-            <a href="#">Profile</a>
-            <a href="#">Settings</a>
-            <a href="#" id="logoutBtn">Logout</a>
-          </div>
-        </li>
-      </ul>
+    <nav class="nav" aria-label="Main">
+      <div class="nav-inner container">
+        <a class="logo" href="/" aria-label="Baylis Property LTD Home">
+          <img src="assets/logo.png" alt="" width="26" height="26" />
+          <span>Baylis Property LTD</span>
+        </a>
+
+        <button class="btn secondary hamb"
+                aria-expanded="false"
+                aria-controls="navLinks"
+                aria-label="Toggle menu"
+                data-hamb>☰</button>
+
+        <div class="nav-links" id="navLinks" data-links>
+          <a href="index.html"           data-test="nav-dashboard">Dashboard</a>
+          <a href="resident.html"   data-test="nav-resident">Resident</a>
+          <a href="landlord.html"   data-test="nav-landlord">Landlord</a>
+          <a href="community.html"  data-test="nav-community">Community</a>
+          <a href="profile.html"    data-test="nav-profile">Profile</a>
+          <a href="settings.html"   data-test="nav-settings">Settings</a>
+          <a href="login.html"      data-test="nav-login">Login</a>
+          <a href="register.html"   data-test="nav-register">Register</a>
+        </div>
+      </div>
     </nav>
   </header>
 
-  <!-- Dashboard Section -->
-  <main class="container">
-    <section id="dashboard" class="dashboard-section">
-      <h2>Resident Dashboard</h2>
-      <p>Easily manage your requests and community.</p>
-      <div class="dashboard-cards">
-        <!-- Cleaning Request Card -->
-        <div class="dashboard-card">
-          <button class="toggle-form-btn" data-target="cleaningForm">🧼 Cleaning Request</button>
-          <div id="cleaningForm" class="form-wrapper hidden">
-            <form>
-              <input type="text" id="cleaningName" placeholder="Your Name" required />
-              <input type="text" id="cleaningAddress" placeholder="Property Address" required />
-              <input type="date" id="cleaningDate" required />
-              <select id="cleaningType" required>
+  <!-- Main -->
+  <main id="content" class="container" tabindex="-1">
+    <header class="header flow">
+      <h1 class="h1">Resident Dashboard</h1>
+      <p class="lead">Manage cleaning requests, repairs, and community updates — all in one place.</p>
+    </header>
+
+    <!-- Cards -->
+    <section class="grid" aria-label="Actions">
+      <!-- Cleaning Request Card -->
+      <article class="card" aria-labelledby="cleaningCardTitle">
+        <div class="card__head">
+          <h2 id="cleaningCardTitle" class="h2">Cleaning Request</h2>
+          <button class="btn secondary toggle-form-btn"
+                  type="button"
+                  data-target="cleaningForm"
+                  aria-controls="cleaningForm"
+                  aria-expanded="false"
+                  data-test="toggle-cleaning">
+            🧼 Open Form
+          </button>
+        </div>
+
+        <div id="cleaningForm" class="form-wrapper hidden" role="region" aria-live="polite" aria-label="Cleaning request form">
+          <form id="cleaningFormEl"
+                method="POST"
+                action="/api/forms/cleaning"
+                novalidate
+                data-test="form-cleaning">
+            <div class="form-row">
+              <label for="cleaningName">Your Name</label>
+              <input type="text" id="cleaningName" name="name" autocomplete="name" required />
+            </div>
+
+            <div class="form-row">
+              <label for="cleaningAddress">Property Address</label>
+              <input type="text" id="cleaningAddress" name="address" autocomplete="street-address" required />
+            </div>
+
+            <div class="form-row">
+              <label for="cleaningDate">Preferred Date</label>
+              <input type="date" id="cleaningDate" name="date" required />
+            </div>
+
+            <div class="form-row">
+              <label for="cleaningType">Type of Clean</label>
+              <select id="cleaningType" name="type" required>
+                <option value="" disabled selected>Select an option</option>
                 <option>Move Out Clean</option>
                 <option>Deep Clean</option>
                 <option>Light Clean</option>
               </select>
-              <button type="submit">Schedule</button>
-            </form>
-            <ul id="cleaningSubmissions"></ul>
-          </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn" type="submit">Schedule</button>
+              <button class="btn secondary" type="reset">Reset</button>
+            </div>
+          </form>
+
+          <ul id="cleaningSubmissions" class="list" data-test="list-cleaning"></ul>
         </div>
-        <!-- Repair Request Card -->
-        <div class="dashboard-card">
-          <button class="toggle-form-btn" data-target="repairForm">🛠️ Repair Request</button>
-          <div id="repairForm" class="form-wrapper hidden">
-            <form>
-              <input type="text" id="repairName" placeholder="Your Name" required />
-              <input type="text" id="repairAddress" placeholder="Property Address" required />
-              <textarea id="repairIssue" placeholder="Issue Description" required></textarea>
-              <button type="submit">Submit</button>
-            </form>
-            <ul id="repairSubmissions"></ul>
-          </div>
+      </article>
+
+      <!-- Repair Request Card -->
+      <article class="card" aria-labelledby="repairCardTitle">
+        <div class="card__head">
+          <h2 id="repairCardTitle" class="h2">Repair Request</h2>
+          <button class="btn secondary toggle-form-btn"
+                  type="button"
+                  data-target="repairForm"
+                  aria-controls="repairForm"
+                  aria-expanded="false"
+                  data-test="toggle-repair">
+            🛠️ Open Form
+          </button>
         </div>
-        <!-- Community Post Card -->
-        <div class="dashboard-card">
-          <button class="toggle-form-btn" data-target="communityPostForm">💬 Post to Community</button>
-          <div id="communityPostForm" class="form-wrapper hidden">
-            <form>
-              <input type="text" id="posterName" placeholder="Your Name" required />
-              <textarea id="posterMessage" placeholder="Message" required></textarea>
-              <button type="submit">Post</button>
-            </form>
-            <ul id="communityPosts"></ul>
-          </div>
+
+        <div id="repairForm" class="form-wrapper hidden" role="region" aria-live="polite" aria-label="Repair request form">
+          <form id="repairFormEl"
+                method="POST"
+                action="/api/forms/repairs"
+                novalidate
+                data-test="form-repair">
+            <div class="form-row">
+              <label for="repairName">Your Name</label>
+              <input type="text" id="repairName" name="name" autocomplete="name" required />
+            </div>
+
+            <div class="form-row">
+              <label for="repairAddress">Property Address</label>
+              <input type="text" id="repairAddress" name="address" autocomplete="street-address" required />
+            </div>
+
+            <div class="form-row">
+              <label for="repairIssue">Issue Description</label>
+              <textarea id="repairIssue" name="issue" rows="4" required></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn" type="submit">Submit</button>
+              <button class="btn secondary" type="reset">Reset</button>
+            </div>
+          </form>
+
+          <ul id="repairSubmissions" class="list" data-test="list-repair"></ul>
         </div>
-      </div>
+      </article>
+
+      <!-- Community Post Card -->
+      <article class="card" aria-labelledby="communityCardTitle">
+        <div class="card__head">
+          <h2 id="communityCardTitle" class="h2">Community Post</h2>
+          <button class="btn secondary toggle-form-btn"
+                  type="button"
+                  data-target="communityPostForm"
+                  aria-controls="communityPostForm"
+                  aria-expanded="false"
+                  data-test="toggle-community">
+            💬 Open Form
+          </button>
+        </div>
+
+        <div id="communityPostForm" class="form-wrapper hidden" role="region" aria-live="polite" aria-label="Community post form">
+          <form id="communityFormEl"
+                method="POST"
+                action="/api/forms/community"
+                novalidate
+                data-test="form-community">
+            <div class="form-row">
+              <label for="posterName">Your Name</label>
+              <input type="text" id="posterName" name="name" autocomplete="name" required />
+            </div>
+
+            <div class="form-row">
+              <label for="posterMessage">Message</label>
+              <textarea id="posterMessage" name="message" rows="4" required></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn" type="submit">Post</button>
+              <button class="btn secondary" type="reset">Reset</button>
+            </div>
+          </form>
+
+          <ul id="communityPosts" class="list" data-test="list-community"></ul>
+        </div>
+      </article>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer class="container">
-    <small>&copy; 2025 Baylis Properties</small>
+  <footer class="site-footer">
+    <div class="container">
+      <small>&copy; <span id="year"></span> Baylis Property LTD</small>
+      <span class="dot">&middot;</span>
+      <a href="community.html">Community</a>
+      <span class="dot">&middot;</span>
+      <a href="settings.html">Settings</a>
+    </div>
   </footer>
+
+  <!-- Inline page-only helpers (kept tiny) -->
+  <script>
+    // Year in footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Collapsible forms + accessible aria-expanded
+    document.querySelectorAll('.toggle-form-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-target');
+        const panel = document.getElementById(id);
+        const open = panel.classList.toggle('hidden') === false; // hidden removed => open
+        btn.setAttribute('aria-expanded', String(open));
+        btn.textContent = (btn.textContent.includes('Open') ? btn.textContent.replace('Open','Close')
+                                                            : btn.textContent.replace('Close','Open'));
+      });
+    });
+
+    // Progressive enhancement – prevent empty submissions & show quick UI feedback
+    const attachFormHandler = (formId, listId, shape) => {
+      const form = document.getElementById(formId);
+      const list = document.getElementById(listId);
+      if (!form || !list) return;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Basic client validation
+        const missing = [...form.querySelectorAll('[required]')].some(el => !el.value.trim());
+        if (missing) {
+          alert('Please fill out all required fields.');
+          return;
+        }
+
+        // Build payload
+        const data = {};
+        Object.keys(shape).forEach(k => {
+          const el = form.querySelector('#' + shape[k]);
+          data[k] = el ? el.value.trim() : '';
+        });
+
+        // Submit to API (fallback to local render if offline)
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data)
+          });
+          if (!res.ok) throw new Error('Request failed');
+        } catch (_) {
+          // Non-blocking: continue to local render so UX still feels responsive in dev
+        }
+
+        // Render item locally
+        const li = document.createElement('li');
+        li.textContent = Object.values(data).filter(Boolean).join(' • ');
+        list.prepend(li);
+
+        form.reset();
+      });
+    };
+
+    attachFormHandler('cleaningFormEl',  'cleaningSubmissions', { name: 'cleaningName', address: 'cleaningAddress', date: 'cleaningDate', type: 'cleaningType' });
+    attachFormHandler('repairFormEl',    'repairSubmissions',   { name: 'repairName',   address: 'repairAddress',   issue: 'repairIssue' });
+    attachFormHandler('communityFormEl', 'communityPosts',      { name: 'posterName',   message: 'posterMessage' });
+  </script>
 </body>
 </html>

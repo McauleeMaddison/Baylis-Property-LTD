@@ -1,25 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Register | Baylis Properties</title>
+  <!-- Meta -->
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Create your Baylis Property LTD account." />
+
+  <title>Register • Baylis Property LTD</title>
+
+  <!-- Root-relative assets -->
+  <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
-  <script>window.API_BASE = 'http://localhost:4000/api';</script>
+
+  <!-- Default API base (override via body[data-api-base] if needed) -->
+  <script>window.API_BASE = "/api";</script>
+
+  <!-- Global app (nav, dark mode, active link, etc.) -->
+  <script defer src="js/app.js"></script>
+  <!-- Page logic (your implementation) -->
   <script defer src="js/register.js"></script>
+
+  <!-- Prefetch common next steps -->
+  <link rel="prefetch" href="login.html" />
+  <link rel="prefetch" href="index.html" />
+
+  <style>
+    /* page-local helpers, keeps your main CSS clean */
+    .auth-shell { min-height: calc(100dvh - 70px); display:grid; place-items:center; padding:1rem; }
+    .auth-grid { display:grid; grid-template-columns: 1.1fr 1fr; gap:1rem; width:100%; max-width: 1000px; }
+    .brand-panel { padding:1.2rem; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); }
+    .brand-logo { width:36px; height:36px; vertical-align:-6px; }
+    .brand-points { margin:.6rem 0 0; padding-left:1.1rem; }
+    .auth-card { padding:1.2rem; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); }
+    .field { display:flex; flex-direction:column; gap:.35rem; }
+    .input-group { display:flex; gap:.4rem; align-items:center; }
+    .icon-btn { border:1px solid rgba(255,255,255,.15); background:#1f2937; padding:.45rem .65rem; border-radius:10px; cursor:pointer; }
+    .pw-meter { position:relative; height:8px; background:rgba(255,255,255,.08); border-radius:999px; margin-top:.45rem; }
+    .pw-bar { position:absolute; left:0; top:0; bottom:0; width:0%; border-radius:999px; background:linear-gradient(90deg, #ef4444, #22c55e); transition:width .25s ease; }
+    .pw-label { display:block; margin-top:.25rem; color:#94a3b8; }
+    .btn-spinner { display:inline-block; width:0; height:0; margin-left:.5rem; border:2px solid transparent; border-top-color:currentColor; border-right-color:currentColor; border-radius:50%; animation:spin .65s linear infinite; opacity:0; }
+    #registerBtn[data-loading="1"] .btn-spinner { width:14px; height:14px; opacity:1; }
+    .form-msg { min-height:1.2rem; margin-top:.4rem; }
+    .is-invalid { border-color:#ef4444 !important; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @media (max-width: 900px){ .auth-grid{ grid-template-columns: 1fr; } }
+  </style>
 </head>
-<body class="auth-body">
-  <main class="auth-shell">
-    <section class="auth-grid">
+
+<body class="page page--register" data-api-base="/api">
+  <!-- Header / Navbar -->
+  <header class="site-header" id="mainHeader">
+    <nav class="nav" aria-label="Main">
+      <div class="nav-inner container">
+        <a class="logo" href="/" aria-label="Baylis Property LTD Home">
+          <img src="assets/logo.png" alt="" width="26" height="26" />
+          <span>Baylis Property LTD</span>
+        </a>
+
+        <button class="btn secondary hamb"
+                aria-expanded="false"
+                aria-controls="navLinks"
+                aria-label="Toggle menu"
+                data-hamb>☰</button>
+
+        <div class="nav-links" id="navLinks" data-links>
+          <a href="index.html">Dashboard</a>
+          <a href="resident.html">Resident</a>
+          <a href="landlord.html">Landlord</a>
+          <a href="community.html">Community</a>
+          <a href="profile.html">Profile</a>
+          <a href="settings.html">Settings</a>
+          <a href="login.html">Login</a>
+          <a href="register.html" aria-current="page">Register</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main id="content" class="container auth-shell" tabindex="-1">
+    <section class="auth-grid" aria-label="Create your account">
       <!-- Brand side -->
       <aside class="brand-panel">
-        <img src="assets/logo.png" alt="Baylis Logo" class="brand-logo" />
-        <h1>Create your account</h1>
-        <p class="brand-tagline">Join Baylis Properties and start managing your home life.</p>
+        <p><img src="assets/logo.png" alt="" class="brand-logo" /> <strong>Baylis Property LTD</strong></p>
+        <h1 class="h2" style="margin:.4rem 0;">Create your account</h1>
+        <p class="muted brand-tagline">Join Baylis Properties and start managing your home life.</p>
         <ul class="brand-points">
           <li>Resident or Landlord roles</li>
-          <li>Requests & community posts</li>
-          <li>Dark mode, profile & settings</li>
+          <li>Requests &amp; community posts</li>
+          <li>Dark mode, profile &amp; settings</li>
         </ul>
       </aside>
 
@@ -28,13 +98,18 @@
         <h2>Register</h2>
         <p class="muted">It’s quick and secure.</p>
 
-        <form id="registerForm" novalidate>
+        <form id="registerForm" method="POST" action="/api/auth/register" novalidate>
           <div class="field">
             <label for="regUsername">Username</label>
-            <input id="regUsername" name="username" type="text" placeholder="e.g. mac.baylis" required minlength="3"/>
+            <input id="regUsername" name="username" type="text" placeholder="e.g. mac.baylis" minlength="3" required autocomplete="username" />
           </div>
 
-          <div class="field">
+          <div class="field" style="margin-top:.6rem;">
+            <label for="regEmail">Email</label>
+            <input id="regEmail" name="email" type="email" placeholder="you@example.com" required autocomplete="email" />
+          </div>
+
+          <div class="field" style="margin-top:.6rem;">
             <label for="regRole">Role</label>
             <select id="regRole" name="role" required>
               <option value="">Select role…</option>
@@ -43,11 +118,11 @@
             </select>
           </div>
 
-          <div class="field">
+          <div class="field" style="margin-top:.6rem;">
             <label for="regPassword">Password</label>
             <div class="input-group">
-              <input id="regPassword" name="password" type="password" placeholder="Min 6 characters" required minlength="6"/>
-              <button type="button" id="togglePw" class="icon-btn" aria-label="Show password" aria-pressed="false">👁️</button>
+              <input id="regPassword" name="password" type="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password" />
+              <button type="button" id="togglePw" class="icon-btn" aria-label="Show password" aria-pressed="false">Show</button>
             </div>
             <div class="pw-meter" aria-hidden="true">
               <div class="pw-bar" id="pwBar"></div>
@@ -55,17 +130,17 @@
             </div>
           </div>
 
-          <div class="field">
+          <div class="field" style="margin-top:.6rem;">
             <label for="regConfirm">Confirm Password</label>
-            <input id="regConfirm" type="password" placeholder="Repeat your password" required />
+            <input id="regConfirm" type="password" placeholder="Repeat your password" required autocomplete="new-password" />
           </div>
 
-          <label class="checkbox" style="margin:.5rem 0 1rem;">
+          <label class="checkbox" style="margin:.8rem 0 1rem;">
             <input type="checkbox" id="acceptTos" required />
-            <span>I agree to the Terms & Privacy</span>
+            <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> &amp; <a href="/privacy" target="_blank" rel="noopener">Privacy</a></span>
           </label>
 
-          <button type="submit" id="registerBtn" class="btn btn-primary">
+          <button type="submit" id="registerBtn" class="btn">
             <span class="btn-label">Create account</span>
             <span class="btn-spinner" aria-hidden="true"></span>
           </button>
@@ -73,11 +148,120 @@
           <div id="registerMsg" class="form-msg" role="status" aria-live="polite"></div>
 
           <p class="muted" style="margin-top:1rem;">
-            Already have an account? <a href="login.html">Sign in</a>
+            Already have an account? <a href="/login">Sign in</a>
           </p>
         </form>
       </section>
     </section>
   </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>&copy; <span id="year"></span> Baylis Property LTD</small>
+    </div>
+  </footer>
+
+  <!-- Inline fallbacks (runs only if /js/register.js doesn’t override) -->
+  <script>
+    (function () {
+      const $ = (s, c=document) => c.querySelector(s);
+      const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
+
+      // Footer year
+      const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
+
+      // Show/Hide password
+      const pw = $('#regPassword'), toggle = $('#togglePw');
+      if (toggle && pw) {
+        toggle.addEventListener('click', () => {
+          const show = pw.type === 'password';
+          pw.type = show ? 'text' : 'password';
+          toggle.setAttribute('aria-pressed', String(show));
+          toggle.textContent = show ? 'Hide' : 'Show';
+          pw.focus();
+        });
+      }
+
+      // Password strength (simple zxcvbn-less heuristic)
+      function score(p) {
+        let s = 0;
+        if (p.length >= 8) s++;
+        if (/[A-Z]/.test(p)) s++;
+        if (/[a-z]/.test(p)) s++;
+        if (/\d/.test(p)) s++;
+        if (/[^A-Za-z0-9]/.test(p)) s++;
+        return Math.min(s, 5);
+      }
+      const pwBar = $('#pwBar'), pwLabel = $('#pwLabel');
+      $('#regPassword')?.addEventListener('input', (e) => {
+        const v = e.target.value || '';
+        const s = score(v);
+        const pct = [0, 25, 50, 75, 100][s] || 0;
+        if (pwBar) pwBar.style.width = pct + '%';
+        if (pwLabel) pwLabel.textContent = 'Strength: ' + (['—','Weak','Fair','Good','Strong','Strong'][s] || '—');
+      });
+
+      // Client validation helpers
+      function markInvalid(el, on) { if (!el) return; el.classList.toggle('is-invalid', !!on); }
+
+      // Submit fallback (if register.js hasn’t called preventDefault earlier)
+      const form = $('#registerForm');
+      const btn  = $('#registerBtn');
+      const msg  = $('#registerMsg');
+
+      function setLoading(on){ if (!btn) return; btn.dataset.loading = on ? '1' : '0'; }
+
+      form?.addEventListener('submit', async (e) => {
+        if (e.defaultPrevented) return; // allow page script to take over
+        e.preventDefault();
+
+        const username = $('#regUsername')?.value.trim();
+        const email    = $('#regEmail')?.value.trim();
+        const role     = $('#regRole')?.value;
+        const pass     = $('#regPassword')?.value || '';
+        const confirm  = $('#regConfirm')?.value || '';
+        const tos      = $('#acceptTos')?.checked;
+
+        // simple checks
+        let bad = false;
+        if (!username || username.length < 3){ markInvalid($('#regUsername'), true); bad = true; } else markInvalid($('#regUsername'), false);
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ markInvalid($('#regEmail'), true); bad = true; } else markInvalid($('#regEmail'), false);
+        if (!role){ markInvalid($('#regRole'), true); bad = true; } else markInvalid($('#regRole'), false);
+        if (!pass || pass.length < 8){ markInvalid($('#regPassword'), true); bad = true; } else markInvalid($('#regPassword'), false);
+        if (confirm !== pass){ markInvalid($('#regConfirm'), true); bad = true; } else markInvalid($('#regConfirm'), false);
+        if (!tos){ msg && (msg.textContent = 'Please agree to the Terms & Privacy.'); bad = true; }
+
+        if (bad) { msg && (msg.textContent ||= 'Please fix the highlighted fields.'); return; }
+
+        try {
+          setLoading(true);
+          msg && (msg.textContent = 'Creating your account…');
+
+          const r = await fetch(`${apiBase}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ username, email, role, password: pass })
+          });
+
+          if (r.status === 409) {
+            msg && (msg.textContent = 'That email or username is already in use.');
+            setLoading(false); return;
+          }
+          if (!r.ok) throw new Error('register-failed');
+
+          // success → redirect based on role
+          const { user } = await r.json();
+          const dest = (user?.role || role) === 'landlord' ? '/landlord' : '/';
+          msg && (msg.textContent = 'Account created! Redirecting…');
+          window.location.replace(dest);
+        } catch {
+          msg && (msg.textContent = 'Could not create your account. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
