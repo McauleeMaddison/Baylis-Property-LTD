@@ -1,32 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Meta -->
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark light" />
-  <meta name="description" content="Profile settings and activity for Baylis Property LTD users." />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<meta name="description" content="Profile settings and activity for Baylis Property LTD users." />
 
   <title>Profile • Baylis Property LTD</title>
-
-  <!-- Root-relative assets so links work on every route -->
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- Default API base; may be overridden via body[data-api-base] -->
   <script>window.API_BASE = "/api";</script>
 
-  <!-- Global (nav, mobile menu, active link, etc.) -->
   <script defer src="server/app.js"></script>
 
-  <!-- Prefetch likely next pages -->
   <link rel="prefetch" href="settings.html" />
   <link rel="prefetch" href="index.html" />
 </head>
 <body class="page page--profile"
       data-required-role="resident,landlord"
       data-api-base="/api">
-  <!-- Header / Navbar -->
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -55,45 +47,34 @@
     </nav>
   </header>
 
-  <!-- Main -->
-  <main id="content" class="container" tabindex="-1" style="margin-top:1rem;">
-    <!-- Profile Header Card -->
+  <main> id="content" class="container" tabindex="-1" style="margin-top:1rem;">
     <section class="dashboard-card profile-card" aria-label="Profile">
-      <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+      <div> style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
         <div>
           <img id="profileAvatar" src="assets/logo.png" alt="" class="avatar profile-avatar" width="96" height="96" />
-          <div style="margin-top:.5rem;">
+          <div> style="margin-top:.5rem;">
             <label class="btn btn-ghost" for="avatarInput">Change avatar</label>
-            <input id="avatarInput" type="file" accept="image/*" style="display:none" />
           </div>
         </div>
 
-        <div style="flex:1 1 280px;">
-          <h1 id="profileName" class="h2" style="margin-bottom:.25rem;">Your Name</h1>
           <div id="profileRole" class="muted">Role</div>
 
-          <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem;">
             <span class="badge" id="statRole">—</span>
             <span class="badge" id="statRequests">Requests: 0</span>
             <span class="badge" id="statPosts">Posts: 0</span>
           </div>
         </div>
 
-        <div style="display:flex; gap:.5rem;">
           <a class="btn btn-ghost" href="/">Go to Dashboard</a>
           <a class="btn" href="settings.html">Open Settings</a>
         </div>
       </div>
     </section>
 
-    <!-- Layout: Left (About/Contact/Prefs), Right (Activity) -->
-    <section style="display:grid; grid-template-columns: 1.1fr 1fr; gap:1rem; margin-top:1rem;">
-      <!-- Left Column -->
-      <div style="display:grid; gap:1rem;">
-        <!-- About -->
+]    <section> style="display:grid; grid-template-columns: 1.1fr 1fr; gap:1rem; margin-top:1rem;">
+      <div> style="display:grid; gap:1rem;">
         <section class="dashboard-card" aria-labelledby="aboutTitle">
           <h2 id="aboutTitle" class="h3">About</h2>
-          <form id="aboutForm" style="margin-top:.6rem;" novalidate>
             <div class="grid-2">
               <label class="field" for="aboutDisplayName">
                 <span>Display name</span>
@@ -104,20 +85,16 @@
                 <input id="aboutUnit" name="unit" type="text" placeholder="e.g. Flat 3B" />
               </label>
             </div>
-            <label class="field" style="margin-top:.6rem;" for="aboutBio">
               <span>Bio</span>
               <textarea id="aboutBio" name="bio" placeholder="Tell others a little about you…"></textarea>
             </label>
-            <button type="submit" class="btn" style="margin-top:.6rem;">Save About</button>
             <div id="aboutMsg" class="form-msg" role="status" aria-live="polite"></div>
           </form>
         </section>
 
-        <!-- Contact -->
         <section class="dashboard-card" aria-labelledby="contactTitle">
           <h2 id="contactTitle" class="h3">Contact</h2>
-          <form id="contactForm" style="margin-top:.6rem;" novalidate>
-            <div class="grid-2">
+]            <div class="grid-2">
               <label class="field" for="contactEmail">
                 <span>Email</span>
                 <input id="contactEmail" name="email" type="email" placeholder="your@email.com" />
@@ -127,23 +104,18 @@
                 <input id="contactPhone" name="phone" type="tel" placeholder="+44 7123 456789" />
               </label>
             </div>
-            <label class="field" style="margin-top:.6rem;" for="contactPref">
               <span>Preferred contact method</span>
-              <select id="contactPref" name="preferred">
                 <option value="email">Email</option>
                 <option value="phone">Phone</option>
                 <option value="none">Do not contact</option>
               </select>
             </label>
-            <button type="submit" class="btn" style="margin-top:.6rem;">Save Contact</button>
             <div id="contactMsg" class="form-msg" role="status" aria-live="polite"></div>
           </form>
         </section>
 
-        <!-- Preferences (quick) -->
         <section class="dashboard-card" aria-labelledby="prefsTitle">
           <h2 id="prefsTitle" class="h3">Preferences</h2>
-          <form id="prefsForm" style="margin-top:.6rem;" novalidate>
             <div class="grid-2">
               <label class="checkbox">
                 <input type="checkbox" id="prefEmailUpdates" name="emailUpdates" />
@@ -154,32 +126,30 @@
                 <span>Show my name on community posts</span>
               </label>
             </div>
-            <button type="submit" class="btn" style="margin-top:.6rem;">Save Preferences</button>
             <div id="prefsMsg" class="form-msg" role="status" aria-live="polite"></div>
           </form>
         </section>
       </div>
 
-      <!-- Right Column -->
       <aside class="dashboard-card" aria-labelledby="activityTitle">
         <h2 id="activityTitle" class="h3">Recent Activity</h2>
         <p class="muted">Latest requests and posts you’ve made.</p>
 
-        <div style="margin-top:.6rem;">
+        <div> style="margin-top:.6rem;">
           <h3 class="list-title">Requests</h3>
           <ul id="activityRequests" class="submission-log" aria-live="polite">
             <li class="muted">Loading…</li>
           </ul>
         </div>
 
-        <div style="margin-top:.6rem;">
+        <div> style="margin-top:.6rem;">
           <h3 class="list-title">Community Posts</h3>
           <ul id="activityPosts" class="post-feed" aria-live="polite">
             <li class="muted">Loading…</li>
           </ul>
         </div>
 
-        <div style="display:flex; gap:.5rem; margin-top:.8rem;">
+        <div> style="display:flex; gap:.5rem; margin-top:.8rem;">
           <a href="/#cleaningForm" class="btn btn-ghost">New Cleaning</a>
           <a href="/#repairForm" class="btn btn-ghost">New Repair</a>
           <a href="/#communityPostForm" class="btn">New Post</a>
@@ -194,17 +164,12 @@
     </div>
   </footer>
 
-  <!-- Page scripts: role gate, hydration, forms, avatar upload, activity feed -->
   <script>
     (function () {
       const $ = (s, ctx=document) => ctx.querySelector(s);
       const $$ = (s, ctx=document) => Array.from(ctx.querySelectorAll(s));
       const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
-
-      // Footer year
       const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
-
-      // ----- Role Gate (resident or landlord) -----
       async function guard() {
         const allow = (document.body.getAttribute('data-required-role') || '').split(',').map(s => s.trim().toLowerCase());
         try {
@@ -225,7 +190,6 @@
         }
       }
 
-      // ----- Hydrate Profile Header -----
       function hydrateHeader(user) {
         const displayName = user.profile?.displayName || user.email?.split('@')[0] || 'User';
         const role = (user.role || 'resident');
@@ -240,25 +204,19 @@
         $('#profileAvatar').src = avatarUrl;
       }
 
-      // ----- Load Forms with User Data -----
       function hydrateForms(user) {
-        // About
         $('#aboutDisplayName').value = user.profile?.displayName || '';
         $('#aboutUnit').value        = user.profile?.unit || '';
         $('#aboutBio').value         = user.profile?.bio || '';
-        // Contact
         $('#contactEmail').value     = user.contact?.email || user.email || '';
         $('#contactPhone').value     = user.contact?.phone || '';
         $('#contactPref').value      = user.contact?.preferred || 'email';
-        // Prefs
         $('#prefEmailUpdates').checked    = !!user.prefs?.emailUpdates;
         $('#prefCommunityVisible').checked= !!user.prefs?.communityVisible;
-        // Stats (fallback if backend doesn’t return)
         $('#statRequests').textContent = `Requests: ${user.stats?.requests ?? 0}`;
         $('#statPosts').textContent    = `Posts: ${user.stats?.posts ?? 0}`;
       }
 
-      // ----- Save helpers -----
       async function postJSON(url, payload, msgEl) {
         try {
           msgEl && (msgEl.textContent = 'Saving…');
@@ -274,8 +232,6 @@
           msgEl && (msgEl.textContent = 'Could not save. Please try again.');
         }
       }
-
-      // ----- Bind Forms -----
       function bindForms() {
         $('#aboutForm')?.addEventListener('submit', (e) => {
           e.preventDefault();
@@ -307,7 +263,6 @@
         });
       }
 
-      // ----- Avatar upload with preview -----
       function bindAvatar() {
         const input = $('#avatarInput');
         const img = $('#profileAvatar');
@@ -317,12 +272,10 @@
           const file = input.files?.[0];
           if (!file) return;
 
-          // Preview
           const url = URL.createObjectURL(file);
           img.src = url;
           setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-          // Upload
           const fd = new FormData();
           fd.append('avatar', file);
           try {
@@ -332,14 +285,11 @@
               body: fd
             });
             if (!r.ok) throw 0;
-            // Optionally read { avatarUrl } and set img.src = avatarUrl
           } catch {
-            // Restore default on failure (optional)
           }
         });
       }
 
-      // ----- Activity feed -----
       async function loadActivity() {
         try {
           const r = await fetch(`${apiBase}/profile/activity`, { credentials: 'include' });
@@ -373,14 +323,12 @@
             ));
           });
         } catch {
-          // Leave defaults
         }
       }
 
-      // ----- Boot -----
       (async () => {
         const user = await guard();
-        if (!user) return;              // redirected
+        if (!user) return;
         hydrateHeader(user);
         hydrateForms(user);
         bindForms();
@@ -389,8 +337,6 @@
       })();
     })();
   </script>
-
-  <!-- Page-only micro styles -->
   <style>
     .profile-avatar { border-radius: 999px; border: 2px solid rgba(255,255,255,.08); box-shadow: 0 6px 24px rgba(0,0,0,.25); }
     .list-title { font-weight: 600; margin: 0; }
