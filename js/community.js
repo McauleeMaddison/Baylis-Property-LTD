@@ -1,382 +1,398 @@
-// js/community.js
 (() => {
-  "use strict";
+  const q = (s, r = document) => r.querySelector(s);
+  const qa = (s, r = document) => [...r.querySelectorAll(s)];
+  const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const nowISO = () => new Date().toISOString();
+  const LS_KEY = "community_posts_v1";
+  const PAGE_SIZE = 6;
 
-  // --------- tiny utils ----------
-  const $  = (s, c = document) => c.querySelector(s);
-  const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
-  const esc = (s) => String(s ?? "")
-    .replaceAll("&","&amp;").replaceAll("<","&lt;")
-    .replaceAll(">","&gt;").replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-  const toast = (m) => (typeof window.showToast === "function" ? window.showToast(m) : alert(m));
-  const uid = () => "p_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-
-  // --------- storage (local) ----------
-  const KEY = "log:community";
-  const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; } };
-  const write = (arr) => localStorage.setItem(KEY, JSON.stringify(arr));
-
-  // --------- user identity ----------
-  function currentUser() {
-    const username = localStorage.getItem("username") || "User";
-    const role = (localStorage.getItem("role") || "resident").toLowerCase();
-    return { username, role };
-  }
-
-  // --------- schema + migration ----------
-  // Accept older shapes and upgrade to a richer unified doc
-  function migrate(list) {
-    if (!Array.isArray(list)) return [];
-    let changed = false;
-    const out = list.map((p) => {
-      if (p && p.id && "likes" in p && "pinned" in p && "comments" in p) return p;
-      changed = true;
-      return {
-        id: p.id || uid(),
-        name: p.name || currentUser().username,
-        title: p.title || "Post",
-        message: p.message || String(p.msg || ""),
-        createdAt: Number(p.createdAt || Date.now()),
-        editedAt: p.editedAt || null,
-        pinned: !!p.pinned,
-        likes: Number(p.likes || 0),
-        likedBy: Array.isArray(p.likedBy) ? p.likedBy : [],
-        comments: Array.isArray(p.comments) ? p.comments : [],
-        roleAtPost: p.roleAtPost || currentUser().role
-      };
-    });
-    if (changed) write(out);
-    return out;
-  }
-
-  // --------- DOM refs ----------
-  const elSearch   = $("#postSearch");
-  const elSort     = $("#postSort");
-  const elMine     = $("#filterMine");
-  const elPinned   = $("#filterPinnedOnly");
-  const elExport   = $("#exportCommunityBtn");
-  const elImport   = $("#importCommunityInput");
-
-  const elForm     = $("#communityForm");
-  const elTitle    = $("#postTitle");
-  const elMsg      = $("#postMessage");
-
-  const elFeed     = $("#communityFeed");
-  const elPrev     = $("#pagePrev");
-  const elNext     = $("#pageNext");
-  const elInfo     = $("#pageInfo");
-
-  // --------- state ----------
-  const PAGE_SIZE = 10;
-  let state = {
-    q: "",
-    sort: "newest",
-    mine: false,
-    pinnedOnly: false,
-    page: 1
+  const state = {
+    posts: [],
+    filtered: [],
+    page: 1,
+    me: (localStorage.getItem("displayName") || "Mac").trim() || "User",
+    accent: localStorage.getItem("accent") || "blue",
   };
 
-  // --------- rendering ----------
-  function templatePost(p, me) {
-    const when = new Date(p.createdAt).toLocaleString();
-    const isMine = (p.name || "").toLowerCase() === (me.username || "").toLowerCase();
-    const canMod = isMine || me.role === "landlord";
-    const liked = (p.likedBy || []).includes(me.username);
+  const el = {
+    form: q("#communityForm"),
+    title: q("#postTitle"),
+    msg: q("#postMessage"),
+    feed: q("#communityFeed"),
+    search: q("#postSearch"),
+    sort: q("#postSort"),
+    mine: q("#filterMine"),
+    pinnedOnly: q("#filterPinnedOnly"),
+    prev: q("#pagePrev"),
+    next: q("#pageNext"),
+    info: q("#pageInfo"),
+    exportBtn: q("#exportCommunityBtn"),
+    importInput: q("#importCommunityInput"),
+  };
 
-    return `
-      <article class="post" data-id="${esc(p.id)}" tabindex="0">
-        <header class="post__head">
-          <div class="post__meta">
-            <strong class="post__author">${esc(p.name)}</strong>
-            <span class="muted"> • ${esc(when)}</span>
-            ${p.pinned ? `<span class="badge" title="Pinned">📌 Pinned</span>` : ""}
-          </div>
-          ${p.title ? `<h4 class="post__title">${esc(p.title)}</h4>` : ""}
-        </header>
+  const accentMap = {
+    blue: "#72a4ff",
+    teal: "#2dd4bf",
+    violet: "#a78bfa",
+  };
 
-        <div class="post__body">${esc(p.message)}</div>
-
-        <footer class="post__foot">
-          <div style="display:flex; gap:.4rem; flex-wrap:wrap;">
-            <button class="btn-chip action-like" aria-pressed="${liked}" title="${liked ? "Unlike" : "Like"}">
-              ❤️ ${liked ? "Liked" : "Like"} · <span class="like-count">${p.likes || 0}</span>
-            </button>
-            <button class="btn-chip action-toggle-comments" aria-expanded="false" title="Show/Hide comments">
-              💬 Comments (${(p.comments || []).length})
-            </button>
-          </div>
-          ${canMod ? `
-            <div class="post__mod">
-              <button class="btn-chip action-pin">${p.pinned ? "Unpin" : "Pin"}</button>
-              <button class="btn-chip action-delete" data-danger="1">Delete</button>
-            </div>` : ""}
-        </footer>
-
-        <section class="post__comments hidden" aria-label="Comments">
-          <ul class="comment-list">
-            ${(p.comments || []).map(c => `
-              <li class="comment" data-cid="${esc(c.id)}">
-                <strong>${esc(c.user)}</strong>
-                <span class="muted"> • ${esc(new Date(c.createdAt).toLocaleString())}</span>
-                <div>${esc(c.text)}</div>
-              </li>
-            `).join("")}
-          </ul>
-          <form class="comment-form" autocomplete="off">
-            <input type="text" name="text" placeholder="Write a comment…" required />
-            <button type="submit" class="btn btn-primary">Reply</button>
-          </form>
-        </section>
-      </article>
-    `;
+  function applyAccent(name) {
+    const val = accentMap[name] || accentMap.blue;
+    document.documentElement.style.setProperty("--brand", val);
+    localStorage.setItem("accent", name);
+    state.accent = name;
   }
 
-  function applyFilters(list, me) {
-    let arr = list.slice();
-    const q = state.q.toLowerCase().trim();
-
-    if (q) {
-      arr = arr.filter(p => (`${p.title} ${p.message} ${p.name}`).toLowerCase().includes(q));
-    }
-    if (state.mine && me.username) {
-      const u = me.username.toLowerCase();
-      arr = arr.filter(p => (p.name || "").toLowerCase() === u);
-    }
-    if (state.pinnedOnly) {
-      arr = arr.filter(p => !!p.pinned);
-    }
-
-    switch (state.sort) {
-      case "oldest":       arr.sort((a,b)=>a.createdAt-b.createdAt); break;
-      case "most_liked":   arr.sort((a,b)=>(b.likes||0)-(a.likes||0)); break;
-      case "pinned_first": arr.sort((a,b)=> (b.pinned===a.pinned) ? (b.createdAt-a.createdAt) : (b.pinned?1:-1)); break;
-      case "newest":
-      default:             arr.sort((a,b)=>b.createdAt-a.createdAt); break;
-    }
-    return arr;
+  function save() {
+    localStorage.setItem(LS_KEY, JSON.stringify(state.posts));
   }
 
-  function paginate(list) {
-    const total = list.length;
-    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-    state.page = Math.min(Math.max(1, state.page), pages);
-    const start = (state.page - 1) * PAGE_SIZE;
-    const end = start + PAGE_SIZE;
-    const slice = list.slice(start, end);
-
-    if (elPrev) elPrev.disabled = state.page <= 1;
-    if (elNext) elNext.disabled = state.page >= pages;
-    if (elInfo) elInfo.textContent = `Page ${state.page} / ${pages} · ${total} post${total === 1 ? "" : "s"}`;
-
-    return slice;
-  }
-
-  function render() {
-    if (!elFeed) return;
-
-    const me = currentUser();
-    const posts = migrate(read());
-    const filtered = applyFilters(posts, me);
-    const pageSlice = paginate(filtered);
-
-    if (!pageSlice.length) {
-      elFeed.innerHTML = `<li class="muted">No posts yet.</li>`;
-      return;
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return [];
+      const data = JSON.parse(raw);
+      if (!Array.isArray(data)) return [];
+      return data;
+    } catch {
+      return [];
     }
-    elFeed.innerHTML = pageSlice.map(p => `<li>${templatePost(p, me)}</li>`).join("");
   }
 
-  // --------- actions ----------
-  function createPost({ title, message }) {
-    const me = currentUser();
-    const list = migrate(read());
-    const doc = {
-      id: uid(),
-      name: me.username,
-      title: title || "",
-      message: message || "",
-      createdAt: Date.now(),
-      editedAt: null,
-      pinned: false,
-      likes: 0,
-      likedBy: [],
-      comments: [],
-      roleAtPost: me.role
+  async function fetchRemote() {
+    if (!window.API_BASE) return null;
+    try {
+      const r = await fetch(`${window.API_BASE}/community`, { credentials: "include" });
+      if (!r.ok) return null;
+      const data = await r.json();
+      if (!Array.isArray(data)) return null;
+      return data.map(normalizePost);
+    } catch {
+      return null;
+    }
+  }
+
+  function normalizePost(p) {
+    return {
+      id: p.id || uid(),
+      title: p.title?.toString().slice(0, 120) || "",
+      message: p.message?.toString() || "",
+      author: p.author?.toString() || state.me,
+      userId: p.userId || "",
+      createdAt: p.createdAt || nowISO(),
+      likes: Number.isFinite(p.likes) ? p.likes : 0,
+      pinned: !!p.pinned,
+      comments: Array.isArray(p.comments) ? p.comments.map(c => ({
+        id: c.id || uid(),
+        author: c.author?.toString() || "Anon",
+        message: c.message?.toString() || "",
+        createdAt: c.createdAt || nowISO(),
+      })) : [],
     };
-    write([doc, ...list].slice(0, 500)); // keep last 500
-    render();
-    return doc;
   }
 
-  function toggleLike(id) {
-    const me = currentUser();
-    const list = migrate(read());
-    const i = list.findIndex(p => p.id === id);
-    if (i < 0) return;
-    const set = new Set(list[i].likedBy || []);
-    set.has(me.username) ? set.delete(me.username) : set.add(me.username);
-    list[i].likedBy = [...set];
-    list[i].likes = list[i].likedBy.length;
-    write(list);
-    render();
+  function seedIfEmpty() {
+    if (state.posts.length) return;
+    state.posts = [
+      normalizePost({ title: "Welcome new residents 🎉", message: "Say hello and drop any questions here.", author: "Admin", pinned: true, likes: 5, createdAt: new Date(Date.now() - 86400000).toISOString() }),
+      normalizePost({ title: "Cleaner recommendation", message: "Looking for end-of-tenancy clean this Friday.", author: "Alex", likes: 2 }),
+    ];
+    save();
   }
 
-  function addComment(id, text) {
-    const me = currentUser();
-    const list = migrate(read());
-    const i = list.findIndex(p => p.id === id);
-    if (i < 0) return;
-    (list[i].comments ||= []).push({ id: uid(), user: me.username, text, createdAt: Date.now() });
-    write(list);
-    render();
+  function setPage(p) {
+    const max = Math.max(1, Math.ceil(state.filtered.length / PAGE_SIZE));
+    state.page = Math.min(Math.max(1, p), max);
   }
 
-  function canModerate(post) {
-    const me = currentUser();
-    return me.role === "landlord" || (post.name || "").toLowerCase() === me.username.toLowerCase();
+  function getVisible() {
+    const start = (state.page - 1) * PAGE_SIZE;
+    return state.filtered.slice(start, start + PAGE_SIZE);
+  }
+
+  function filterAndSort() {
+    const term = (el.search?.value || "").toLowerCase().trim();
+    const mine = !!el.mine?.checked;
+    const onlyPinned = !!el.pinnedOnly?.checked;
+    let arr = [...state.posts];
+    if (term) {
+      arr = arr.filter(p => [p.title, p.message, p.author].join(" ").toLowerCase().includes(term));
     }
+    if (mine) {
+      arr = arr.filter(p => (p.author || "").toLowerCase() === state.me.toLowerCase());
+    }
+    if (onlyPinned) {
+      arr = arr.filter(p => p.pinned);
+    }
+    const sort = el.sort?.value || "newest";
+    arr.sort((a, b) => {
+      if (sort === "newest") return b.createdAt.localeCompare(a.createdAt);
+      if (sort === "oldest") return a.createdAt.localeCompare(b.createdAt);
+      if (sort === "most_liked") return (b.likes || 0) - (a.likes || 0);
+      if (sort === "pinned_first") return (b.pinned === a.pinned) ? b.createdAt.localeCompare(a.createdAt) : (b.pinned ? 1 : -1);
+      return 0;
+    });
+    state.filtered = arr;
+    setPage(1);
+  }
+
+  function renderFeed() {
+    if (!el.feed) return;
+    el.feed.innerHTML = "";
+    const items = getVisible();
+    if (!items.length) {
+      const li = document.createElement("li");
+      li.className = "muted";
+      li.textContent = "No posts match your filters.";
+      el.feed.appendChild(li);
+    } else {
+      items.forEach(p => el.feed.appendChild(renderPost(p)));
+    }
+    const max = Math.max(1, Math.ceil(state.filtered.length / PAGE_SIZE));
+    if (el.info) el.info.textContent = `Page ${state.page} / ${max} · ${state.filtered.length} posts`;
+    if (el.prev) el.prev.disabled = state.page <= 1;
+    if (el.next) el.next.disabled = state.page >= max;
+  }
+
+  function renderPost(p) {
+    const li = document.createElement("li");
+    li.className = "post";
+    li.dataset.id = p.id;
+
+    const head = document.createElement("div");
+    head.className = "post__head";
+
+    const meta = document.createElement("div");
+    meta.className = "post__meta";
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = p.pinned ? "Pinned" : "Post";
+    const author = document.createElement("span");
+    author.textContent = `• ${p.author}`;
+    const date = document.createElement("span");
+    date.className = "muted";
+    date.textContent = `• ${new Date(p.createdAt).toLocaleString()}`;
+    meta.append(badge, author, date);
+
+    const title = document.createElement("h3");
+    title.className = "post__title h2";
+    title.textContent = p.title || "Untitled";
+
+    const body = document.createElement("div");
+    body.className = "post__body";
+    body.textContent = p.message;
+
+    const foot = document.createElement("div");
+    foot.className = "post__foot";
+    const mod = document.createElement("div");
+    mod.className = "post__mod";
+    const like = document.createElement("button");
+    like.className = "btn-chip";
+    like.dataset.action = "like";
+    like.dataset.id = p.id;
+    like.textContent = `👍 ${p.likes || 0}`;
+    const pin = document.createElement("button");
+    pin.className = "btn-chip";
+    pin.dataset.action = "pin";
+    pin.dataset.id = p.id;
+    pin.textContent = p.pinned ? "Unpin" : "Pin";
+    const commentBtn = document.createElement("button");
+    commentBtn.className = "btn-chip";
+    commentBtn.dataset.action = "comment";
+    commentBtn.dataset.id = p.id;
+    commentBtn.textContent = "Comment";
+    const del = document.createElement("button");
+    del.className = "btn-chip";
+    del.dataset.action = "delete";
+    del.dataset.id = p.id;
+    del.textContent = "Delete";
+    mod.append(like, pin, commentBtn, del);
+
+    const count = document.createElement("span");
+    count.className = "muted";
+    count.textContent = `${p.comments?.length || 0} comments`;
+
+    foot.append(mod, count);
+
+    const comments = document.createElement("div");
+    comments.className = "post__comments";
+    const list = document.createElement("ul");
+    list.className = "comment-list";
+    (p.comments || []).forEach(c => {
+      const ci = document.createElement("li");
+      ci.className = "comment";
+      ci.textContent = `${c.author}: ${c.message}`;
+      list.appendChild(ci);
+    });
+
+    const form = document.createElement("form");
+    form.dataset.pid = p.id;
+    form.style.display = "flex";
+    form.style.gap = ".4rem";
+    form.style.marginTop = ".5rem";
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.placeholder = "Write a comment…";
+    inp.required = true;
+    inp.style.flex = "1";
+    const submit = document.createElement("button");
+    submit.type = "submit";
+    submit.className = "btn secondary";
+    submit.textContent = "Add";
+    form.append(inp, submit);
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const txt = inp.value.trim();
+      if (!txt) return;
+      addComment(p.id, { author: state.me, message: txt });
+      inp.value = "";
+    });
+
+    comments.append(list, form);
+
+    head.append(meta, title);
+    li.append(head, body, foot, comments);
+    li.addEventListener("click", onPostClick);
+    return li;
+  }
+
+  function onPostClick(e) {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    if (action === "like") likePost(id);
+    if (action === "pin") togglePin(id);
+    if (action === "comment") {
+      const card = btn.closest(".post");
+      const input = card?.querySelector("form input[type='text']");
+      input?.focus();
+    }
+    if (action === "delete") deletePost(id);
+  }
+
+  function likePost(id) {
+    const p = state.posts.find(x => x.id === id);
+    if (!p) return;
+    p.likes = (p.likes || 0) + 1;
+    save();
+    filterAndSort();
+    renderFeed();
+  }
 
   function togglePin(id) {
-    const list = migrate(read());
-    const i = list.findIndex(p => p.id === id);
-    if (i < 0) return;
-    if (!canModerate(list[i])) return toast("You don’t have permission to pin this.");
-    list[i].pinned = !list[i].pinned;
-    write(list);
-    render();
+    const p = state.posts.find(x => x.id === id);
+    if (!p) return;
+    p.pinned = !p.pinned;
+    save();
+    filterAndSort();
+    renderFeed();
   }
 
-  function removePost(id) {
-    const list = migrate(read());
-    const i = list.findIndex(p => p.id === id);
-    if (i < 0) return;
-    if (!canModerate(list[i])) return toast("You don’t have permission to delete this.");
-    list.splice(i, 1);
-    write(list);
-    render();
+  function deletePost(id) {
+    const p = state.posts.find(x => x.id === id);
+    if (!p) return;
+    if (p.author.toLowerCase() !== state.me.toLowerCase() && p.author !== "Admin") return;
+    state.posts = state.posts.filter(x => x.id !== id);
+    save();
+    filterAndSort();
+    renderFeed();
   }
 
-  // --------- wire UI ----------
-  function bindComposer() {
-    if (!elForm) return;
-    elForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const title = (elTitle?.value || "").trim();
-      const msg = (elMsg?.value || "").trim();
-      if (!msg) return toast("Please enter a message.");
-      createPost({ title, message: msg });
-      elForm.reset();
-      toast("Post published 💬");
-    });
-    elMsg?.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+  function addComment(pid, c) {
+    const p = state.posts.find(x => x.id === pid);
+    if (!p) return;
+    p.comments = p.comments || [];
+    p.comments.unshift({ id: uid(), author: c.author || "User", message: c.message || "", createdAt: nowISO() });
+    save();
+    filterAndSort();
+    renderFeed();
+  }
+
+  async function createPost({ title, message }) {
+    const post = normalizePost({ id: uid(), title, message, author: state.me, createdAt: nowISO(), likes: 0, pinned: false, comments: [] });
+    state.posts.unshift(post);
+    save();
+    if (window.API_BASE) {
+      try {
+        await fetch(`${window.API_BASE}/community`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(post),
+        });
+      } catch {}
+    }
+    filterAndSort();
+    renderFeed();
+  }
+
+  function bindEvents() {
+    if (el.form) {
+      el.form.addEventListener("submit", e => {
         e.preventDefault();
-        elForm.dispatchEvent(new Event("submit", { cancelable: true }));
-      }
-    });
-  }
-
-  function bindFilters() {
-    elSearch?.addEventListener("input", (e) => { state.q = e.target.value; state.page = 1; render(); });
-    elSort?.addEventListener("change", (e) => { state.sort = e.target.value; state.page = 1; render(); });
-    elMine?.addEventListener("change", (e) => { state.mine = !!e.target.checked; state.page = 1; render(); });
-    elPinned?.addEventListener("change", (e) => { state.pinnedOnly = !!e.target.checked; state.page = 1; render(); });
-
-    elPrev?.addEventListener("click", () => { state.page = Math.max(1, state.page - 1); render(); });
-    elNext?.addEventListener("click", () => { state.page = state.page + 1; render(); });
-  }
-
-  function bindFeedActions() {
-    if (!elFeed) return;
-
-    elFeed.addEventListener("click", (e) => {
-      const postEl = e.target.closest("article.post");
-      if (!postEl) return;
-      const id = postEl.getAttribute("data-id");
-
-      if (e.target.closest(".action-like")) {
-        toggleLike(id);
-        return;
-      }
-      if (e.target.closest(".action-toggle-comments")) {
-        const sec = postEl.querySelector(".post__comments");
-        const btn = e.target.closest(".action-toggle-comments");
-        if (sec && btn) {
-          const hidden = sec.classList.toggle("hidden");
-          btn.setAttribute("aria-expanded", String(!hidden));
+        const title = el.title?.value.trim() || "";
+        const message = el.msg?.value.trim() || "";
+        if (!message) return;
+        createPost({ title, message });
+        el.form.reset();
+      });
+      el.form.addEventListener("keydown", e => {
+        const isMac = navigator.platform.toUpperCase().includes("MAC");
+        if ((isMac && e.metaKey && e.key === "Enter") || (!isMac && e.ctrlKey && e.key === "Enter")) {
+          e.preventDefault();
+          el.form.requestSubmit();
         }
-        return;
-      }
-      if (e.target.closest(".action-pin")) {
-        togglePin(id);
-        return;
-      }
-      if (e.target.closest(".action-delete")) {
-        if (confirm("Delete this post? This cannot be undone.")) removePost(id);
-        return;
-      }
-    });
-
-    // comment form submit
-    elFeed.addEventListener("submit", (e) => {
-      const form = e.target.closest(".comment-form");
-      if (!form) return;
-      e.preventDefault();
-      const postEl = e.target.closest("article.post");
-      const id = postEl?.getAttribute("data-id");
-      const input = form.querySelector('input[name="text"]');
-      const text = (input?.value || "").trim();
-      if (!id || !text) return;
-      addComment(id, text);
-      input.value = "";
-    });
-  }
-
-  function bindImportExport() {
-    elExport?.addEventListener("click", () => {
-      const data = JSON.stringify(migrate(read()), null, 2);
-      const blob = new Blob([data], { type: "application/json" });
+      });
+    }
+    el.search?.addEventListener("input", () => { filterAndSort(); renderFeed(); });
+    el.sort?.addEventListener("change", () => { filterAndSort(); renderFeed(); });
+    el.mine?.addEventListener("change", () => { filterAndSort(); renderFeed(); });
+    el.pinnedOnly?.addEventListener("change", () => { filterAndSort(); renderFeed(); });
+    el.prev?.addEventListener("click", () => { setPage(state.page - 1); renderFeed(); });
+    el.next?.addEventListener("click", () => { setPage(state.page + 1); renderFeed(); });
+    qa("[data-accent-option]").forEach(b => b.addEventListener("click", () => applyAccent(b.dataset.accentOption)));
+    el.exportBtn?.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(state.posts, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const a = Object.assign(document.createElement("a"), { href: url, download: `baylis-community-${Date.now()}.json` });
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 300);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "community-posts.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     });
-
-    elImport?.addEventListener("change", () => {
-      const f = elImport.files?.[0];
+    el.importInput?.addEventListener("change", async () => {
+      const f = el.importInput.files?.[0];
       if (!f) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const data = JSON.parse(String(reader.result || "[]"));
-          if (!Array.isArray(data)) throw new Error("Invalid JSON");
-          write(migrate(data));
-          toast("Imported community posts");
-          render();
-        } catch {
-          toast("Invalid file format");
-        } finally {
-          elImport.value = "";
+      try {
+        const text = await f.text();
+        const arr = JSON.parse(text);
+        if (Array.isArray(arr)) {
+          const map = new Map(state.posts.map(p => [p.id, p]));
+          arr.map(normalizePost).forEach(p => map.set(p.id, p));
+          state.posts = [...map.values()].sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+          save();
+          filterAndSort();
+          renderFeed();
         }
-      };
-      reader.readAsText(f);
+      } catch {}
+      el.importInput.value = "";
     });
   }
 
-  // --------- boot ----------
-  function boot() {
-    migrate(read());   // ensure schema once
-    bindComposer();
-    bindFilters();
-    bindFeedActions();
-    bindImportExport();
-    render();
+  async function init() {
+    applyAccent(state.accent);
+    const local = loadLocal();
+    const remote = await fetchRemote();
+    state.posts = (remote && remote.length ? remote : local).map(normalizePost);
+    seedIfEmpty();
+    bindEvents();
+    filterAndSort();
+    renderFeed();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
-  }
+  init();
 })();

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Meta -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
@@ -9,23 +8,20 @@
 
   <title>Landlord Dashboard • Baylis Property LTD</title>
 
-  <!-- Root-relative assets so links work from any route -->
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
   <script>
-    // Default API base is relative; you can override via body[data-api-base]
     window.API_BASE = '/api';
   </script>
   <script defer src="server/app.js"></script>
 
-  <!-- Optional prefetch for snappy nav -->
   <link rel="prefetch" href="resident.html" />
 </head>
 <body class="page page--landlord"
       data-required-role="landlord"
       data-api-base="/api">
-  <!-- Header / Navbar -->
-  <header class="site-header" id="mainHeader">
+
+      <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
         <a class="logo" href="/" aria-label="Baylis Property LTD Home">
@@ -53,14 +49,11 @@
     </nav>
   </header>
 
-  <!-- Main -->
   <main id="content" class="container" tabindex="-1">
-    <header class="header" style="margin: .75rem 0 1rem;">
       <h1 class="h1">Landlord Dashboard</h1>
       <p class="muted">Welcome, <strong id="userWelcome">Landlord</strong>. Review requests, update statuses, and monitor community activity.</p>
     </header>
 
-    <!-- Overview Metrics -->
     <section class="dashboard-cards" aria-label="Overview metrics">
       <article class="dashboard-card" aria-labelledby="mOpen">
         <h3 id="mOpen">Open Requests</h3>
@@ -87,10 +80,7 @@
       </article>
     </section>
 
-    <!-- Toolbar -->
     <section class="dashboard-card" aria-label="Tools">
-      <div class="grid-2" style="gap:.6rem;">
-        <div style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;">
           <label for="reqSearch" class="visually-hidden">Search requests</label>
           <input id="reqSearch" type="search" placeholder="Search requests by name, issue or type…" inputmode="search" />
 
@@ -110,17 +100,13 @@
           </select>
         </div>
 
-        <div style="display:flex; gap:.5rem; justify-content:flex-end; flex-wrap:wrap;">
           <button type="button" id="btnRefresh" class="btn btn-ghost">Refresh</button>
           <button type="button" id="btnExport" class="btn btn-ghost">Export CSV</button>
         </div>
       </div>
-      <small class="muted" style="display:block; margin-top:.4rem;">
-        Tip: Use the status dropdown on each item and click <em>Save</em> to update.
       </small>
     </section>
 
-    <!-- Requests Panels -->
     <section class="dashboard-cards" aria-label="Requests">
       <article class="dashboard-card">
         <h3>Cleaning Requests</h3>
@@ -137,8 +123,6 @@
       </article>
     </section>
 
-    <!-- Community Posts -->
-    <section class="dashboard-card" aria-label="Community Posts" style="margin-top:1rem;">
       <h3>Community Posts</h3>
       <ul id="allCommunityPosts" class="post-feed" aria-live="polite">
         <li class="muted">Loading…</li>
@@ -156,19 +140,15 @@
     </div>
   </footer>
 
-  <!-- Page helpers: role-gate, metrics, filters, CSV export. Works with /js/app.js data fetches. -->
   <script>
     (function () {
       const $ = (sel, ctx=document) => ctx.querySelector(sel);
       const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
 
-      // Footer year
       $('#year').textContent = new Date().getFullYear();
 
-      // Respect API base from body if provided
       const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
 
-      // Role gate: confirm current user is landlord; otherwise redirect
       async function ensureLandlord() {
         const required = document.body.getAttribute('data-required-role');
         if (!required) return;
@@ -176,7 +156,6 @@
           const r = await fetch(`${apiBase}/auth/me`, { credentials: 'include' });
           if (!r.ok) throw new Error('not-auth');
           const { user } = await r.json();
-          // Expect user.role to exist; fallback to showing name if present
           if (user?.role !== required) {
             window.location.href = '/login';
             return;
@@ -187,14 +166,12 @@
         }
       }
 
-      // Metrics recompute based on rendered lists (script populates the ULs)
       function recomputeMetrics() {
         const ulClean  = $('#allCleaningRequests');
         const ulRepair = $('#allRepairRequests');
         const ulPosts  = $('#allCommunityPosts');
 
         const allLis = [...(ulClean?.children || []), ...(ulRepair?.children || [])]
-          // ignore placeholders
           .filter(li => !li.classList.contains('muted'));
 
         const map = { open: 0, in_progress: 0, done: 0 };
@@ -211,7 +188,6 @@
         $('#metricPosts').textContent      = (ulPosts?.children?.length || 0) - (ulPosts?.querySelectorAll('.muted').length || 0);
       }
 
-      // Filtering
       function applyFilters() {
         const q = ($('#reqSearch')?.value || '').toLowerCase();
         const t = ($('#filterType')?.value || 'all');
@@ -234,7 +210,6 @@
         filterList($('#allRepairRequests'),   'repair');
       }
 
-      // Export CSV of currently visible items
       function exportCSV() {
         const rows = [['Type','Name','Details','Date/Info','Status']];
         const harvest = (ul, type) => {
@@ -263,21 +238,18 @@
         setTimeout(() => URL.revokeObjectURL(url), 500);
       }
 
-      // Wire UI controls
       $('#reqSearch')?.addEventListener('input',  applyFilters);
       $('#filterType')?.addEventListener('change', applyFilters);
       $('#filterStatus')?.addEventListener('change', applyFilters);
       $('#btnRefresh')?.addEventListener('click', () => window.location.reload());
       $('#btnExport')?.addEventListener('click', exportCSV);
 
-      // Watch for data injected by /js/app.js
       const obs = new MutationObserver(() => { applyFilters(); recomputeMetrics(); });
       ['#allCleaningRequests', '#allRepairRequests', '#allCommunityPosts'].forEach(sel => {
         const el = $(sel);
         if (el) obs.observe(el, { childList: true, subtree: true });
       });
 
-      // Kick things off
       ensureLandlord();
       applyFilters();
       recomputeMetrics();
@@ -285,7 +257,6 @@
   </script>
 
   <style>
-    /* small presentational touches here to avoid editing your main CSS */
     .metric { font-size: 1.8rem; font-weight: 700; }
     .visually-hidden { position: absolute !important; height: 1px; width: 1px; overflow: hidden; clip: rect(1px,1px,1px,1px); white-space: nowrap; }
   </style>

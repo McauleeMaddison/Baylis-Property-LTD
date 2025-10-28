@@ -2,63 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Community | Baylis Properties</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Community hub for Baylis Properties residents and landlords: post updates, ask questions, and collaborate." />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Community hub for Baylis Property LTD residents and landlords: post updates, ask questions, and connect." />
+  <title>Community • Baylis Property LTD</title>
+  <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- Configure API base (safe default for local dev) -->
   <script>window.API_BASE = window.API_BASE || 'http://localhost:4000/api';</script>
-
-  <!-- Shared app script (auth-guard, nav, dark mode, toast, etc.) -->
   <script defer src="js/script.js"></script>
-  <!-- Page-specific: community logic (reactions, comments, filters, pagination, import/export) -->
   <script defer src="js/community.js"></script>
-
   <style>
-    /* Page-specific polish (keeps to your design tokens) */
-    .community-hero {
-      display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap;
-    }
-    .hero-actions { display:flex; gap:.4rem; align-items:center; flex-wrap:wrap; }
-    .filters-row { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
-    .filters-row .checkbox { display:flex; gap:.35rem; align-items:center; }
-    .composer { display:grid; gap:.6rem; }
-    .composer .grid-2 { grid-template-columns: 1fr; }
-    .post-feed { list-style:none; padding:0; margin:0; display:grid; gap:.6rem; }
-    .post { border:1px solid var(--border, #e5e7eb); border-radius: var(--radius, 12px); background: var(--bg, #fff); padding:.75rem .9rem; box-shadow: var(--shadow, 0 1px 2px rgba(0,0,0,.05)); }
-    .post__head { margin-bottom:.25rem; }
-    .post__meta { display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; font-size:.95rem; }
-    .post__title { margin:.15rem 0 .35rem; }
-    .post__body { white-space:pre-wrap; line-height:1.5; }
-    .post__foot { display:flex; gap:.4rem; align-items:center; justify-content:space-between; margin-top:.6rem; flex-wrap:wrap; }
-    .post__mod { display:flex; gap:.35rem; }
-    .btn-chip { border:1px solid var(--border, #e5e7eb); background:transparent; border-radius:999px; padding:.25rem .6rem; cursor:pointer; font-size:.9rem; }
-    .badge { border:1px solid var(--border, #e5e7eb); border-radius:999px; padding:.05rem .45rem; font-size:.8rem; }
-    .post__comments { margin-top:.6rem; border-top:1px dashed var(--border, #e5e7eb); padding-top:.6rem; }
-    .comment-list { list-style:none; padding:0; margin:0; display:grid; gap:.4rem; }
-    .comment { padding:.35rem .5rem; border-radius:8px; background:var(--bg-light, #f8fafc); }
-    body.dark .post { background:#232334; border-color:#3b3b56; }
-    body.dark .comment { background:#2e2e45; }
-    .pager { display:flex; gap:.5rem; align-items:center; justify-content:flex-end; }
-    .muted { color:#6b7280; }
-    body.dark .muted { color:#c9cdd4; }
-    @media (min-width: 860px) {
-      .composer .grid-2 { display:grid; grid-template-columns: 1fr 2fr; gap:.6rem; }
-    }
+    .community-hero{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
+    .hero-actions{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+    .filters-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .filters-row .checkbox{display:flex;gap:.35rem;align-items:center}
+    .composer{display:grid;gap:.6rem}
+    .composer .grid-2{grid-template-columns:1fr}
+    .post-feed{list-style:none;padding:0;margin:0;display:grid;gap:.6rem}
+    .post{border:1px solid var(--border,#e5e7eb);border-radius:12px;background:var(--bg,#fff);padding:.75rem .9rem;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+    .post__meta{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;font-size:.95rem}
+    .post__title{margin:.15rem 0 .35rem}
+    .post__body{white-space:pre-wrap;line-height:1.5}
+    .post__foot{display:flex;gap:.4rem;align-items:center;justify-content:space-between;margin-top:.6rem;flex-wrap:wrap}
+    .post__mod{display:flex;gap:.35rem}
+    .btn-chip{border:1px solid var(--border,#e5e7eb);background:transparent;border-radius:999px;padding:.25rem .6rem;cursor:pointer;font-size:.9rem}
+    .badge{border:1px solid var(--border,#e5e7eb);border-radius:999px;padding:.05rem .45rem;font-size:.8rem}
+    .post__comments{margin-top:.6rem;border-top:1px dashed var(--border,#e5e7eb);padding-top:.6rem}
+    .comment-list{list-style:none;padding:0;margin:0;display:grid;gap:.4rem}
+    .comment{padding:.35rem .5rem;border-radius:8px;background:var(--bg-light,#f8fafc)}
+    body.dark .post{background:#232334;border-color:#3b3b56}
+    body.dark .comment{background:#2e2e45}
+    .pager{display:flex;gap:.5rem;align-items:center;justify-content:flex-end}
+    .muted{color:#6b7280}
+    body.dark .muted{color:#c9cdd4}
+    @media (min-width:860px){.composer .grid-2{display:grid;grid-template-columns:1fr 2fr;gap:.6rem}}
   </style>
 </head>
-
-<!-- Both residents and landlords can access -->
-<body data-required-role="resident,landlord">
-  <!-- Header / Navbar -->
-  <header class="site-header" id="mainHeader">
-    <nav class="nav">
+<body class="page page--community" data-required-role="resident,landlord">
+  <header class="site-header">
+    <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
-        <a class="logo" href="index.html"><img src="assets/logo.png" alt="" /> Baylis Property LTD</a>
-        <button class="btn secondary hamb" aria-expanded="false" aria-label="Toggle menu" data-hamb>☰</button>
-
-        <div class="nav-links" data-links>
+        <a class="logo" href="index.html">
+          <img src="assets/logo.png" alt="" width="26" height="26" />
+          <span>Baylis Property LTD</span>
+        </a>
+        <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
           <a href="index.html">Dashboard</a>
           <a href="resident.html">Resident</a>
           <a href="landlord.html">Landlord</a>
@@ -72,25 +61,20 @@
     </nav>
   </header>
 
-  <!-- Main -->
-  <main class="container" style="margin-top:1rem;">
-    <!-- Hero -->
     <section class="dashboard-card">
       <div class="community-hero">
         <div>
-          <h2 style="margin-bottom:.2rem;">Community</h2>
+          <h1 class="h1">Community</h1>
           <p class="muted">Share updates, ask questions, and connect with your neighbours.</p>
         </div>
         <div class="hero-actions">
-          <!-- Optional quick-access accent samples that your script.js can pick up -->
-          <button class="btn-chip" type="button" data-accent-option="blue"  title="Accent: Blue">Blue</button>
-          <button class="btn-chip" type="button" data-accent-option="teal"  title="Accent: Teal">Teal</button>
+          <button class="btn-chip" type="button" data-accent-option="blue" title="Accent: Blue">Blue</button>
+          <button class="btn-chip" type="button" data-accent-option="teal" title="Accent: Teal">Teal</button>
           <button class="btn-chip" type="button" data-accent-option="violet" title="Accent: Violet">Violet</button>
         </div>
       </div>
     </section>
 
-    <!-- Filters -->
     <section class="dashboard-card" aria-label="Filters">
       <div class="filters-row">
         <input id="postSearch" type="search" placeholder="Search posts by title, message, or author…" aria-label="Search posts" />
@@ -102,16 +86,11 @@
         </select>
         <label class="checkbox"><input id="filterMine" type="checkbox" /> <span>Mine only</span></label>
         <label class="checkbox"><input id="filterPinnedOnly" type="checkbox" /> <span>Pinned only</span></label>
-        <button id="exportCommunityBtn" class="btn btn-ghost" type="button" title="Export posts as JSON">Export</button>
-        <button class="btn btn-ghost" type="button" title="Import posts" onclick="document.getElementById('importCommunityInput').click()">Import</button>
-        <input id="importCommunityInput" type="file" accept="application/json" aria-label="Import posts file" style="display:none" />
+        <button id="exportCommunityBtn" class="btn secondary" type="button">Export</button>
+        <button class="btn secondary" type="button" onclick="document.getElementById('importCommunityInput').click()">Import</button>
       </div>
-      <small class="muted" style="display:block; margin-top:.35rem;">
-        Tip: Press <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Enter</kbd> to post quickly.
-      </small>
     </section>
 
-    <!-- Composer -->
     <section class="dashboard-card composer" aria-label="Composer">
       <form id="communityForm" autocomplete="off">
         <div class="grid-2">
@@ -124,38 +103,57 @@
             <textarea id="postMessage" placeholder="Write your message for the community…" required rows="4"></textarea>
           </label>
         </div>
-        <div style="display:flex; gap:.5rem; justify-content:flex-end;">
-          <button type="reset" class="btn btn-ghost">Clear</button>
-          <button type="submit" class="btn btn-primary">Post</button>
+          <button type="reset" class="btn secondary">Clear</button>
+          <button type="submit" class="btn">Post</button>
         </div>
       </form>
     </section>
 
-    <!-- Feed -->
     <section class="dashboard-card" aria-label="Community posts">
       <ul id="communityFeed" class="post-feed">
         <li class="muted">Loading…</li>
       </ul>
-
-      <div class="pager" style="margin-top:.6rem;">
-        <button id="pagePrev" class="btn btn-ghost" type="button" aria-label="Previous page">Prev</button>
+        <button id="pagePrev" class="btn secondary" type="button" aria-label="Previous page">Prev</button>
         <span id="pageInfo" class="muted" aria-live="polite">Page 1 / 1 · 0 posts</span>
-        <button id="pageNext" class="btn btn-ghost" type="button" aria-label="Next page">Next</button>
+        <button id="pageNext" class="btn secondary" type="button" aria-label="Next page">Next</button>
       </div>
     </section>
   </main>
 
-  <footer class="container" style="margin-top:1rem;">
-    <small>&copy; 2025 Baylis Properties</small>
+  <footer class="site-footer">
+    <div class="container">
+      <small>&copy; <span id="year"></span> Baylis Property LTD</small>
+      <span class="dot">&middot;</span>
+      <a href="community.html" aria-current="page">Community</a>
+      <span class="dot">&middot;</span>
+      <a href="settings.html">Settings</a>
+    </div>
   </footer>
 
   <noscript>
     <div class="container" style="margin-top:1rem;">
       <div class="dashboard-card">
         <strong>JavaScript required</strong>
-        <p class="muted">This page needs JavaScript enabled for posting, comments, reactions, and filtering.</p>
+        <p class="muted">This page needs JavaScript enabled for posting, comments, and filtering.</p>
       </div>
     </div>
   </noscript>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const hamb = document.querySelector('[data-hamb]');
+    const links = document.querySelector('[data-links]');
+    if (hamb && links) {
+      const setOpen = (open) => {
+        hamb.setAttribute('aria-expanded', String(open));
+        links.dataset.open = String(open);
+        document.body.classList.toggle('nav-open', open);
+      };
+      hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
+      links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+      document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
+    }
+  </script>
 </body>
 </html>

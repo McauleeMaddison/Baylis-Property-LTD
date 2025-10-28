@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Meta -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
@@ -9,27 +8,21 @@
 
   <title>Settings • Baylis Property LTD</title>
 
-  <!-- Root-relative assets -->
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
 
-  <!-- Default API base (override via body[data-api-base]) -->
   <script>window.API_BASE = "/api";</script>
 
-  <!-- Shared UI (nav, mobile menu, active link, etc.) -->
   <script defer src="server/app.js"></script>
-  <!-- Optional page script (if you have one); inline fallbacks handle everything otherwise -->
   <script defer src="js/settings.js"></script>
-
-  <!-- Prefetch likely next pages -->
   <link rel="prefetch" href="index.html" />
   <link rel="prefetch" href="profile.html" />
 </head>
 <body class="page page--settings"
       data-required-role="resident,landlord"
       data-api-base="/api">
-  <!-- Header / Navbar -->
-  <header class="site-header" id="mainHeader">
+
+      <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
         <a class="logo" href="/" aria-label="Baylis Property LTD Home">
@@ -56,47 +49,30 @@
       </div>
     </nav>
   </header>
-
-  <!-- Main -->
-  <main id="content" class="container" tabindex="-1" style="margin-top: 1rem;">
     <header class="header">
       <h1 class="h1">Settings</h1>
       <p class="muted">Tune your experience. Changes to appearance are previewed live.</p>
     </header>
-
-    <!-- Quick tabs (anchor style) -->
-    <nav class="dashboard-buttons" aria-label="Settings Sections" style="margin-top:.75rem;">
       <a class="btn-chip" href="#general">General</a>
       <a class="btn-chip" href="#appearance">Appearance</a>
       <a class="btn-chip" href="#notifications">Notifications</a>
       <a class="btn-chip" href="#security">Security & Privacy</a>
     </nav>
-
-    <!-- Live Preview Card -->
-    <section class="dashboard-card" aria-live="polite" aria-label="Theme preview" style="margin-top:1rem;">
       <div id="previewCard">
-        <h2 class="h3" id="previewTitle" style="margin-bottom:.4rem;">Preview: Baylis Card</h2>
         <p class="muted">Buttons and surfaces reflect your appearance choices below.</p>
-        <div style="display:flex; gap:.5rem; margin-top:.6rem;">
           <button class="btn" id="previewBtnPrimary">Primary</button>
           <button class="btn btn-ghost" id="previewBtnGhost">Ghost</button>
         </div>
       </div>
     </section>
 
-    <!-- Settings Form -->
-    <form id="settingsForm" class="settings-form" style="margin-top:1rem;" novalidate>
-      <!-- GENERAL -->
       <section id="general" class="dashboard-card">
         <h2 class="h3">General</h2>
         <p class="muted">Basic preferences for your account on this device.</p>
 
-        <label class="checkbox" style="margin-top:.6rem;">
-          <input type="checkbox" id="showTips" />
           <span>Show onboarding tips</span>
         </label>
 
-        <div class="grid-2" style="margin-top:.6rem;">
           <label class="field" for="defaultLanding">
             <span>Default landing page</span>
             <select id="defaultLanding">
@@ -118,17 +94,13 @@
         </div>
       </section>
 
-      <!-- APPEARANCE -->
       <section id="appearance" class="dashboard-card">
         <h2 class="h3">Appearance</h2>
         <p class="muted">Color, density, and theme preferences.</p>
 
-        <label class="checkbox" style="margin-top:.6rem;">
-          <input type="checkbox" id="darkModeSetting" />
           <span>Enable dark mode by default</span>
         </label>
 
-        <div class="grid-2" style="margin-top:.6rem;">
           <label class="field" for="accentColor">
             <span>Accent color</span>
             <input type="color" id="accentColor" value="#4a90e2" />
@@ -145,7 +117,6 @@
           </label>
         </div>
 
-        <div class="grid-2" style="margin-top:.6rem;">
           <label class="field" for="baseFontSize">
             <span>Base font size</span>
             <select id="baseFontSize">
@@ -163,12 +134,10 @@
         </div>
       </section>
 
-      <!-- NOTIFICATIONS -->
       <section id="notifications" class="dashboard-card">
         <h2 class="h3">Notifications</h2>
         <p class="muted">Stay in the loop about your properties and community.</p>
 
-        <div class="grid-2" style="margin-top:.6rem;">
           <label class="checkbox">
             <input type="checkbox" id="notifRequests" checked />
             <span>Request updates (cleaning & repair)</span>
@@ -190,24 +159,17 @@
           </label>
         </div>
       </section>
-
-      <!-- SECURITY & PRIVACY -->
       <section id="security" class="dashboard-card">
         <h2 class="h3">Security & Privacy</h2>
         <p class="muted">Manage your password and privacy options.</p>
 
-        <details style="margin-top:.6rem;">
           <summary><strong>Change password</strong></summary>
-          <div class="grid-2" style="margin-top:.6rem;">
             <input type="password" id="currentPassword" placeholder="Current password" autocomplete="current-password" />
             <input type="password" id="newPassword" placeholder="New password" autocomplete="new-password" />
           </div>
-          <input type="password" id="confirmNewPassword" placeholder="Confirm new password" style="margin-top:.6rem;" autocomplete="new-password" />
-          <button type="button" id="changePasswordBtn" class="btn" style="margin-top:.6rem;">Update password</button>
           <small class="muted">Requires backend endpoint; button is wired for JSON POST.</small>
         </details>
 
-        <div class="grid-2" style="margin-top:.8rem;">
           <label class="checkbox">
             <input type="checkbox" id="twoFA" />
             <span>Enable 2-Step Verification</span>
@@ -215,14 +177,10 @@
           <button type="button" id="signOutAllBtn" class="btn btn-ghost">Sign out of all devices</button>
         </div>
 
-        <div style="margin-top:.8rem;">
           <button type="button" id="exportDataBtn" class="btn btn-ghost">Export my data</button>
-          <button type="button" id="clearLocalBtn" class="btn" style="background:#ef4444; color:#fff;">Clear local data</button>
         </div>
       </section>
 
-      <!-- Form actions -->
-      <section class="dashboard-card" style="display:flex; gap:.6rem; align-items:center; justify-content:flex-end;">
         <button type="button" id="resetDefaults" class="btn btn-ghost">Reset to defaults</button>
         <button type="submit" class="btn">Save Settings</button>
       </section>
@@ -237,17 +195,14 @@
     </div>
   </footer>
 
-  <!-- Inline page logic: role gate, live preview, local persistence + backend sync -->
   <script>
     (function () {
       const $  = (s, c=document) => c.querySelector(s);
       const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
       const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
 
-      // Footer year
       const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
 
-      // -------- Role Gate (resident OR landlord) --------
       async function guard() {
         const allow = (document.body.getAttribute('data-required-role') || 'resident,landlord')
           .split(',').map(x => x.trim().toLowerCase());
@@ -258,14 +213,12 @@
           if (!user || (allow.length && !allow.includes(String(user.role || '').toLowerCase()))) {
             window.location.replace('/login'); return null;
           }
-          // Title personalization
           const name = user.profile?.displayName || user.email?.split('@')[0] || 'User';
           document.title = `Settings • ${name} | Baylis Property LTD`;
           return user;
         } catch { window.location.replace('/login'); return null; }
       }
 
-      // -------- Local settings storage (namespaced) --------
       const LS_KEY = 'appSettings';
       const defaults = {
         general:   { showTips: false, defaultLanding: '/settings', timeFormat: '24h' },
@@ -282,26 +235,20 @@
         localStorage.setItem(LS_KEY, JSON.stringify(obj));
       }
 
-      // -------- Apply appearance to document + preview --------
       function applyAppearance(s) {
-        // document-level tokens
         document.documentElement.style.setProperty('--accent', s.accent);
         document.documentElement.style.setProperty('--radius', s.radius + 'px');
         document.documentElement.style.setProperty('--base-font-size', (s.fontSize || 16) + 'px');
 
-        // density class
         document.documentElement.classList.remove('density-compact','density-comfortable','density-spacious');
         document.documentElement.classList.add('density-' + (s.density || 'comfortable'));
 
-        // dark mode
         document.body.classList.toggle('dark', !!s.darkMode);
 
-        // preview card emphasis (purely visual)
         const preview = $('#previewCard');
         if (preview) preview.style.borderRadius = s.radius + 'px';
       }
 
-      // -------- Hydrate form from settings --------
       function fillForm(s) {
         // General
         $('#showTips').checked = !!s.general.showTips;
@@ -322,7 +269,6 @@
         $('#twoFA').checked = !!s.security.twoFA;
       }
 
-      // -------- Live preview bindings --------
       function bindLivePreview(settings) {
         const ap = settings.appearance;
         const onChange = () => {
@@ -338,9 +284,7 @@
         onChange();
       }
 
-      // -------- Save to backend (non-blocking; local is source of truth for UI) --------
       async function syncSettingsToServer(settings, msgEl) {
-        // Try modern endpoint first; fall back to profile/prefs if that’s what you have
         const bodies = [
           { url: `${apiBase}/settings`,            body: settings },             // preferred
           { url: `${apiBase}/profile/prefs`,       body: settings.appearance },  // example fallback
@@ -360,7 +304,6 @@
         return false;
       }
 
-      // -------- Export helper --------
       function download(filename, text, type='application/json') {
         const blob = new Blob([text], { type });
         const url = URL.createObjectURL(blob);
@@ -369,15 +312,12 @@
         setTimeout(() => URL.revokeObjectURL(url), 400);
       }
 
-      // -------- Wire actions --------
       function bindActions(settings) {
         const form = $('#settingsForm');
         const msg  = $('#settingsMsg');
 
-        // Save
         form?.addEventListener('submit', async (e) => {
           e.preventDefault();
-          // collect
           settings.general.showTips     = $('#showTips').checked;
           settings.general.defaultLanding = $('#defaultLanding').value;
           settings.general.timeFormat   = $('#timeFormat').value;
@@ -401,7 +341,6 @@
           await syncSettingsToServer(settings, msg);
         });
 
-        // Reset to defaults
         $('#resetDefaults')?.addEventListener('click', () => {
           const next = JSON.parse(JSON.stringify(defaults));
           writeSettings(next);
@@ -410,7 +349,6 @@
           msg.textContent = 'Defaults restored (saved locally).';
         });
 
-        // Change password (expects /api/auth/change-password)
         $('#changePasswordBtn')?.addEventListener('click', async () => {
           const cur = $('#currentPassword')?.value || '';
           const npw = $('#newPassword')?.value || '';
@@ -428,7 +366,6 @@
           } catch { msg.textContent = 'Password update failed.'; }
         });
 
-        // Sign out of all sessions
         $('#signOutAllBtn')?.addEventListener('click', async () => {
           try {
             await fetch(`${apiBase}/auth/logout-all`, { method: 'POST', credentials: 'include' });
@@ -437,7 +374,6 @@
           window.location.replace('/login');
         });
 
-        // Export my data (fallback to local settings export)
         $('#exportDataBtn')?.addEventListener('click', async () => {
           try {
             const r = await fetch(`${apiBase}/profile/export`, { credentials: 'include' });
@@ -447,19 +383,15 @@
               return;
             }
           } catch {}
-          // fallback: export settings only
           const payload = { settings: readSettings() };
           download(`baylis-settings-${Date.now()}.json`, JSON.stringify(payload, null, 2));
         });
 
-        // Clear local data only
         $('#clearLocalBtn')?.addEventListener('click', () => {
           localStorage.removeItem(LS_KEY);
           msg.textContent = 'Local settings cleared.';
         });
       }
-
-      // -------- Boot --------
       (async () => {
         const user = await guard();
         if (!user) return;
@@ -471,16 +403,12 @@
       })();
     })();
   </script>
-
-  <!-- Page micro styles -->
   <style>
     .btn { --_accent: var(--accent, #4a90e2); }
     .density-compact .dashboard-card { padding: .6rem; }
     .density-comfortable .dashboard-card { padding: 1rem; }
     .density-spacious .dashboard-card { padding: 1.4rem; }
   </style>
-
-  <!-- Fallback: set document title from local name if available -->
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       const n = localStorage.getItem('username');

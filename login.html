@@ -1,159 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Meta -->
   <meta charset="utf-8" />
+  <title>Sign In • Baylis Property LTD</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
   <meta name="description" content="Sign in to Baylis Property LTD to manage properties, requests, and your community." />
-
-  <title>Sign In • Baylis Property LTD</title>
-
-  <!-- Root-relative assets so links work from any route -->
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- API base: default to /api; can be overridden via body[data-api-base] -->
-  <script>window.API_BASE = '/api';</script>
-
-  <!-- Prefetch likely next pages -->
-  <link rel="prefetch" href="index.html" />
-  <link rel="prefetch" href="landlord.html" />
-  <link rel="prefetch" href="resident.html" />
-
-  <!-- Global scripts: nav/dark toggle, etc. -->
-  <script defer src="server/app.js"></script>
-  <!-- Page logic: validation, lockout, OTP, remember-me (your implementation) -->
-  <script defer src="js/login.js"></script>
-
-  <style>
-    /* Minimal auth layout helpers (uses your CSS variables) */
-    .auth-wrap { min-height: calc(100dvh - 70px); display:grid; place-items:center; padding:1rem; }
-    .auth-card { width:100%; max-width: 520px; }
-    .brand-row { display:flex; gap:.6rem; align-items:center; justify-content:center; margin-bottom:.6rem; }
-    .brand-row .logo-icon { width:28px; height:28px; object-fit:contain; }
-    .auth-title { text-align:center; margin:.2rem 0 .4rem; }
-    .auth-sub { text-align:center; color:#6b7280; margin-bottom:.8rem; }
-    .actions-row { display:flex; justify-content:space-between; align-items:center; gap:.6rem; flex-wrap:wrap; }
-    .inline-btn { border:none; background:transparent; cursor:pointer; padding:0; font-size:.95rem; color:var(--accent); text-decoration:underline; }
-    .error, .success { margin-top:.5rem; font-size:.95rem; }
-    .error { color: var(--danger, #ef4444); }
-    .success { color: var(--success, #22c55e); }
-    .hidden { display:none !important; }
-    .is-invalid { border-color: var(--danger, #ef4444) !important; }
-    .hint { font-size:.85rem; color:#6b7280; }
-    .otp-grid { display:grid; gap:.6rem; grid-template-columns: 1fr; }
-    .role-row { display:flex; gap:.6rem; }
-    .role-row select { flex:1; }
-    .visually-hidden { position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
-    body.dark .auth-sub, body.dark .hint { color:#c9cdd4; }
-    #submitBtn[data-loading="1"] { opacity:.8; pointer-events:none; }
-  </style>
-
-  <noscript>
-    <meta http-equiv="refresh" content="0; url=/login-noscript.html">
-  </noscript>
+  <script>window.API_BASE = window.API_BASE || '/api';</script>
 </head>
-
 <body class="page page--login" data-api-base="/api">
-  <!-- Header / Navbar -->
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
-        <a class="logo" href="/" aria-label="Baylis Property LTD Home">
+        <a class="logo" href="index.html" aria-label="Baylis Property LTD Home">
           <img src="assets/logo.png" alt="" width="26" height="26" />
           <span>Baylis Property LTD</span>
         </a>
-
-        <button class="btn secondary hamb"
-                aria-expanded="false"
-                aria-controls="navLinks"
-                aria-label="Toggle menu"
-                data-hamb>☰</button>
-
-        <div class="nav-links" id="navLinks" data-links>
-          <a href="index.html"           data-test="nav-dashboard">Dashboard</a>
-          <a href="resident.html"   data-test="nav-resident">Resident</a>
-          <a href="landlord.html"   data-test="nav-landlord">Landlord</a>
-          <a href="community.html"  data-test="nav-community">Community</a>
-          <a href="profile.html"    data-test="nav-profile">Profile</a>
-          <a href="settings.html"   data-test="nav-settings">Settings</a>
-          <a href="login.html"      aria-current="page" data-test="nav-login">Login</a>
-          <a href="register.html"   data-test="nav-register">Register</a>
+        <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
+          <a href="index.html">Dashboard</a>
+          <a href="resident.html">Resident</a>
+          <a href="landlord.html">Landlord</a>
+          <a href="community.html">Community</a>
+          <a href="profile.html">Profile</a>
+          <a href="settings.html">Settings</a>
+          <a href="login.html" aria-current="page">Login</a>
+          <a href="register.html">Register</a>
         </div>
       </div>
     </nav>
   </header>
 
-  <!-- Main -->
-  <main id="content" class="container auth-wrap" tabindex="-1">
-    <section class="dashboard-card auth-card" aria-label="Sign in">
-      <div class="brand-row">
-        <img src="assets/logo.png" class="logo-icon" alt="" />
+  <main> id="content" class="container auth-wrap" tabindex="-1" style="min-height:calc(100dvh - 70px);display:grid;place-items:center;padding:1rem;">
+    <section> class="dashboard-card auth-card" style="width:100%;max-width:520px;">
+      <div> class="brand-row" style="display:flex;gap:.6rem;align-items:center;justify-content:center;margin-bottom:.6rem;">
+        <img src="assets/logo.png" alt="" width="28" height="28" />
         <strong>Baylis Property LTD</strong>
       </div>
 
-      <h1 class="auth-title">Welcome back</h1>
-      <p class="auth-sub">Sign in to manage properties, requests, and your community.</p>
+      <h1> class="auth-title" style="text-align:center;margin:.2rem 0 .4rem;">Welcome back</h1>
+      <p> class="auth-sub" style="text-align:center;color:#6b7280;margin-bottom:.8rem;">Sign in to manage properties, requests, and your community.</p>
 
-      <!-- LOGIN STEP -->
       <form id="loginForm" method="POST" action="/api/auth/login" novalidate>
         <label class="field" for="username">
           <span>Username</span>
-          <input id="username" name="username" type="text" placeholder="e.g. mac.baylis"
-                 autocomplete="username" inputmode="text" required />
+          <input id="username" name="username" type="text" placeholder="e.g. mac.baylis" autocomplete="username" required />
         </label>
 
-        <label class="field" for="password" style="margin-top:.5rem;">
-          <span>
-            Password
-            <small id="capsWarning" class="hint" aria-live="polite" style="display:none;">(Caps Lock is ON)</small>
-          </span>
-          <div style="display:flex; gap:.4rem;">
-            <input id="password" name="password" type="password" placeholder="••••••••"
-                   autocomplete="current-password" required style="flex:1;" />
-            <button id="showPasswordBtn" class="btn btn-ghost" type="button"
-                    aria-pressed="false" aria-controls="password">Show</button>
-          </div>
+        <label class="field" for="password">
+          <span>Password</span>
+          <input id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required />
         </label>
 
-        <div class="role-row" style="margin-top:.5rem;">
-          <label class="field" style="flex:1;">
+        <div> class="role-row" style="display:flex;gap:.6rem;margin:.6rem 0;">
+          <label> class="field" for="roleSelect" style="flex:1;">
             <span>Role</span>
             <select id="roleSelect" name="role" aria-label="Select role">
               <option value="resident">Resident</option>
               <option value="landlord">Landlord</option>
             </select>
           </label>
-
-          <label class="checkbox" style="align-self:flex-end;">
-            <input type="checkbox" id="rememberMe" name="remember" />
-            <span>Remember me</span>
+          <label> class="field" style="display:flex;align-items:flex-end;">
+            <span> style="display:block;margin-bottom:.35rem;">&nbsp;</span>
+            <label> style="display:flex;gap:.4rem;align-items:center;">
+              <input id="rememberMe" type="checkbox" />
+              <span>Remember me</span>
+            </label>
           </label>
         </div>
 
-        <div class="actions-row" style="margin-top:.6rem;">
-          <button id="forgotPassword" class="inline-btn" type="button">Forgot password?</button>
+        <div> class="actions-row" style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.4rem;">
+          <button id="forgotPassword" class="btn secondary" type="button">Forgot password?</button>
           <button id="submitBtn" type="submit" class="btn">Sign in</button>
         </div>
 
-        <div id="loginMsg" role="status" aria-live="polite" style="min-height:1.25rem; margin-top:.3rem;"></div>
-
-        <p class="hint" style="margin-top:.4rem;">
-          Tip: demo credentials — Resident: <code>resident123</code>, Landlord: <code>landlord123</code>.
-        </p>
+        <p> id="loginMsg" class="error" style="margin-top:.5rem;display:none;"></p>
+        <p> class="hint" style="font-size:.85rem;color:#6b7280;margin-top:.4rem;">Demo credentials: Resident <code>resident123</code>, Landlord <code>landlord123</code></p>
       </form>
 
-      <!-- OTP STEP (hidden by default; shown if backend requests 2FA) -->
-      <section id="otpSection" class="hidden" aria-label="Two-step verification" aria-live="polite">
-        <h2 class="h3">Verify it’s you</h2>
-        <p class="hint">Enter the 6-digit code we sent to your email/phone.</p>
-        <div class="otp-grid">
+      <section> id="otpSection" class="hidden" aria-label="Two-step verification" aria-live="polite" style="margin-top:1rem;">
+        <h2> class="h3">Verify it’s you</h2>
+        <p> class="hint" style="font-size:.85rem;color:#6b7280;">Enter the 6-digit code we sent to your email/phone.</p>
+        <div > class="otp-grid" style="display:grid;gap:.6rem;grid-template-columns:1fr;">
           <label for="otpCode" class="visually-hidden">One-time code</label>
-          <input id="otpCode" name="otp" type="text" inputmode="numeric" pattern="[0-9]*"
-                 maxlength="6" placeholder="000000" autocomplete="one-time-code" />
-          <div class="actions-row">
-            <button id="otpBackBtn"   type="button" class="btn btn-ghost">Back</button>
+          <input id="otpCode" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" autocomplete="one-time-code" />
+          <div> class="actions-row" style="display:flex;gap:.6rem;justify-content:flex-end;">
+            <button id="otpBackBtn" type="button" class="btn secondary">Back</button>
             <button id="otpSubmitBtn" type="button" class="btn">Verify</button>
           </div>
         </div>
@@ -169,174 +103,133 @@
     </div>
   </footer>
 
-  <!-- Page helpers -->
   <script>
-    (function () {
-      // Footer year
-      const y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-      // API base: prefer data-api-base, fallback to window.API_BASE
-      const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
+    const hamb = document.querySelector('[data-hamb]');
+    const links = document.querySelector('[data-links]');
+    if (hamb && links) {
+      const setOpen = (open) => {
+        hamb.setAttribute('aria-expanded', String(open));
+        links.dataset.open = String(open);
+        document.body.classList.toggle('nav-open', open);
+      };
+      hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
+      links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+      document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
+    }
 
-      // If already authenticated, redirect to user's default landing
-      (async () => {
-        try {
-          const r = await fetch(`${apiBase}/auth/me`, { credentials: 'include' });
-          if (r.ok) {
-            const { user } = await r.json();
-            const role = user?.role || localStorage.getItem('role') || 'resident';
-            const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
-            const dest = settings?.general?.defaultLanding || (role === 'landlord' ? '/landlord' : '/');
-            window.location.replace(dest);
-          }
-        } catch { /* ignore – user not logged in */ }
-      })();
-
-      // Show/hide password
-      const pwd = document.getElementById('password');
-      const toggleBtn = document.getElementById('showPasswordBtn');
-      if (toggleBtn && pwd) {
-        toggleBtn.addEventListener('click', () => {
-          const isText = pwd.type === 'text';
-          pwd.type = isText ? 'password' : 'text';
-          toggleBtn.setAttribute('aria-pressed', String(!isText));
-          toggleBtn.textContent = isText ? 'Show' : 'Hide';
-          pwd.focus();
-        });
-      }
-
-      // Caps Lock warning
-      const capsHint = document.getElementById('capsWarning');
-      if (pwd && capsHint) {
-        pwd.addEventListener('keyup', (e) => {
-          const on = e.getModifierState && e.getModifierState('CapsLock');
-          capsHint.style.display = on ? '' : 'none';
-        });
-        pwd.addEventListener('focusout', () => { capsHint.style.display = 'none'; });
-      }
-
-      // Optional: handle forgot-password route
-      const forgot = document.getElementById('forgotPassword');
-      if (forgot) {
-        forgot.addEventListener('click', () => {
-          window.location.href = '/reset-password';
-        });
-      }
-
-      // Progressive enhancement: if /js/login.js does not intercept submit,
-      // fallback to fetch POST -> /api/auth/login with JSON.
-      const form = document.getElementById('loginForm');
-      const submitBtn = document.getElementById('submitBtn');
-      const msg = document.getElementById('loginMsg');
-
-      function setLoading(on) {
-        if (!submitBtn) return;
-        submitBtn.dataset.loading = on ? '1' : '0';
-        submitBtn.textContent = on ? 'Signing in…' : 'Sign in';
-      }
-
-      if (form) {
-        form.addEventListener('submit', async (e) => {
-          // If login.js already called preventDefault earlier, skip this.
-          if (e.defaultPrevented) return;
-          e.preventDefault();
-
-          const username = document.getElementById('username')?.value.trim();
-          const password = pwd?.value || '';
-          const role = document.getElementById('roleSelect')?.value || 'resident';
-          const remember = document.getElementById('rememberMe')?.checked || false;
-
-          // Simple client validation
-          let invalid = false;
-          for (const id of ['username', 'password']) {
-            const el = document.getElementById(id);
-            if (el && !el.value.trim()) { el.classList.add('is-invalid'); invalid = true; }
-            else if (el) el.classList.remove('is-invalid');
-          }
-          if (invalid) {
-            if (msg) msg.textContent = 'Please enter username and password.';
-            return;
-          }
-
-          try {
-            setLoading(true);
-            const res = await fetch(`${apiBase}/auth/login`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ username, password, role, remember })
-            });
-
-            if (res.status === 401) {
-              if (msg) msg.textContent = 'Incorrect credentials.';
-              setLoading(false);
-              return;
-            }
-            if (res.status === 423) {
-              if (msg) msg.textContent = 'Account temporarily locked. Try again later.';
-              setLoading(false);
-              return;
-            }
-            if (res.status === 202) {
-              // Backend requests 2FA
-              document.getElementById('otpSection')?.classList.remove('hidden');
-              if (msg) msg.textContent = 'Check your email/phone for the code.';
-              setLoading(false);
-              return;
-            }
-            if (!res.ok) throw new Error('Login failed');
-
-            const { user } = await res.json();
-
-            // Persist light preferences
-            localStorage.setItem('role', user?.role || role);
-            const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
-            const dest = settings?.general?.defaultLanding || ((user?.role || role) === 'landlord' ? '/landlord' : '/');
-            window.location.replace(dest);
-          } catch (err) {
-            if (msg) msg.textContent = 'Unable to sign in. Please try again.';
-          } finally {
-            setLoading(false);
-          }
-        });
-      }
-
-      // OTP handlers (your backend should verify and establish session)
-      const otpBtn = document.getElementById('otpSubmitBtn');
-      const otpBack = document.getElementById('otpBackBtn');
-      if (otpBtn) {
-        otpBtn.addEventListener('click', async () => {
-          const code = (document.getElementById('otpCode')?.value || '').trim();
-          if (!/^\d{6}$/.test(code)) {
-            if (msg) msg.textContent = 'Enter the 6-digit code.';
-            return;
-          }
-          try {
-            setLoading(true);
-            const r = await fetch(`${apiBase}/auth/verify-otp`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ code })
-            });
-            if (!r.ok) throw new Error('OTP failed');
-            const { user } = await r.json();
-            localStorage.setItem('role', user?.role || 'resident');
-            window.location.replace(user?.role === 'landlord' ? '/landlord' : '/');
-          } catch {
-            if (msg) msg.textContent = 'Invalid or expired code.';
-          } finally {
-            setLoading(false);
-          }
-        });
-      }
-      if (otpBack) {
-        otpBack.addEventListener('click', () => {
-          document.getElementById('otpSection')?.classList.add('hidden');
-          if (msg) msg.textContent = '';
-        });
-      }
+    const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
+    (async () => {
+      try {
+        const r = await fetch(`${apiBase}/auth/me`, { credentials: 'include' });
+        if (r.ok) {
+          const { user } = await r.json();
+          const role = user?.role || localStorage.getItem('role') || 'resident';
+          const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
+          const dest = settings?.general?.defaultLanding || (role === 'landlord' ? 'landlord.html' : 'index.html');
+          window.location.replace(dest);
+        }
+      } catch {}
     })();
+
+    const pwd = document.getElementById('password');
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const msg = document.getElementById('loginMsg');
+
+    function setMsg(text, isError = true) {
+      if (!msg) return;
+      msg.textContent = text || '';
+      msg.style.display = text ? '' : 'none';
+      msg.className = isError ? 'error' : 'success';
+    }
+
+    function setLoading(on) {
+      if (!submitBtn) return;
+      submitBtn.dataset.loading = on ? '1' : '0';
+      submitBtn.textContent = on ? 'Signing in…' : 'Sign in';
+    }
+
+    document.getElementById('forgotPassword')?.addEventListener('click', () => {
+      window.location.href = 'reset-password.html';
+    });
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username')?.value.trim();
+        const password = pwd?.value || '';
+        const role = document.getElementById('roleSelect')?.value || 'resident';
+        const remember = document.getElementById('rememberMe')?.checked || false;
+
+        let invalid = false;
+        ['username', 'password'].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el?.value.trim()) { el?.classList.add('is-invalid'); invalid = true; }
+          else el?.classList.remove('is-invalid');
+        });
+        if (invalid) { setMsg('Please enter username and password.'); return; }
+
+        try {
+          setLoading(true);
+          const res = await fetch(`${apiBase}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ username, password, role, remember })
+          });
+
+          if (res.status === 401) { setMsg('Incorrect credentials.'); setLoading(false); return; }
+          if (res.status === 423) { setMsg('Account temporarily locked. Try again later.'); setLoading(false); return; }
+          if (res.status === 202) {
+            document.getElementById('otpSection')?.classList.remove('hidden');
+            setMsg('Check your email/phone for the code.', false);
+            setLoading(false);
+            return;
+          }
+          if (!res.ok) throw new Error('Login failed');
+
+          const { user } = await res.json();
+          localStorage.setItem('role', user?.role || role);
+          const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
+          const dest = settings?.general?.defaultLanding || ((user?.role || role) === 'landlord' ? 'landlord.html' : 'index.html');
+          window.location.replace(dest);
+        } catch {
+          setMsg('Unable to sign in. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      });
+    }
+
+    document.getElementById('otpSubmitBtn')?.addEventListener('click', async () => {
+      const code = (document.getElementById('otpCode')?.value || '').trim();
+      if (!/^\d{6}$/.test(code)) { setMsg('Enter the 6-digit code.'); return; }
+      try {
+        setLoading(true);
+        const r = await fetch(`${apiBase}/auth/verify-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ code })
+        });
+        if (!r.ok) throw new Error('OTP failed');
+        const { user } = await r.json();
+        localStorage.setItem('role', user?.role || 'resident');
+        window.location.replace(user?.role === 'landlord' ? 'landlord.html' : 'index.html');
+      } catch {
+        setMsg('Invalid or expired code.');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    document.getElementById('otpBackBtn')?.addEventListener('click', () => {
+      document.getElementById('otpSection')?.classList.add('hidden');
+      setMsg('');
+    });
   </script>
 </body>
 </html>
