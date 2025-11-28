@@ -9,8 +9,10 @@
 
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/script.js"></script>
 
   <script>window.API_BASE = "/api";</script>
+  <script defer src="js/script.js"></script>
   <script defer src="js/settings.js"></script>
   <link rel="prefetch" href="index.html" />
   <link rel="prefetch" href="profile.html" />
@@ -22,6 +24,7 @@
   </style>
 </head>
 <body class="page page--settings" data-required-role="resident,landlord" data-api-base="/api">
+  <a class="skip-link" href="#content">Skip to main content</a>
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -32,7 +35,7 @@
 
         <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
 
-        <div class="nav-links" id="navLinks" data-links>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
           <a href="index.html">Dashboard</a>
           <a href="resident.html">Resident</a>
           <a href="landlord.html">Landlord</a>
@@ -46,7 +49,7 @@
     </nav>
   </header>
 
-  <main id="content" class="container" tabindex="-1" style="margin-top:1rem;">
+  <main role="main" id="content" class="container" tabindex="-1" style="margin-top:1rem;">
     <header class="header">
       <h1 class="h1">Settings</h1>
       <p class="muted">Tune your experience. Changes to appearance are previewed live.</p>
@@ -80,7 +83,7 @@
 
           <label class="field" for="defaultLanding" style="margin-top:.6rem;">
             <span>Default landing page</span>
-            <select id="defaultLanding">
+            <select id="defaultLanding" aria-describedby="settingsMsg">
               <option value="index.html">Resident Dashboard</option>
               <option value="landlord.html">Landlord Dashboard</option>
               <option value="profile.html">Profile</option>
@@ -91,7 +94,7 @@
 
           <label class="field" for="timeFormat" style="margin-top:.6rem;">
             <span>Time format</span>
-            <select id="timeFormat">
+            <select id="timeFormat" aria-describedby="settingsMsg">
               <option value="24h" selected>24-hour</option>
               <option value="12h">12-hour (AM/PM)</option>
             </select>
@@ -103,19 +106,19 @@
           <p class="muted">Color, density, and theme preferences.</p>
 
           <label class="checkbox" style="margin-top:.75rem;">
-            <input type="checkbox" id="darkModeSetting" />
+            <input type="checkbox" id="darkModeSetting" aria-describedby="settingsMsg" />
             <span>Enable dark mode by default</span>
           </label>
 
           <label class="field" for="accentColor" style="margin-top:.6rem;">
             <span>Accent color</span>
-            <input type="color" id="accentColor" value="#4a90e2" />
+            <input type="color" id="accentColor" value="#4a90e2" aria-describedby="settingsMsg" />
             <small class="muted">Affects highlights and focus states.</small>
           </label>
 
           <label class="field" for="uiDensity" style="margin-top:.6rem;">
             <span>UI density</span>
-            <select id="uiDensity">
+            <select id="uiDensity" aria-describedby="settingsMsg">
               <option value="comfortable" selected>Comfortable</option>
               <option value="compact">Compact</option>
               <option value="spacious">Spacious</option>
@@ -124,12 +127,12 @@
 
           <label class="field" for="baseFontSize" style="margin-top:.6rem;">
             <span>Base font size (px)</span>
-            <input type="number" id="baseFontSize" value="16" min="12" max="22" />
+            <input type="number" id="baseFontSize" value="16" min="12" max="22" aria-describedby="settingsMsg" />
           </label>
 
           <label class="field" for="cornerRadius" style="margin-top:.6rem;">
             <span>Corner radius (px)</span>
-            <input type="number" id="cornerRadius" value="12" min="6" max="24" />
+            <input type="number" id="cornerRadius" value="12" min="6" max="24" aria-describedby="settingsMsg" />
           </label>
         </section>
 
@@ -138,14 +141,14 @@
           <p class="muted">Choose what we should ping you about.</p>
 
           <div style="display:grid; gap:.55rem; margin-top:.75rem;">
-            <label class="checkbox"><input type="checkbox" id="notifRequests" /> <span>Requests</span></label>
-            <label class="checkbox"><input type="checkbox" id="notifCommunity" /> <span>Community posts</span></label>
-            <label class="checkbox"><input type="checkbox" id="notifDigest" /> <span>Weekly digest</span></label>
+            <label class="checkbox"><input type="checkbox" id="notifRequests" aria-describedby="settingsMsg" /> <span>Requests</span></label>
+            <label class="checkbox"><input type="checkbox" id="notifCommunity" aria-describedby="settingsMsg" /> <span>Community posts</span></label>
+            <label class="checkbox"><input type="checkbox" id="notifDigest" aria-describedby="settingsMsg" /> <span>Weekly digest</span></label>
           </div>
 
           <label class="field" for="digestDay" style="margin-top:.6rem;">
             <span>Digest day</span>
-            <select id="digestDay">
+            <select id="digestDay" aria-describedby="settingsMsg">
               <option>Monday</option>
               <option>Tuesday</option>
               <option>Wednesday</option>
@@ -162,22 +165,22 @@
           <p class="muted">Passwords, devices, and your data.</p>
 
           <label class="checkbox" style="margin-top:.75rem;">
-            <input type="checkbox" id="twoFA" />
+            <input type="checkbox" id="twoFA" aria-describedby="settingsMsg" />
             <span>Enable 2FA (if supported)</span>
           </label>
 
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.6rem; margin-top:.75rem;">
             <label class="field" for="currentPassword">
               <span>Current password</span>
-              <input id="currentPassword" type="password" autocomplete="current-password" />
+              <input id="currentPassword" type="password" autocomplete="current-password" aria-describedby="settingsMsg" />
             </label>
             <label class="field" for="newPassword">
               <span>New password</span>
-              <input id="newPassword" type="password" autocomplete="new-password" />
+              <input id="newPassword" type="password" autocomplete="new-password" aria-describedby="settingsMsg" />
             </label>
             <label class="field" for="confirmNewPassword">
               <span>Confirm new password</span>
-              <input id="confirmNewPassword" type="password" autocomplete="new-password" />
+              <input id="confirmNewPassword" type="password" autocomplete="new-password" aria-describedby="settingsMsg" />
             </label>
           </div>
 
@@ -197,7 +200,7 @@
       <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
         <button type="submit" class="btn">Save settings</button>
       </div>
-      <div id="settingsMsg" class="form-msg" role="status" aria-live="polite"></div>
+      <div id="settingsMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
     </form>
   </main>
 

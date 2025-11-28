@@ -29,8 +29,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   /* ========== Refs ========== */
   const header        = $("#mainHeader");
-  const hamburgerBtn  = $("#hamburgerBtn");
-  const navLinks      = $("#navLinks");
+  const hamburgerBtn  = document.querySelector("[data-hamb]");
+  const navLinks      = document.querySelector("[data-links]");
   const darkToggle    = $("#darkModeToggle");
   const darkIcon      = $("#darkModeIcon");
   const avatarBtn     = $("#avatarBtn") || $(".avatar-toggle");
@@ -53,28 +53,32 @@ window.addEventListener("DOMContentLoaded", () => {
   })();
 
   /* ========== Mobile nav ========== */
-  on(hamburgerBtn, "click", () => {
-    const open = navLinks?.classList.toggle("show");
+  const setNavOpen = (open) => {
+    if (!navLinks || !hamburgerBtn) return;
+    navLinks.classList.toggle("show", !!open);
+    navLinks.dataset.open = String(!!open);
     hamburgerBtn.setAttribute("aria-expanded", String(!!open));
-  });
+    document.body.classList.toggle("nav-open", !!open);
+  };
+
+  on(hamburgerBtn, "click", () => setNavOpen(navLinks?.dataset.open !== "true"));
 
   // Auto-close nav on link click (mobile)
   on(navLinks, "click", (e) => {
     const link = e.target.closest("a");
     if (!link) return;
-    if (window.innerWidth < 768) {
-      navLinks.classList.remove("show");
-      hamburgerBtn?.setAttribute("aria-expanded", "false");
-    }
+    setNavOpen(false);
   });
 
   // Close nav with ESC
   on(document, "keydown", (e) => {
-    if (e.key === "Escape" && navLinks?.classList.contains("show")) {
-      navLinks.classList.remove("show");
-      hamburgerBtn?.setAttribute("aria-expanded", "false");
-      hamburgerBtn?.focus();
-    }
+    if (e.key === "Escape") setNavOpen(false);
+  });
+
+  // Close on outside click
+  on(document, "click", (e) => {
+    if (!navLinks || !hamburgerBtn) return;
+    if (!navLinks.contains(e.target) && !hamburgerBtn.contains(e.target)) setNavOpen(false);
   });
 
   /* ========== Dark mode (sync icon + persist + cross-tab sync) ========== */

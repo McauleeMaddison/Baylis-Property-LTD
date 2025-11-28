@@ -8,7 +8,9 @@
   <title>Profile • Baylis Property LTD</title>
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/script.js"></script>
   <script>window.API_BASE = "/api";</script>
+  <script defer src="js/script.js"></script>
   <link rel="prefetch" href="settings.html" />
   <link rel="prefetch" href="index.html" />
   <style>
@@ -20,6 +22,7 @@
   </style>
 </head>
 <body class="page page--profile" data-required-role="resident,landlord" data-api-base="/api">
+  <a class="skip-link" href="#content">Skip to main content</a>
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -28,7 +31,7 @@
           <span>Baylis Property LTD</span>
         </a>
         <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
-        <div class="nav-links" id="navLinks" data-links>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
           <a href="index.html" data-test="nav-dashboard">Dashboard</a>
           <a href="resident.html" data-test="nav-resident">Resident</a>
           <a href="landlord.html" data-test="nav-landlord">Landlord</a>
@@ -42,7 +45,7 @@
     </nav>
   </header>
 
-  <main id="content" class="container" tabindex="-1">
+  <main role="main" id="content" class="container" tabindex="-1">
     <header class="header">
       <p class="muted">Account</p>
       <h1 class="h1">Profile</h1>
@@ -90,21 +93,21 @@
             <div>
               <label class="field" for="aboutDisplayName">
                 <span>Display name</span>
-                <input id="aboutDisplayName" name="displayName" type="text" placeholder="e.g. Mac Baylis" />
+                <input id="aboutDisplayName" name="displayName" type="text" placeholder="e.g. Mac Baylis" aria-describedby="aboutMsg" />
               </label>
               <label class="field" for="aboutUnit">
                 <span>Unit / Property</span>
-                <input id="aboutUnit" name="unit" type="text" placeholder="e.g. Flat 3B" />
+                <input id="aboutUnit" name="unit" type="text" placeholder="e.g. Flat 3B" aria-describedby="aboutMsg" />
               </label>
             </div>
             <label class="field" for="aboutBio">
               <span>Bio</span>
-              <textarea id="aboutBio" name="bio" placeholder="Tell others a little about you…"></textarea>
+              <textarea id="aboutBio" name="bio" placeholder="Tell others a little about you…" aria-describedby="aboutMsg"></textarea>
             </label>
             <div>
               <button class="btn" type="submit">Save about</button>
             </div>
-            <div id="aboutMsg" class="form-msg" role="status" aria-live="polite"></div>
+            <div id="aboutMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
           </form>
         </section>
 
@@ -119,16 +122,16 @@
             <div>
               <label class="field" for="contactEmail">
                 <span>Email</span>
-                <input id="contactEmail" name="email" type="email" placeholder="your@email.com" />
+                <input id="contactEmail" name="email" type="email" placeholder="your@email.com" aria-describedby="contactMsg" />
               </label>
               <label class="field" for="contactPhone">
                 <span>Phone</span>
-                <input id="contactPhone" name="phone" type="tel" placeholder="+44 7123 456789" />
+                <input id="contactPhone" name="phone" type="tel" placeholder="+44 7123 456789" aria-describedby="contactMsg" />
               </label>
             </div>
             <label class="field" for="contactPref">
               <span>Preferred contact method</span>
-              <select id="contactPref" name="preferred">
+              <select id="contactPref" name="preferred" aria-describedby="contactMsg">
                 <option value="email">Email</option>
                 <option value="phone">Phone</option>
                 <option value="none">Do not contact</option>
@@ -137,7 +140,7 @@
             <div>
               <button class="btn" type="submit">Save contact</button>
             </div>
-            <div id="contactMsg" class="form-msg" role="status" aria-live="polite"></div>
+            <div id="contactMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
           </form>
         </section>
 
@@ -151,18 +154,18 @@
           <form id="prefsForm">
             <div>
               <label class="checkbox">
-                <input type="checkbox" id="prefEmailUpdates" name="emailUpdates" />
+                <input type="checkbox" id="prefEmailUpdates" name="emailUpdates" aria-describedby="prefsMsg" />
                 <span>Email updates</span>
               </label>
               <label class="checkbox">
-                <input type="checkbox" id="prefCommunityVisible" name="communityVisible" />
+                <input type="checkbox" id="prefCommunityVisible" name="communityVisible" aria-describedby="prefsMsg" />
                 <span>Show my name on community posts</span>
               </label>
             </div>
             <div>
               <button class="btn" type="submit">Save preferences</button>
             </div>
-            <div id="prefsMsg" class="form-msg" role="status" aria-live="polite"></div>
+            <div id="prefsMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
           </form>
         </section>
       </div>

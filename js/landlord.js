@@ -11,7 +11,7 @@
     let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
   };
 
-  const API_BASE = window.API_BASE || "http://localhost:4000/api";
+  const API_BASE = (document.body?.getAttribute("data-api-base") || window.API_BASE || "/api");
   const HAS_APP_STORE = !!(window.APP && APP.store && typeof APP.store.getList === "function");
 
   const STATUS = { open: "Open", in_progress: "In Progress", done: "Done" };

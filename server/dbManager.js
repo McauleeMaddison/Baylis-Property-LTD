@@ -1,21 +1,26 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 dotenv.config();
-import User from './models/User.js';
-import Repair from './models/Repair.js';
-import Cleaning from './models/Cleaning.js';
-import Message from './models/Message.js';
 
+import User from "./models/User.js";
+import Request from "./models/Request.js";
+import CommunityPost from "./models/CommunityPost.js";
+import Session from "./models/Session.js";
 
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/baylis";
 
-export const mongo = {
+export async function connectMongo() {
+  if (mongoose.connection.readyState === 1) return mongoose.connection;
+  await mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
+  return mongoose.connection;
+}
+
+export const models = {
   User,
-  Repair,
-  Cleaning,
-  Message,
-  mongoose
+  Request,
+  CommunityPost,
+  Session
 };

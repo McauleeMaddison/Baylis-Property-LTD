@@ -12,6 +12,7 @@
   <!-- Root-relative assets -->
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/script.js"></script>
 
   <!-- Default API base (override via body[data-api-base] if needed) -->
   <script>window.API_BASE = "/api";</script>
@@ -46,6 +47,7 @@
 </head>
 
 <body class="page page--register" data-api-base="/api">
+  <a class="skip-link" href="#content">Skip to main content</a>
   <!-- Header / Navbar -->
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
@@ -61,7 +63,7 @@
                 aria-label="Toggle menu"
                 data-hamb>☰</button>
 
-        <div class="nav-links" id="navLinks" data-links>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
           <a href="index.html">Dashboard</a>
           <a href="resident.html">Resident</a>
           <a href="landlord.html">Landlord</a>
@@ -76,7 +78,7 @@
   </header>
 
   <!-- Main -->
-  <main id="content" class="container auth-shell" tabindex="-1">
+  <main role="main" id="content" class="container auth-shell" tabindex="-1">
     <section class="auth-grid" aria-label="Create your account">
       <!-- Brand side -->
       <aside class="brand-panel">
@@ -98,17 +100,17 @@
         <form id="registerForm" method="POST" action="/api/auth/register" novalidate>
           <div class="field">
             <label for="regUsername">Username</label>
-            <input id="regUsername" name="username" type="text" placeholder="e.g. mac.baylis" minlength="3" required autocomplete="username" />
+            <input id="regUsername" name="username" type="text" placeholder="e.g. mac.baylis" minlength="3" required autocomplete="username" aria-describedby="registerMsg" />
           </div>
 
           <div class="field" style="margin-top:.6rem;">
             <label for="regEmail">Email</label>
-            <input id="regEmail" name="email" type="email" placeholder="you@example.com" required autocomplete="email" />
+            <input id="regEmail" name="email" type="email" placeholder="you@example.com" required autocomplete="email" aria-describedby="registerMsg" />
           </div>
 
           <div class="field" style="margin-top:.6rem;">
             <label for="regRole">Role</label>
-            <select id="regRole" name="role" required>
+            <select id="regRole" name="role" required aria-describedby="registerMsg">
               <option value="">Select role…</option>
               <option value="resident">Resident</option>
               <option value="landlord">Landlord</option>
@@ -118,7 +120,7 @@
           <div class="field" style="margin-top:.6rem;">
             <label for="regPassword">Password</label>
             <div class="input-group">
-              <input id="regPassword" name="password" type="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password" />
+              <input id="regPassword" name="password" type="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password" aria-describedby="registerMsg" />
               <button type="button" id="togglePw" class="icon-btn" aria-label="Show password" aria-pressed="false">Show</button>
             </div>
             <div class="pw-meter" aria-hidden="true">
@@ -129,11 +131,11 @@
 
           <div class="field" style="margin-top:.6rem;">
             <label for="regConfirm">Confirm Password</label>
-            <input id="regConfirm" type="password" placeholder="Repeat your password" required autocomplete="new-password" />
+            <input id="regConfirm" type="password" placeholder="Repeat your password" required autocomplete="new-password" aria-describedby="registerMsg" />
           </div>
 
           <label class="checkbox" style="margin:.8rem 0 1rem;">
-            <input type="checkbox" id="acceptTos" required />
+            <input type="checkbox" id="acceptTos" required aria-describedby="registerMsg" />
             <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> &amp; <a href="/privacy" target="_blank" rel="noopener">Privacy</a></span>
           </label>
 
@@ -142,7 +144,7 @@
             <span class="btn-spinner" aria-hidden="true"></span>
           </button>
 
-          <div id="registerMsg" class="form-msg" role="status" aria-live="polite"></div>
+          <div id="registerMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
 
           <p class="muted" style="margin-top:1rem;">
             Already have an account? <a href="/login">Sign in</a>
@@ -166,21 +168,6 @@
 
       // Footer year
       const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
-
-      // Mobile nav toggle
-      const hamb = document.querySelector('[data-hamb]');
-      const links = document.querySelector('[data-links]');
-      if (hamb && links) {
-        const setOpen = (open) => {
-          hamb.setAttribute('aria-expanded', String(open));
-          links.dataset.open = String(open);
-          document.body.classList.toggle('nav-open', open);
-        };
-        hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
-        links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
-        document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
-      }
 
       // Show/Hide password
       const pw = $('#regPassword'), toggle = $('#togglePw');

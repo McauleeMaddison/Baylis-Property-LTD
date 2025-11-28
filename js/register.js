@@ -1,6 +1,6 @@
 // js/register.js
 window.addEventListener('DOMContentLoaded', () => {
-  const API_BASE = window.API_BASE || 'http://localhost:4000/api';
+  const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
 
   const form       = document.getElementById('registerForm');
   const msg        = document.getElementById('registerMsg');
@@ -89,6 +89,9 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!msg) return;
     msg.textContent = text;
     msg.style.color = success ? '#28a745' : '#e74c3c';
+    msg.setAttribute('role','alert');
+    msg.setAttribute('aria-live', success ? 'polite' : 'assertive');
+    msg.focus?.();
   }
   function clearMsg() {
     if (msg) { msg.textContent = ''; msg.style.color = ''; }

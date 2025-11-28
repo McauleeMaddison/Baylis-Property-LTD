@@ -1,6 +1,6 @@
 // js/profile.js
 window.addEventListener('DOMContentLoaded', () => {
-  const API_BASE = window.API_BASE || 'http://localhost:4000/api';
+  const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
 
   // ---- Current user context
   const username = (localStorage.getItem('username') || 'User').trim();

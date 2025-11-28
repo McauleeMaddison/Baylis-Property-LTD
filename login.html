@@ -10,9 +10,11 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="prefetch" href="register.html" />
   <link rel="prefetch" href="index.html" />
+  <script defer src="js/script.js"></script>
   <script>window.API_BASE = window.API_BASE || '/api';</script>
 </head>
 <body class="page page--login auth-body" data-api-base="/api">
+  <a class="skip-link" href="#content">Skip to main content</a>
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -35,7 +37,7 @@
     </nav>
   </header>
 
-  <main class="auth-shell container" id="content" tabindex="-1">
+  <main role="main" class="auth-shell container" id="content" tabindex="-1">
     <section class="auth-grid" aria-label="Sign in">
       <aside class="brand-panel">
         <img src="assets/logo.png" alt="" class="brand-logo" />
@@ -63,7 +65,7 @@
           <div>
             <label class="field" for="username">
               <span>Username</span>
-              <input id="username" name="username" type="text" placeholder="e.g. mac.baylis" autocomplete="username" required />
+              <input id="username" name="username" type="text" placeholder="e.g. mac.baylis" autocomplete="username" required aria-describedby="loginMsg" />
             </label>
             <label class="field" for="roleSelect">
               <span>Role</span>
@@ -77,7 +79,7 @@
           <label>
             <span>Password <small> Caps lock is on </small></span>
             <div class="input-group">
-              <input id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required />
+              <input id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required aria-describedby="loginMsg" />
               <button type="button" id="showPasswordBtn" class="btn secondary" aria-pressed="false">Show</button>
             </div>
           </label>
@@ -124,20 +126,6 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    const hamb = document.querySelector('[data-hamb]');
-    const links = document.querySelector('[data-links]');
-    if (hamb && links) {
-      const setOpen = (open) => {
-        hamb.setAttribute('aria-expanded', String(open));
-        links.dataset.open = String(open);
-        document.body.classList.toggle('nav-open', open);
-      };
-      hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
-      links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
-      document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
-    }
   </script>
   <script defer src="js/login.js"></script>
 </body>

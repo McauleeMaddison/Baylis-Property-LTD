@@ -1,6 +1,6 @@
 // js/settings.js
 window.addEventListener('DOMContentLoaded', async () => {
-  const API_BASE = window.API_BASE || 'http://localhost:4000/api';
+  const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
   // ---- Elements
@@ -340,6 +340,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   function setMsg(text) {
     if (!msg) return;
     msg.textContent = text;
+    msg.setAttribute('role','alert');
+    msg.setAttribute('aria-live','assertive');
+    msg.focus?.();
   }
   function toast(t) {
     // Leverage global showToast from script.js if available

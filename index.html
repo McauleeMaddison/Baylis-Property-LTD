@@ -8,11 +8,13 @@
   <title>Dashboard • Baylis Property LTD</title>
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/script.js"></script>
   <link rel="prefetch" href="resident.html" />
   <link rel="prefetch" href="landlord.html" />
   
 </head>
 <body class="page page--dashboard">
+  <a class="skip-link" href="#content">Skip to main content</a>
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -35,7 +37,7 @@
     </nav>
   </header>
 
-  <main id="content" class="container" tabindex="-1">
+  <main role="main" id="content" class="container" tabindex="-1">
     <header class="header flow">
       <h1 class="h1">Resident Dashboard</h1>
       <p class="lead">Manage cleaning requests, repairs, and community updates — all in one place.</p>
@@ -145,75 +147,6 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    const hamb = document.querySelector('[data-hamb]');
-    const links = document.querySelector('[data-links]');
-    if (hamb && links) {
-      const setOpen = (open) => {
-        hamb.setAttribute('aria-expanded', String(open));
-        links.dataset.open = String(open);
-        document.body.classList.toggle('nav-open', open);
-      };
-      hamb.addEventListener('click', () => {
-        const isOpen = links.dataset.open === 'true';
-        setOpen(!isOpen);
-      });
-      links.addEventListener('click', (e) => {
-        const a = e.target.closest('a');
-        if (a) setOpen(false);
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') setOpen(false);
-      });
-      document.addEventListener('click', (e) => {
-        if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false);
-      });
-    }
-
-    document.querySelectorAll('.toggle-form-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.getAttribute('data-target');
-        const panel = document.getElementById(id);
-        const nowHidden = panel.classList.toggle('hidden');
-        const open = !nowHidden;
-        btn.setAttribute('aria-expanded', String(open));
-        const t = btn.textContent.includes('Open') ? btn.textContent.replace('Open','Close') : btn.textContent.replace('Close','Open');
-        btn.textContent = t;
-      });
-    });
-
-    const attachFormHandler = (formId, listId, shape) => {
-      const form = document.getElementById(formId);
-      const list = document.getElementById(listId);
-      if (!form || !list) return;
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const missing = [...form.querySelectorAll('[required]')].some(el => !el.value.trim());
-        if (missing) { alert('Please fill out all required fields.'); return; }
-        const data = {};
-        Object.keys(shape).forEach(k => {
-          const el = form.querySelector('#' + shape[k]);
-          data[k] = el ? el.value.trim() : '';
-        });
-        try {
-          const res = await fetch(form.action, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(data)
-          });
-          if (!res.ok) throw new Error('Request failed');
-        } catch (_) {}
-        const li = document.createElement('li');
-        li.textContent = Object.values(data).filter(Boolean).join(' • ');
-        list.prepend(li);
-        form.reset();
-      });
-    };
-
-    attachFormHandler('cleaningFormEl',  'cleaningSubmissions', { name: 'cleaningName', address: 'cleaningAddress', date: 'cleaningDate', type: 'cleaningType' });
-    attachFormHandler('repairFormEl',    'repairSubmissions',   { name: 'repairName',   address: 'repairAddress',   issue: 'repairIssue' });
-    attachFormHandler('communityFormEl', 'communityPosts',      { name: 'posterName',   message: 'posterMessage' });
   </script>
 </body>
 </html>

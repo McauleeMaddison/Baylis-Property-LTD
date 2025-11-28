@@ -108,6 +108,18 @@ select:focus-visible, textarea:focus-visible {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--space-3);
 }
+.skip-link {
+  position:absolute;
+  left:-999px;
+  top:0;
+  background: var(--secondary);
+  color: #fff;
+  padding:.6rem 1rem;
+  border-radius: var(--radius-2xs);
+  z-index: var(--z-header);
+  transition: left var(--t-fast);
+}
+.skip-link:focus { left: var(--space-4); }
 .site-header {
   position: fixed; inset: 0 0 auto 0; height: 70px;
   background: var(--bg-light);

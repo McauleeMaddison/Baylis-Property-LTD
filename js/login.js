@@ -2,7 +2,7 @@
 (() => {
   'use strict';
 
-  const API_BASE = window.API_BASE || 'http://localhost:4000/api';
+  const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
   const DEMO = {
     resident: { password: 'resident123', redirect: 'index.html' },
     landlord: { password: 'landlord123', redirect: 'landlord.html' }
@@ -365,6 +365,9 @@
     if (!msgDiv) return;
     msgDiv.textContent = text;
     msgDiv.className = ok ? 'success' : 'error';
+    msgDiv.setAttribute('role', 'alert');
+    msgDiv.setAttribute('aria-live', ok ? 'polite' : 'assertive');
+    msgDiv.focus?.();
   }
 
   function clearMsg() {

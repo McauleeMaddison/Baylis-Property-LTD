@@ -10,10 +10,12 @@
 
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/script.js"></script>
   <script>window.API_BASE = '/api';</script>
   <link rel="prefetch" href="resident.html" />
 </head>
 <body class="page page--landlord" data-required-role="landlord" data-api-base="/api">
+  <a class="skip-link" href="#content">Skip to main content</a>
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -24,7 +26,7 @@
 
         <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
 
-        <div class="nav-links" id="navLinks" data-links>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
           <a href="index.html" data-test="nav-dashboard">Dashboard</a>
           <a href="resident.html" data-test="nav-resident">Resident</a>
           <a href="landlord.html" aria-current="page" data-test="nav-landlord">Landlord</a>
@@ -38,7 +40,7 @@
     </nav>
   </header>
 
-  <main id="content" class="container" tabindex="-1" style="margin-top:1rem;">
+  <main role="main" id="content" class="container" tabindex="-1" style="margin-top:1rem;">
     <header class="header">
       <h1 class="h1">Landlord Dashboard</h1>
       <p class="muted">Welcome, <strong id="userWelcome">Landlord</strong>. Review requests, update statuses, and monitor community activity.</p>

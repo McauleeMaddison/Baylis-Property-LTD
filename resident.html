@@ -12,6 +12,7 @@
   <!-- Root-relative assets -->
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/script.js"></script>
 
   <!-- Default API base (overridable via body[data-api-base]) -->
   <script>window.API_BASE = "/api";</script>
@@ -22,6 +23,7 @@
 </head>
 
 <body class="page page--resident"
+  <a class="skip-link" href="#content">Skip to main content</a>
       data-required-role="resident"
       data-api-base="/api">
   <!-- Header / Navbar -->
@@ -39,7 +41,7 @@
                 aria-label="Toggle menu"
                 data-hamb>☰</button>
 
-        <div class="nav-links" id="navLinks" data-links>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
           <a href="index.html"           data-test="nav-dashboard">Dashboard</a>
           <a href="resident.html"   aria-current="page" data-test="nav-resident">Resident</a>
           <a href="landlord.html"   data-test="nav-landlord">Landlord</a>
@@ -54,7 +56,7 @@
   </header>
 
   <!-- Main -->
-  <main id="content" class="container" tabindex="-1" style="margin-top:1rem;">
+  <main role="main" id="content" class="container" tabindex="-1" style="margin-top:1rem;">
     <header class="header">
       <h1 class="h1">Resident Dashboard</h1>
       <p class="muted">Welcome, <strong id="userWelcome">Resident</strong> — create requests, track progress, and post to your community.</p>
@@ -91,11 +93,11 @@
         <form id="cleaningForm" action="/api/forms/cleaning" method="POST" class="grid-3" novalidate>
           <label class="field">
             <span>Date</span>
-            <input id="cleaningDate" name="date" type="date" required />
+            <input id="cleaningDate" name="date" type="date" required aria-describedby="cleaningMsg" />
           </label>
           <label class="field">
             <span>Type</span>
-            <select id="cleaningType" name="type" required>
+            <select id="cleaningType" name="type" required aria-describedby="cleaningMsg">
               <option value="">Select…</option>
               <option>Move Out Clean</option>
               <option>Deep Clean</option>
@@ -104,13 +106,13 @@
           </label>
           <label class="field">
             <span>Address</span>
-            <input id="cleaningAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required />
+            <input id="cleaningAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required aria-describedby="cleaningMsg" />
           </label>
           <div class="grid-span-3" style="display:flex; gap:.5rem; justify-content:flex-end;">
             <button class="btn btn-ghost" type="reset">Reset</button>
             <button class="btn" type="submit" id="cleaningSubmit">Schedule</button>
           </div>
-          <div id="cleaningMsg" class="form-msg grid-span-3" role="status" aria-live="polite"></div>
+          <div id="cleaningMsg" class="form-msg grid-span-3" role="alert" aria-live="assertive" tabindex="-1"></div>
         </form>
       </article>
 
@@ -119,17 +121,17 @@
         <form id="repairForm" action="/api/forms/repair" method="POST" class="grid-3" novalidate>
           <label class="field grid-span-3">
             <span>Issue</span>
-            <textarea id="repairIssue" name="issue" rows="3" placeholder="Describe the problem…" required></textarea>
+            <textarea id="repairIssue" name="issue" rows="3" placeholder="Describe the problem…" required aria-describedby="repairMsg"></textarea>
           </label>
           <label class="field">
             <span>Address</span>
-            <input id="repairAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required />
+            <input id="repairAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required aria-describedby="repairMsg" />
           </label>
           <div class="grid-span-3" style="display:flex; gap:.5rem; justify-content:flex-end;">
             <button class="btn btn-ghost" type="reset">Reset</button>
             <button class="btn" type="submit" id="repairSubmit">Submit</button>
           </div>
-          <div id="repairMsg" class="form-msg grid-span-3" role="status" aria-live="polite"></div>
+          <div id="repairMsg" class="form-msg grid-span-3" role="alert" aria-live="assertive" tabindex="-1"></div>
         </form>
       </article>
 
@@ -138,13 +140,13 @@
         <form id="communityForm" action="/api/forms/message" method="POST" class="grid-3" novalidate>
           <label class="field grid-span-3">
             <span>Message</span>
-            <textarea id="communityMessage" name="message" rows="3" placeholder="Share an update or ask a question…" required></textarea>
+            <textarea id="communityMessage" name="message" rows="3" placeholder="Share an update or ask a question…" required aria-describedby="communityMsg"></textarea>
           </label>
           <div class="grid-span-3" style="display:flex; gap:.5rem; justify-content:flex-end;">
             <button class="btn btn-ghost" type="reset">Reset</button>
             <button class="btn" type="submit" id="communitySubmit">Post</button>
           </div>
-          <div id="communityMsg" class="form-msg grid-span-3" role="status" aria-live="polite"></div>
+          <div id="communityMsg" class="form-msg grid-span-3" role="alert" aria-live="assertive" tabindex="-1"></div>
         </form>
       </article>
     </section>
@@ -181,21 +183,6 @@
 
       // Footer year
       const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
-
-      // Mobile nav toggle
-      const hamb = document.querySelector('[data-hamb]');
-      const links = document.querySelector('[data-links]');
-      if (hamb && links) {
-        const setOpen = (open) => {
-          hamb.setAttribute('aria-expanded', String(open));
-          links.dataset.open = String(open);
-          document.body.classList.toggle('nav-open', open);
-        };
-        hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
-        links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
-        document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
-      }
 
       // ---- Role gate (resident) & greeting ----
       async function getUserOrRedirect() {

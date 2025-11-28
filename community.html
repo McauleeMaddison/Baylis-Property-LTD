@@ -8,7 +8,7 @@
   <title>Community • Baylis Property LTD</title>
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
-  <script>window.API_BASE = window.API_BASE || 'http://localhost:4000/api';</script>
+  <script>window.API_BASE = window.API_BASE || '/api';</script>
   <script defer src="js/script.js"></script>
   <script defer src="js/community.js"></script>
   <style>
@@ -39,6 +39,7 @@
   </style>
 </head>
 <body class="page page--community" data-required-role="resident,landlord" data-api-base="/api">
+  <a class="skip-link" href="#content">Skip to main content</a>
   <header class="site-header">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -61,7 +62,7 @@
     </nav>
   </header>
 
-  <main id="content" class="container" tabindex="-1">
+  <main role="main" id="content" class="container" tabindex="-1">
     <section class="dashboard-card">
       <div class="community-hero">
         <div>
@@ -145,19 +146,6 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-    const hamb = document.querySelector('[data-hamb]');
-    const links = document.querySelector('[data-links]');
-    if (hamb && links) {
-      const setOpen = (open) => {
-        hamb.setAttribute('aria-expanded', String(open));
-        links.dataset.open = String(open);
-        document.body.classList.toggle('nav-open', open);
-      };
-      hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
-      links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
-      document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
-    }
   </script>
 </body>
 </html>
