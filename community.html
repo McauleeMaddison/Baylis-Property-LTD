@@ -17,7 +17,7 @@
     .filters-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
     .filters-row .checkbox{display:flex;gap:.35rem;align-items:center}
     .composer{display:grid;gap:.6rem}
-    .composer .grid-2{grid-template-columns:1fr}
+    .composer .grid-2{display:grid;grid-template-columns:1fr;gap:.6rem}
     .post-feed{list-style:none;padding:0;margin:0;display:grid;gap:.6rem}
     .post{border:1px solid var(--border,#e5e7eb);border-radius:12px;background:var(--bg,#fff);padding:.75rem .9rem;box-shadow:0 1px 2px rgba(0,0,0,.05)}
     .post__meta{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;font-size:.95rem}
@@ -32,13 +32,13 @@
     .comment{padding:.35rem .5rem;border-radius:8px;background:var(--bg-light,#f8fafc)}
     body.dark .post{background:#232334;border-color:#3b3b56}
     body.dark .comment{background:#2e2e45}
-    .pager{display:flex;gap:.5rem;align-items:center;justify-content:flex-end}
+    .pager{display:flex;gap:.5rem;align-items:center;justify-content:flex-end;flex-wrap:wrap}
     .muted{color:#6b7280}
     body.dark .muted{color:#c9cdd4}
     @media (min-width:860px){.composer .grid-2{display:grid;grid-template-columns:1fr 2fr;gap:.6rem}}
   </style>
 </head>
-<body class="page page--community" data-required-role="resident,landlord">
+<body class="page page--community" data-required-role="resident,landlord" data-api-base="/api">
   <header class="site-header">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -61,6 +61,7 @@
     </nav>
   </header>
 
+  <main id="content" class="container" tabindex="-1">
     <section class="dashboard-card">
       <div class="community-hero">
         <div>
@@ -88,6 +89,7 @@
         <label class="checkbox"><input id="filterPinnedOnly" type="checkbox" /> <span>Pinned only</span></label>
         <button id="exportCommunityBtn" class="btn secondary" type="button">Export</button>
         <button class="btn secondary" type="button" onclick="document.getElementById('importCommunityInput').click()">Import</button>
+        <input id="importCommunityInput" type="file" accept="application/json" class="sr-only" title="Import community data" />
       </div>
     </section>
 
@@ -103,6 +105,7 @@
             <textarea id="postMessage" placeholder="Write your message for the community…" required rows="4"></textarea>
           </label>
         </div>
+        <div>
           <button type="reset" class="btn secondary">Clear</button>
           <button type="submit" class="btn">Post</button>
         </div>
@@ -113,6 +116,7 @@
       <ul id="communityFeed" class="post-feed">
         <li class="muted">Loading…</li>
       </ul>
+      <div class="pager">
         <button id="pagePrev" class="btn secondary" type="button" aria-label="Previous page">Prev</button>
         <span id="pageInfo" class="muted" aria-live="polite">Page 1 / 1 · 0 posts</span>
         <button id="pageNext" class="btn secondary" type="button" aria-label="Next page">Next</button>

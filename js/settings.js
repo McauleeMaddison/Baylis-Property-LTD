@@ -1,6 +1,7 @@
 // js/settings.js
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   const API_BASE = window.API_BASE || 'http://localhost:4000/api';
+  const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
   // ---- Elements
   const form = $('#settingsForm');
@@ -66,6 +67,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Load from localStorage -> state
   let settings = loadSettings();
+
+  // ---- Auth guard (best-effort)
+  const authedUser = await guard();
+  if (!authedUser) return;
 
   // ---- Init UI from settings
   hydrateForm(settings);
@@ -201,7 +206,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // ===== Helpers =====
 
-  function $(sel) { return document.querySelector(sel); }
+  async function guard() {
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+      if (!res.ok) throw new Error('auth');
+      const { user } = await res.json();
+      if (!user) throw new Error('no-user');
+      const name = user.profile?.displayName || user.email?.split('@')[0] || 'User';
+      document.title = `Settings • ${name} | Baylis Property LTD`;
+      return user;
+    } catch {
+      window.location.replace('/login');
+      return null;
+    }
+  }
 
   function loadSettings() {
     // Try namespaced blob first

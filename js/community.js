@@ -5,6 +5,7 @@
   const nowISO = () => new Date().toISOString();
   const LS_KEY = "community_posts_v1";
   const PAGE_SIZE = 6;
+  const API_BASE = document.body?.getAttribute("data-api-base") || window.API_BASE || "/api";
 
   const state = {
     posts: [],
@@ -60,9 +61,9 @@
   }
 
   async function fetchRemote() {
-    if (!window.API_BASE) return null;
+    if (!API_BASE) return null;
     try {
-      const r = await fetch(`${window.API_BASE}/community`, { credentials: "include" });
+      const r = await fetch(`${API_BASE}/community`, { credentials: "include" });
       if (!r.ok) return null;
       const data = await r.json();
       if (!Array.isArray(data)) return null;

@@ -149,6 +149,11 @@ select:focus-visible, textarea:focus-visible {
 .muted { color: var(--text-muted); }
 .center { display:grid; place-items:center; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.grid-2 {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
 
 /* ========================
    3) Header / Navbar

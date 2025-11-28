@@ -10,46 +10,36 @@
 
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
-  <script>
-    window.API_BASE = '/api';
-  </script>
-  <script defer src="server/app.js"></script>
-
+  <script>window.API_BASE = '/api';</script>
   <link rel="prefetch" href="resident.html" />
 </head>
-<body class="page page--landlord"
-      data-required-role="landlord"
-      data-api-base="/api">
-
-      <header class="site-header" id="mainHeader">
+<body class="page page--landlord" data-required-role="landlord" data-api-base="/api">
+  <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
-        <a class="logo" href="/" aria-label="Baylis Property LTD Home">
+        <a class="logo" href="index.html" aria-label="Baylis Property LTD Home">
           <img src="assets/logo.png" alt="" width="26" height="26" />
           <span>Baylis Property LTD</span>
         </a>
 
-        <button class="btn secondary hamb"
-                aria-expanded="false"
-                aria-controls="navLinks"
-                aria-label="Toggle menu"
-                data-hamb>☰</button>
+        <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
 
         <div class="nav-links" id="navLinks" data-links>
-          <a href="index.html"           data-test="nav-dashboard">Dashboard</a>
-          <a href="resident.html"   data-test="nav-resident">Resident</a>
-          <a href="landlord.html"   data-test="nav-landlord">Landlord</a>
-          <a href="community.html"  data-test="nav-community">Community</a>
-          <a href="profile.html"    data-test="nav-profile">Profile</a>
-          <a href="settings.html"   data-test="nav-settings">Settings</a>
-          <a href="login.html"      data-test="nav-login">Login</a>
-          <a href="register.html"   data-test="nav-register">Register</a>
+          <a href="index.html" data-test="nav-dashboard">Dashboard</a>
+          <a href="resident.html" data-test="nav-resident">Resident</a>
+          <a href="landlord.html" aria-current="page" data-test="nav-landlord">Landlord</a>
+          <a href="community.html" data-test="nav-community">Community</a>
+          <a href="profile.html" data-test="nav-profile">Profile</a>
+          <a href="settings.html" data-test="nav-settings">Settings</a>
+          <a href="login.html" data-test="nav-login">Login</a>
+          <a href="register.html" data-test="nav-register">Register</a>
         </div>
       </div>
     </nav>
   </header>
 
-  <main id="content" class="container" tabindex="-1">
+  <main id="content" class="container" tabindex="-1" style="margin-top:1rem;">
+    <header class="header">
       <h1 class="h1">Landlord Dashboard</h1>
       <p class="muted">Welcome, <strong id="userWelcome">Landlord</strong>. Review requests, update statuses, and monitor community activity.</p>
     </header>
@@ -80,31 +70,34 @@
       </article>
     </section>
 
-    <section class="dashboard-card" aria-label="Tools">
-          <label for="reqSearch" class="visually-hidden">Search requests</label>
-          <input id="reqSearch" type="search" placeholder="Search requests by name, issue or type…" inputmode="search" />
-
-          <label for="filterType" class="visually-hidden">Filter by type</label>
+    <section class="dashboard-card" aria-label="Tools" style="display:grid; gap:.75rem;">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:.6rem; align-items:end;">
+        <label for="reqSearch" class="field">
+          <span>Search requests</span>
+          <input id="reqSearch" type="search" placeholder="Search by name, issue or type…" inputmode="search" />
+        </label>
+        <label for="filterType" class="field">
+          <span>Filter by type</span>
           <select id="filterType" title="Filter by type">
             <option value="all" selected>All types</option>
             <option value="cleaning">Cleaning</option>
             <option value="repair">Repair</option>
           </select>
-
-          <label for="filterStatus" class="visually-hidden">Filter by status</label>
+        </label>
+        <label for="filterStatus" class="field">
+          <span>Filter by status</span>
           <select id="filterStatus" title="Filter by status">
             <option value="all" selected>All status</option>
             <option value="open">Open</option>
             <option value="in_progress">In Progress</option>
             <option value="done">Done</option>
           </select>
-        </div>
-
-          <button type="button" id="btnRefresh" class="btn btn-ghost">Refresh</button>
-          <button type="button" id="btnExport" class="btn btn-ghost">Export CSV</button>
-        </div>
+        </label>
       </div>
-      </small>
+      <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+        <button type="button" id="btnRefresh" class="btn btn-ghost">Refresh</button>
+        <button type="button" id="btnExport" class="btn btn-ghost">Export CSV</button>
+      </div>
     </section>
 
     <section class="dashboard-cards" aria-label="Requests">
@@ -123,6 +116,7 @@
       </article>
     </section>
 
+    <section class="dashboard-card" aria-label="Community posts">
       <h3>Community Posts</h3>
       <ul id="allCommunityPosts" class="post-feed" aria-live="polite">
         <li class="muted">Loading…</li>
@@ -146,6 +140,20 @@
       const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
 
       $('#year').textContent = new Date().getFullYear();
+
+      const hamb = document.querySelector('[data-hamb]');
+      const links = document.querySelector('[data-links]');
+      if (hamb && links) {
+        const setOpen = (open) => {
+          hamb.setAttribute('aria-expanded', String(open));
+          links.dataset.open = String(open);
+          document.body.classList.toggle('nav-open', open);
+        };
+        hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
+        links.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+        document.addEventListener('click', (e) => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
+      }
 
       const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
 
@@ -258,7 +266,6 @@
 
   <style>
     .metric { font-size: 1.8rem; font-weight: 700; }
-    .visually-hidden { position: absolute !important; height: 1px; width: 1px; overflow: hidden; clip: rect(1px,1px,1px,1px); white-space: nowrap; }
   </style>
 </body>
 </html>

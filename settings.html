@@ -5,36 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
   <meta name="description" content="Settings for Baylis Property LTD — appearance, notifications, privacy." />
-
   <title>Settings • Baylis Property LTD</title>
 
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
 
   <script>window.API_BASE = "/api";</script>
-
-  <script defer src="server/app.js"></script>
   <script defer src="js/settings.js"></script>
   <link rel="prefetch" href="index.html" />
   <link rel="prefetch" href="profile.html" />
-</head>
-<body class="page page--settings"
-      data-required-role="resident,landlord"
-      data-api-base="/api">
 
-      <header class="site-header" id="mainHeader">
+  <style>
+    .settings-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+    .chip-row { display:flex; gap:.5rem; flex-wrap:wrap; margin: .75rem 0 1rem; }
+    .chip-row .btn-chip { border:1px solid var(--border); border-radius: var(--radius-full); padding:.4rem .75rem; background:transparent; }
+  </style>
+</head>
+<body class="page page--settings" data-required-role="resident,landlord" data-api-base="/api">
+  <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
-        <a class="logo" href="/" aria-label="Baylis Property LTD Home">
+        <a class="logo" href="index.html" aria-label="Baylis Property LTD Home">
           <img src="assets/logo.png" alt="" width="26" height="26" />
           <span>Baylis Property LTD</span>
         </a>
 
-        <button class="btn secondary hamb"
-                aria-expanded="false"
-                aria-controls="navLinks"
-                aria-label="Toggle menu"
-                data-hamb>☰</button>
+        <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
 
         <div class="nav-links" id="navLinks" data-links>
           <a href="index.html">Dashboard</a>
@@ -49,65 +45,75 @@
       </div>
     </nav>
   </header>
+
+  <main id="content" class="container" tabindex="-1" style="margin-top:1rem;">
     <header class="header">
       <h1 class="h1">Settings</h1>
       <p class="muted">Tune your experience. Changes to appearance are previewed live.</p>
     </header>
+
+    <div class="chip-row">
       <a class="btn-chip" href="#general">General</a>
       <a class="btn-chip" href="#appearance">Appearance</a>
       <a class="btn-chip" href="#notifications">Notifications</a>
-      <a class="btn-chip" href="#security">Security & Privacy</a>
-    </nav>
-      <div id="previewCard">
-        <p class="muted">Buttons and surfaces reflect your appearance choices below.</p>
-          <button class="btn" id="previewBtnPrimary">Primary</button>
-          <button class="btn btn-ghost" id="previewBtnGhost">Ghost</button>
-        </div>
+      <a class="btn-chip" href="#security">Security &amp; Privacy</a>
+    </div>
+
+    <section class="dashboard-card" id="previewCard">
+      <p class="muted">Buttons and surfaces reflect your appearance choices below.</p>
+      <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.4rem;">
+        <button class="btn" id="previewBtnPrimary">Primary</button>
+        <button class="btn btn-ghost" id="previewBtnGhost">Ghost</button>
       </div>
     </section>
 
-      <section id="general" class="dashboard-card">
-        <h2 class="h3">General</h2>
-        <p class="muted">Basic preferences for your account on this device.</p>
+    <form id="settingsForm">
+      <div class="settings-grid">
+        <section id="general" class="dashboard-card">
+          <h2 class="h3">General</h2>
+          <p class="muted">Basic preferences for your account on this device.</p>
 
-          <span>Show onboarding tips</span>
-        </label>
+          <label class="checkbox" style="margin-top:.75rem;">
+            <input type="checkbox" id="showTips" />
+            <span>Show onboarding tips</span>
+          </label>
 
-          <label class="field" for="defaultLanding">
+          <label class="field" for="defaultLanding" style="margin-top:.6rem;">
             <span>Default landing page</span>
             <select id="defaultLanding">
-              <option value="/">Resident Dashboard</option>
-              <option value="/landlord">Landlord Dashboard</option>
-              <option value="/profile">Profile</option>
-              <option value="/settings" selected>Settings</option>
+              <option value="index.html">Resident Dashboard</option>
+              <option value="landlord.html">Landlord Dashboard</option>
+              <option value="profile.html">Profile</option>
+              <option value="settings.html" selected>Settings</option>
             </select>
             <small class="muted">Used after you sign in.</small>
           </label>
 
-          <label class="field" for="timeFormat">
+          <label class="field" for="timeFormat" style="margin-top:.6rem;">
             <span>Time format</span>
             <select id="timeFormat">
               <option value="24h" selected>24-hour</option>
               <option value="12h">12-hour (AM/PM)</option>
             </select>
           </label>
-        </div>
-      </section>
+        </section>
 
-      <section id="appearance" class="dashboard-card">
-        <h2 class="h3">Appearance</h2>
-        <p class="muted">Color, density, and theme preferences.</p>
+        <section id="appearance" class="dashboard-card">
+          <h2 class="h3">Appearance</h2>
+          <p class="muted">Color, density, and theme preferences.</p>
 
-          <span>Enable dark mode by default</span>
-        </label>
+          <label class="checkbox" style="margin-top:.75rem;">
+            <input type="checkbox" id="darkModeSetting" />
+            <span>Enable dark mode by default</span>
+          </label>
 
-          <label class="field" for="accentColor">
+          <label class="field" for="accentColor" style="margin-top:.6rem;">
             <span>Accent color</span>
             <input type="color" id="accentColor" value="#4a90e2" />
             <small class="muted">Affects highlights and focus states.</small>
           </label>
 
-          <label class="field" for="uiDensity">
+          <label class="field" for="uiDensity" style="margin-top:.6rem;">
             <span>UI density</span>
             <select id="uiDensity">
               <option value="comfortable" selected>Comfortable</option>
@@ -115,76 +121,82 @@
               <option value="spacious">Spacious</option>
             </select>
           </label>
-        </div>
 
-          <label class="field" for="baseFontSize">
-            <span>Base font size</span>
-            <select id="baseFontSize">
-              <option value="14">14px</option>
-              <option value="16" selected>16px</option>
-              <option value="18">18px</option>
-            </select>
+          <label class="field" for="baseFontSize" style="margin-top:.6rem;">
+            <span>Base font size (px)</span>
+            <input type="number" id="baseFontSize" value="16" min="12" max="22" />
           </label>
 
-          <label class="field" for="cornerRadius">
-            <span>Corner radius</span>
-            <input type="range" id="cornerRadius" min="6" max="18" value="12" />
-            <small class="muted">Controls rounded corners on components.</small>
+          <label class="field" for="cornerRadius" style="margin-top:.6rem;">
+            <span>Corner radius (px)</span>
+            <input type="number" id="cornerRadius" value="12" min="6" max="24" />
           </label>
-        </div>
-      </section>
+        </section>
 
-      <section id="notifications" class="dashboard-card">
-        <h2 class="h3">Notifications</h2>
-        <p class="muted">Stay in the loop about your properties and community.</p>
+        <section id="notifications" class="dashboard-card">
+          <h2 class="h3">Notifications</h2>
+          <p class="muted">Choose what we should ping you about.</p>
 
-          <label class="checkbox">
-            <input type="checkbox" id="notifRequests" checked />
-            <span>Request updates (cleaning & repair)</span>
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" id="notifCommunity" />
-            <span>Community post replies</span>
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" id="notifDigest" />
-            <span>Weekly activity digest</span>
-          </label>
-          <label class="field" for="digestDay">
+          <div style="display:grid; gap:.55rem; margin-top:.75rem;">
+            <label class="checkbox"><input type="checkbox" id="notifRequests" /> <span>Requests</span></label>
+            <label class="checkbox"><input type="checkbox" id="notifCommunity" /> <span>Community posts</span></label>
+            <label class="checkbox"><input type="checkbox" id="notifDigest" /> <span>Weekly digest</span></label>
+          </div>
+
+          <label class="field" for="digestDay" style="margin-top:.6rem;">
             <span>Digest day</span>
             <select id="digestDay">
-              <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-              <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+              <option>Monday</option>
+              <option>Tuesday</option>
+              <option>Wednesday</option>
+              <option>Thursday</option>
+              <option>Friday</option>
+              <option>Saturday</option>
+              <option>Sunday</option>
             </select>
           </label>
-        </div>
-      </section>
-      <section id="security" class="dashboard-card">
-        <h2 class="h3">Security & Privacy</h2>
-        <p class="muted">Manage your password and privacy options.</p>
+        </section>
 
-          <summary><strong>Change password</strong></summary>
-            <input type="password" id="currentPassword" placeholder="Current password" autocomplete="current-password" />
-            <input type="password" id="newPassword" placeholder="New password" autocomplete="new-password" />
-          </div>
-          <small class="muted">Requires backend endpoint; button is wired for JSON POST.</small>
-        </details>
+        <section id="security" class="dashboard-card">
+          <h2 class="h3">Security &amp; Privacy</h2>
+          <p class="muted">Passwords, devices, and your data.</p>
 
-          <label class="checkbox">
+          <label class="checkbox" style="margin-top:.75rem;">
             <input type="checkbox" id="twoFA" />
-            <span>Enable 2-Step Verification</span>
+            <span>Enable 2FA (if supported)</span>
           </label>
-          <button type="button" id="signOutAllBtn" class="btn btn-ghost">Sign out of all devices</button>
-        </div>
 
-          <button type="button" id="exportDataBtn" class="btn btn-ghost">Export my data</button>
-        </div>
-      </section>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.6rem; margin-top:.75rem;">
+            <label class="field" for="currentPassword">
+              <span>Current password</span>
+              <input id="currentPassword" type="password" autocomplete="current-password" />
+            </label>
+            <label class="field" for="newPassword">
+              <span>New password</span>
+              <input id="newPassword" type="password" autocomplete="new-password" />
+            </label>
+            <label class="field" for="confirmNewPassword">
+              <span>Confirm new password</span>
+              <input id="confirmNewPassword" type="password" autocomplete="new-password" />
+            </label>
+          </div>
 
-        <button type="button" id="resetDefaults" class="btn btn-ghost">Reset to defaults</button>
-        <button type="submit" class="btn">Save Settings</button>
-      </section>
+          <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem;">
+            <button type="button" class="btn" id="changePasswordBtn">Change password</button>
+            <button type="button" class="btn btn-ghost" id="signOutAllBtn">Sign out of all devices</button>
+          </div>
 
+          <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem;">
+            <button type="button" class="btn secondary" id="exportDataBtn">Export my data</button>
+            <button type="button" class="btn secondary" id="clearLocalBtn">Clear local data</button>
+            <button type="button" class="btn btn-ghost" id="resetDefaults">Reset defaults</button>
+          </div>
+        </section>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
+        <button type="submit" class="btn">Save settings</button>
+      </div>
       <div id="settingsMsg" class="form-msg" role="status" aria-live="polite"></div>
     </form>
   </main>
@@ -192,215 +204,29 @@
   <footer class="site-footer">
     <div class="container">
       <small>&copy; <span id="year"></span> Baylis Property LTD</small>
+      <span class="dot">&middot;</span>
+      <a href="community.html">Community</a>
+      <span class="dot">&middot;</span>
+      <a href="settings.html" aria-current="page">Settings</a>
     </div>
   </footer>
 
   <script>
-    (function () {
-      const $  = (s, c=document) => c.querySelector(s);
-      const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
-      const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
-
-      const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
-
-      async function guard() {
-        const allow = (document.body.getAttribute('data-required-role') || 'resident,landlord')
-          .split(',').map(x => x.trim().toLowerCase());
-        try {
-          const r = await fetch(`${apiBase}/auth/me`, { credentials: 'include' });
-          if (!r.ok) throw 0;
-          const { user } = await r.json();
-          if (!user || (allow.length && !allow.includes(String(user.role || '').toLowerCase()))) {
-            window.location.replace('/login'); return null;
-          }
-          const name = user.profile?.displayName || user.email?.split('@')[0] || 'User';
-          document.title = `Settings • ${name} | Baylis Property LTD`;
-          return user;
-        } catch { window.location.replace('/login'); return null; }
-      }
-
-      const LS_KEY = 'appSettings';
-      const defaults = {
-        general:   { showTips: false, defaultLanding: '/settings', timeFormat: '24h' },
-        appearance:{ darkMode: false, accent: '#4a90e2', density: 'comfortable', fontSize: 16, radius: 12 },
-        notify:    { requests: true, community: false, digest: false, digestDay: 'Monday' },
-        security:  { twoFA: false }
-      };
-
-      function readSettings() {
-        try { return Object.assign({}, defaults, JSON.parse(localStorage.getItem(LS_KEY) || '{}')); }
-        catch { return JSON.parse(JSON.stringify(defaults)); }
-      }
-      function writeSettings(obj) {
-        localStorage.setItem(LS_KEY, JSON.stringify(obj));
-      }
-
-      function applyAppearance(s) {
-        document.documentElement.style.setProperty('--accent', s.accent);
-        document.documentElement.style.setProperty('--radius', s.radius + 'px');
-        document.documentElement.style.setProperty('--base-font-size', (s.fontSize || 16) + 'px');
-
-        document.documentElement.classList.remove('density-compact','density-comfortable','density-spacious');
-        document.documentElement.classList.add('density-' + (s.density || 'comfortable'));
-
-        document.body.classList.toggle('dark', !!s.darkMode);
-
-        const preview = $('#previewCard');
-        if (preview) preview.style.borderRadius = s.radius + 'px';
-      }
-
-      function fillForm(s) {
-        // General
-        $('#showTips').checked = !!s.general.showTips;
-        $('#defaultLanding').value = s.general.defaultLanding || '/settings';
-        $('#timeFormat').value = s.general.timeFormat || '24h';
-        // Appearance
-        $('#darkModeSetting').checked = !!s.appearance.darkMode;
-        $('#accentColor').value = s.appearance.accent || '#4a90e2';
-        $('#uiDensity').value = s.appearance.density || 'comfortable';
-        $('#baseFontSize').value = String(s.appearance.fontSize || 16);
-        $('#cornerRadius').value = String(s.appearance.radius || 12);
-        // Notifications
-        $('#notifRequests').checked = !!s.notify.requests;
-        $('#notifCommunity').checked = !!s.notify.community;
-        $('#notifDigest').checked = !!s.notify.digest;
-        $('#digestDay').value = s.notify.digestDay || 'Monday';
-        // Security
-        $('#twoFA').checked = !!s.security.twoFA;
-      }
-
-      function bindLivePreview(settings) {
-        const ap = settings.appearance;
-        const onChange = () => {
-          ap.darkMode = $('#darkModeSetting').checked;
-          ap.accent   = $('#accentColor').value;
-          ap.density  = $('#uiDensity').value;
-          ap.fontSize = parseInt($('#baseFontSize').value, 10) || 16;
-          ap.radius   = parseInt($('#cornerRadius').value, 10) || 12;
-          applyAppearance(ap);
+    (function() {
+      const y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
+      const hamb = document.querySelector('[data-hamb]');
+      const links = document.querySelector('[data-links]');
+      if (hamb && links) {
+        const setOpen = (open) => {
+          hamb.setAttribute('aria-expanded', String(open));
+          links.dataset.open = String(open);
+          document.body.classList.toggle('nav-open', open);
         };
-        ['#darkModeSetting','#accentColor','#uiDensity','#baseFontSize','#cornerRadius']
-          .forEach(sel => $(sel)?.addEventListener('input', onChange));
-        onChange();
+        hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
+        links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+        document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
       }
-
-      async function syncSettingsToServer(settings, msgEl) {
-        const bodies = [
-          { url: `${apiBase}/settings`,            body: settings },             // preferred
-          { url: `${apiBase}/profile/prefs`,       body: settings.appearance },  // example fallback
-        ];
-        for (const { url, body } of bodies) {
-          try {
-            const r = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify(body)
-            });
-            if (r.ok) { msgEl && (msgEl.textContent = 'Settings saved.'); return true; }
-          } catch {}
-        }
-        msgEl && (msgEl.textContent = 'Saved locally. Server sync unavailable.');
-        return false;
-      }
-
-      function download(filename, text, type='application/json') {
-        const blob = new Blob([text], { type });
-        const url = URL.createObjectURL(blob);
-        const a = Object.assign(document.createElement('a'), { href: url, download: filename });
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 400);
-      }
-
-      function bindActions(settings) {
-        const form = $('#settingsForm');
-        const msg  = $('#settingsMsg');
-
-        form?.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          settings.general.showTips     = $('#showTips').checked;
-          settings.general.defaultLanding = $('#defaultLanding').value;
-          settings.general.timeFormat   = $('#timeFormat').value;
-
-          settings.appearance.darkMode  = $('#darkModeSetting').checked;
-          settings.appearance.accent    = $('#accentColor').value;
-          settings.appearance.density   = $('#uiDensity').value;
-          settings.appearance.fontSize  = parseInt($('#baseFontSize').value, 10) || 16;
-          settings.appearance.radius    = parseInt($('#cornerRadius').value, 10) || 12;
-
-          settings.notify.requests      = $('#notifRequests').checked;
-          settings.notify.community     = $('#notifCommunity').checked;
-          settings.notify.digest        = $('#notifDigest').checked;
-          settings.notify.digestDay     = $('#digestDay').value;
-
-          settings.security.twoFA       = $('#twoFA').checked;
-
-          msg.textContent = 'Saving…';
-          writeSettings(settings);
-          applyAppearance(settings.appearance);
-          await syncSettingsToServer(settings, msg);
-        });
-
-        $('#resetDefaults')?.addEventListener('click', () => {
-          const next = JSON.parse(JSON.stringify(defaults));
-          writeSettings(next);
-          fillForm(next);
-          applyAppearance(next.appearance);
-          msg.textContent = 'Defaults restored (saved locally).';
-        });
-
-        $('#changePasswordBtn')?.addEventListener('click', async () => {
-          const cur = $('#currentPassword')?.value || '';
-          const npw = $('#newPassword')?.value || '';
-          const cpw = $('#confirmNewPassword')?.value || '';
-          if (!cur || !npw || npw !== cpw) { msg.textContent = 'Please fill current/new and confirm match.'; return; }
-          msg.textContent = 'Updating password…';
-          try {
-            const r = await fetch(`${apiBase}/auth/change-password`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ currentPassword: cur, newPassword: npw })
-            });
-            msg.textContent = r.ok ? 'Password updated.' : 'Password update failed.';
-          } catch { msg.textContent = 'Password update failed.'; }
-        });
-
-        $('#signOutAllBtn')?.addEventListener('click', async () => {
-          try {
-            await fetch(`${apiBase}/auth/logout-all`, { method: 'POST', credentials: 'include' });
-          } catch {}
-          localStorage.removeItem('role');
-          window.location.replace('/login');
-        });
-
-        $('#exportDataBtn')?.addEventListener('click', async () => {
-          try {
-            const r = await fetch(`${apiBase}/profile/export`, { credentials: 'include' });
-            if (r.ok) {
-              const payload = await r.json();
-              download(`baylis-export-${Date.now()}.json`, JSON.stringify(payload, null, 2));
-              return;
-            }
-          } catch {}
-          const payload = { settings: readSettings() };
-          download(`baylis-settings-${Date.now()}.json`, JSON.stringify(payload, null, 2));
-        });
-
-        $('#clearLocalBtn')?.addEventListener('click', () => {
-          localStorage.removeItem(LS_KEY);
-          msg.textContent = 'Local settings cleared.';
-        });
-      }
-      (async () => {
-        const user = await guard();
-        if (!user) return;
-
-        const s = readSettings();
-        fillForm(s);
-        bindLivePreview(s);
-        bindActions(s);
-      })();
     })();
   </script>
   <style>
@@ -409,11 +235,5 @@
     .density-comfortable .dashboard-card { padding: 1rem; }
     .density-spacious .dashboard-card { padding: 1.4rem; }
   </style>
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const n = localStorage.getItem('username');
-      if (n) document.title = `Settings • ${n} | Baylis Property LTD`;
-    });
-  </script>
 </body>
 </html>

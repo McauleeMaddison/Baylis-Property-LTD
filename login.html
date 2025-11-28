@@ -8,9 +8,11 @@
   <meta name="description" content="Sign in to Baylis Property LTD to manage properties, requests, and your community." />
   <link rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="prefetch" href="register.html" />
+  <link rel="prefetch" href="index.html" />
   <script>window.API_BASE = window.API_BASE || '/api';</script>
 </head>
-<body class="page page--login" data-api-base="/api">
+<body class="page page--login auth-body" data-api-base="/api">
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
@@ -33,64 +35,81 @@
     </nav>
   </header>
 
-  <main> id="content" class="container auth-wrap" tabindex="-1" style="min-height:calc(100dvh - 70px);display:grid;place-items:center;padding:1rem;">
-    <section> class="dashboard-card auth-card" style="width:100%;max-width:520px;">
-      <div> class="brand-row" style="display:flex;gap:.6rem;align-items:center;justify-content:center;margin-bottom:.6rem;">
-        <img src="assets/logo.png" alt="" width="28" height="28" />
-        <strong>Baylis Property LTD</strong>
-      </div>
+  <main class="auth-shell container" id="content" tabindex="-1">
+    <section class="auth-grid" aria-label="Sign in">
+      <aside class="brand-panel">
+        <img src="assets/logo.png" alt="" class="brand-logo" />
+        <h1 class="h2">Welcome back</h1>
+        <p class="muted">Sign in to manage properties, requests, and your community.</p>
+        <ul class="brand-points">
+          <li>Role-aware dashboards for residents &amp; landlords</li>
+          <li>Secure login with optional 2FA step</li>
+          <li>Modern UI with light &amp; dark modes</li>
+        </ul>
+      </aside>
 
-      <h1> class="auth-title" style="text-align:center;margin:.2rem 0 .4rem;">Welcome back</h1>
-      <p> class="auth-sub" style="text-align:center;color:#6b7280;margin-bottom:.8rem;">Sign in to manage properties, requests, and your community.</p>
+      <section class="auth-card">
+        <header>
+          <div>
+            <p class="muted">Baylis Property LTD</p>
+            <h2>Sign in</h2>
+          </div>
+          <span class="badge">Demo: resident123 / landlord123</span>
+        </header>
 
-      <form id="loginForm" method="POST" action="/api/auth/login" novalidate>
-        <label class="field" for="username">
-          <span>Username</span>
-          <input id="username" name="username" type="text" placeholder="e.g. mac.baylis" autocomplete="username" required />
-        </label>
+        <div id="loginMsg" class="form-msg" role="status" aria-live="polite"></div>
 
-        <label class="field" for="password">
-          <span>Password</span>
-          <input id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required />
-        </label>
+        <form id="loginForm" method="POST" action="/api/auth/login" novalidate>
+          <div>
+            <label class="field" for="username">
+              <span>Username</span>
+              <input id="username" name="username" type="text" placeholder="e.g. mac.baylis" autocomplete="username" required />
+            </label>
+            <label class="field" for="roleSelect">
+              <span>Role</span>
+              <select id="roleSelect" name="role" required>
+                <option value="resident">Resident</option>
+                <option value="landlord">Landlord</option>
+              </select>
+            </label>
+          </div>
 
-        <div> class="role-row" style="display:flex;gap:.6rem;margin:.6rem 0;">
-          <label> class="field" for="roleSelect" style="flex:1;">
-            <span>Role</span>
-            <select id="roleSelect" name="role" aria-label="Select role">
-              <option value="resident">Resident</option>
-              <option value="landlord">Landlord</option>
-            </select>
+          <label>
+            <span>Password <small> Caps lock is on </small></span>
+            <div class="input-group">
+              <input id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required />
+              <button type="button" id="showPasswordBtn" class="btn secondary" aria-pressed="false">Show</button>
+            </div>
           </label>
-          <label> class="field" style="display:flex;align-items:flex-end;">
-            <span> style="display:block;margin-bottom:.35rem;">&nbsp;</span>
-            <label> style="display:flex;gap:.4rem;align-items:center;">
+
+          <div>
+            <label class="checkbox">
               <input id="rememberMe" type="checkbox" />
               <span>Remember me</span>
             </label>
-          </label>
-        </div>
-
-        <div> class="actions-row" style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.4rem;">
-          <button id="forgotPassword" class="btn secondary" type="button">Forgot password?</button>
-          <button id="submitBtn" type="submit" class="btn">Sign in</button>
-        </div>
-
-        <p> id="loginMsg" class="error" style="margin-top:.5rem;display:none;"></p>
-        <p> class="hint" style="font-size:.85rem;color:#6b7280;margin-top:.4rem;">Demo credentials: Resident <code>resident123</code>, Landlord <code>landlord123</code></p>
-      </form>
-
-      <section> id="otpSection" class="hidden" aria-label="Two-step verification" aria-live="polite" style="margin-top:1rem;">
-        <h2> class="h3">Verify it’s you</h2>
-        <p> class="hint" style="font-size:.85rem;color:#6b7280;">Enter the 6-digit code we sent to your email/phone.</p>
-        <div > class="otp-grid" style="display:grid;gap:.6rem;grid-template-columns:1fr;">
-          <label for="otpCode" class="visually-hidden">One-time code</label>
-          <input id="otpCode" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" autocomplete="one-time-code" />
-          <div> class="actions-row" style="display:flex;gap:.6rem;justify-content:flex-end;">
-            <button id="otpBackBtn" type="button" class="btn secondary">Back</button>
-            <button id="otpSubmitBtn" type="button" class="btn">Verify</button>
+            <button id="forgotPassword" class="btn btn-ghost" type="button">Forgot password?</button>
           </div>
-        </div>
+
+          <div>
+            <button id="submitBtn" type="submit" class="btn">Sign in</button>
+            <a class="btn btn-ghost" href="register.html">Create account</a>
+          </div>
+        </form>
+
+        <section id="otpSection" class="hidden" aria-label="Verify it is you">
+          <h3 class="h3">Verify it’s you</h3>
+          <p class="muted">Enter the 6-digit code we sent to your email/phone.</p>
+          <div>
+            <label class="field" for="otpCode">
+              <span>One-time code</span>
+              <input id="otpCode" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" autocomplete="one-time-code" />
+            </label>
+            <div>
+              <button id="otpBackBtn" type="button" class="btn secondary">Back</button>
+              <button id="otpSubmitBtn" type="button" class="btn">Verify</button>
+            </div>
+          </div>
+        </section>
       </section>
     </section>
   </main>
@@ -119,117 +138,7 @@
       document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
       document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
     }
-
-    const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
-    (async () => {
-      try {
-        const r = await fetch(`${apiBase}/auth/me`, { credentials: 'include' });
-        if (r.ok) {
-          const { user } = await r.json();
-          const role = user?.role || localStorage.getItem('role') || 'resident';
-          const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
-          const dest = settings?.general?.defaultLanding || (role === 'landlord' ? 'landlord.html' : 'index.html');
-          window.location.replace(dest);
-        }
-      } catch {}
-    })();
-
-    const pwd = document.getElementById('password');
-    const form = document.getElementById('loginForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const msg = document.getElementById('loginMsg');
-
-    function setMsg(text, isError = true) {
-      if (!msg) return;
-      msg.textContent = text || '';
-      msg.style.display = text ? '' : 'none';
-      msg.className = isError ? 'error' : 'success';
-    }
-
-    function setLoading(on) {
-      if (!submitBtn) return;
-      submitBtn.dataset.loading = on ? '1' : '0';
-      submitBtn.textContent = on ? 'Signing in…' : 'Sign in';
-    }
-
-    document.getElementById('forgotPassword')?.addEventListener('click', () => {
-      window.location.href = 'reset-password.html';
-    });
-
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username')?.value.trim();
-        const password = pwd?.value || '';
-        const role = document.getElementById('roleSelect')?.value || 'resident';
-        const remember = document.getElementById('rememberMe')?.checked || false;
-
-        let invalid = false;
-        ['username', 'password'].forEach(id => {
-          const el = document.getElementById(id);
-          if (!el?.value.trim()) { el?.classList.add('is-invalid'); invalid = true; }
-          else el?.classList.remove('is-invalid');
-        });
-        if (invalid) { setMsg('Please enter username and password.'); return; }
-
-        try {
-          setLoading(true);
-          const res = await fetch(`${apiBase}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ username, password, role, remember })
-          });
-
-          if (res.status === 401) { setMsg('Incorrect credentials.'); setLoading(false); return; }
-          if (res.status === 423) { setMsg('Account temporarily locked. Try again later.'); setLoading(false); return; }
-          if (res.status === 202) {
-            document.getElementById('otpSection')?.classList.remove('hidden');
-            setMsg('Check your email/phone for the code.', false);
-            setLoading(false);
-            return;
-          }
-          if (!res.ok) throw new Error('Login failed');
-
-          const { user } = await res.json();
-          localStorage.setItem('role', user?.role || role);
-          const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
-          const dest = settings?.general?.defaultLanding || ((user?.role || role) === 'landlord' ? 'landlord.html' : 'index.html');
-          window.location.replace(dest);
-        } catch {
-          setMsg('Unable to sign in. Please try again.');
-        } finally {
-          setLoading(false);
-        }
-      });
-    }
-
-    document.getElementById('otpSubmitBtn')?.addEventListener('click', async () => {
-      const code = (document.getElementById('otpCode')?.value || '').trim();
-      if (!/^\d{6}$/.test(code)) { setMsg('Enter the 6-digit code.'); return; }
-      try {
-        setLoading(true);
-        const r = await fetch(`${apiBase}/auth/verify-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ code })
-        });
-        if (!r.ok) throw new Error('OTP failed');
-        const { user } = await r.json();
-        localStorage.setItem('role', user?.role || 'resident');
-        window.location.replace(user?.role === 'landlord' ? 'landlord.html' : 'index.html');
-      } catch {
-        setMsg('Invalid or expired code.');
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    document.getElementById('otpBackBtn')?.addEventListener('click', () => {
-      document.getElementById('otpSection')?.classList.add('hidden');
-      setMsg('');
-    });
   </script>
+  <script defer src="js/login.js"></script>
 </body>
 </html>
