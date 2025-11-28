@@ -24,6 +24,21 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(root, { index: false }));
 
+// Simple in-memory rate limiter (per IP)
+const rateBuckets = new Map();
+const rateLimit = (max = 100, windowMs = 60_000) => (req, res, next) => {
+  const now = Date.now();
+  const bucket = rateBuckets.get(req.ip) || { count: 0, reset: now + windowMs };
+  if (now > bucket.reset) {
+    bucket.count = 0;
+    bucket.reset = now + windowMs;
+  }
+  bucket.count += 1;
+  rateBuckets.set(req.ip, bucket);
+  if (bucket.count > max) return res.status(429).json({ error: 'Too many requests, slow down.' });
+  next();
+};
+
 // Helpers
 function uid() { return crypto.randomUUID(); }
 function parseCookies(req) {
@@ -76,8 +91,17 @@ const authRequired = asyncHandler(async (req, res, next) => {
   next();
 });
 
+function requireFields(obj, rules) {
+  for (const [field, { min = 0, required = true }] of Object.entries(rules)) {
+    const val = (obj?.[field] || '').toString().trim();
+    if (required && !val) return `${field} is required`;
+    if (val && val.length < min) return `${field} must be at least ${min} characters`;
+  }
+  return '';
+}
+
 // Auth
-app.post('/api/auth/register', asyncHandler(async (req, res) => {
+app.post('/api/auth/register', rateLimit(30, 60_000), asyncHandler(async (req, res) => {
   const { username, email = '', role = 'resident', password = '' } = req.body || {};
   if (!username || username.length < 3) return res.status(400).json({ error: 'Username too short' });
   if (!password || password.length < 6) return res.status(400).json({ error: 'Password too short' });
@@ -96,7 +120,7 @@ app.post('/api/auth/register', asyncHandler(async (req, res) => {
   res.status(201).json({ user: publicUser(user) });
 }));
 
-app.post('/api/auth/login', asyncHandler(async (req, res) => {
+app.post('/api/auth/login', rateLimit(60, 60_000), asyncHandler(async (req, res) => {
   const { username = '', password = '' } = req.body || {};
   const user = await User.findOne({ username: username.toLowerCase() });
   if (!user) return res.status(401).json({ error: 'Invalid credentials' });
@@ -177,6 +201,8 @@ app.get('/api/profile/activity', authRequired, asyncHandler(async (req, res) => 
 // Requests
 app.post('/api/forms/cleaning', authRequired, asyncHandler(async (req, res) => {
   const { name = req.user.username, address = '', date = '', type = '' } = req.body || {};
+  const err = requireFields({ address, date, type }, { address: { min: 3 }, date: { min: 2 }, type: { min: 2 } });
+  if (err) return res.status(400).json({ error: err });
   const rec = await Request.create({ userId: req.user.id, type: 'cleaning', name, address, date, cleaningType: type });
   req.user.stats.requests = (req.user.stats.requests || 0) + 1;
   await req.user.save();
@@ -184,6 +210,8 @@ app.post('/api/forms/cleaning', authRequired, asyncHandler(async (req, res) => {
 }));
 app.post('/api/forms/repairs', authRequired, asyncHandler(async (req, res) => {
   const { name = req.user.username, address = '', issue = '' } = req.body || {};
+  const err = requireFields({ address, issue }, { address: { min: 3 }, issue: { min: 3 } });
+  if (err) return res.status(400).json({ error: err });
   const rec = await Request.create({ userId: req.user.id, type: 'repair', name, address, issue });
   req.user.stats.requests = (req.user.stats.requests || 0) + 1;
   await req.user.save();
@@ -241,6 +269,10 @@ app.get('/*.html', (req, res) => send(res, req.path.replace(/^\//, '')));
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
+});
+app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  console.error(err);
+  res.status(500).json({ error: 'Server error' });
 });
 
 app.listen(PORT, () => {
