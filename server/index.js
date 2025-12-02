@@ -256,8 +256,13 @@ app.post('/api/community/:id/comments', authRequired, asyncHandler(async (req, r
 
 // File routes
 const send = (res, file) => res.sendFile(path.join(root, file));
-// Root should point to login — require authentication for dashboards
-app.get('/', (req, res) => res.redirect('/login'));
+// Root redirects role-based: landlord -> /landlord, resident -> /resident, otherwise to /login
+app.get('/', asyncHandler(async (req, res) => {
+  const user = await getUserFromReq(req);
+  if (!user) return res.redirect('/login');
+  if (user.role === 'landlord') return res.redirect('/landlord');
+  return res.redirect('/resident');
+}));
 app.get('/login', (req, res) => send(res, 'login.html'));
 app.get('/register', (req, res) => send(res, 'register.html'));
 
