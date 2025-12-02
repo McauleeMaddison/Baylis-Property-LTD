@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pw_temp
+      MYSQL_DATABASE: baylis_db
+      MYSQL_USER: Mcaulee
+      MYSQL_PASSWORD: Blazefj1312
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-proot_pw_temp"]
+      interval: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    build:
+      context: ./server
+    env_file:
+      - ./server/.env
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+
+volumes:
+  db_data:
