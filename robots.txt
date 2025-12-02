@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /login.html
+Disallow: /register.html
+
+Sitemap: https://baylisproperty.co.uk/sitemap.xml

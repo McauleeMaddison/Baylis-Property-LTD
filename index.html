@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Baylis Property LTD – Modern property management platform for residents and landlords. Streamline maintenance requests, community engagement, and property oversight." />
+  <meta name="keywords" content="property management, Baylis Property, resident portal, landlord portal, maintenance management, community platform" />
+  <meta name="author" content="Baylis Property LTD" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Open Graph Tags -->
+  <meta property="og:title" content="Baylis Property LTD – Property Management Platform" />
+  <meta property="og:description" content="Modern property management for residents and landlords." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://baylisproperty.co.uk/" />
+  <meta property="og:image" content="https://baylisproperty.co.uk/assets/logo.svg" />
+  <meta property="og:site_name" content="Baylis Property LTD" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Baylis Property LTD – Property Management Platform" />
+  <meta name="twitter:description" content="Modern property management for residents and landlords." />
+  <meta name="twitter:image" content="https://baylisproperty.co.uk/assets/logo.svg" />
+  
+  <!-- Canonical -->
+  <link rel="canonical" href="https://baylisproperty.co.uk/" />
+  <link rel="icon" href="assets/logo.svg" />
+  
+  <title>Baylis Property LTD – Property Management Platform</title>
+  <link rel="stylesheet" href="css/style.css" />
+  
+  <style>
+    .hero {
+      background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+      color: #fff;
+      padding: 6rem 2rem;
+      text-align: center;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-logo {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+    }
+    
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    
+    .hero p {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+      color: #d4d4d8;
+    }
+    
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+    
+    .btn-primary, .btn-secondary {
+      padding: 0.875rem 2rem;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: 2px solid #d4af37;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background: #d4af37;
+      color: #1a2332;
+    }
+    
+    .btn-primary:hover {
+      background: #e5c158;
+      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: #d4af37;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(212, 175, 55, 0.1);
+    }
+    
+    .features {
+      padding: 4rem 2rem;
+      background: #0f1419;
+      color: #fff;
+    }
+    
+    .features-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    
+    .feature-card {
+      background: #1a2332;
+      padding: 2rem;
+      border-radius: 12px;
+      border-left: 4px solid #d4af37;
+    }
+    
+    .feature-card h3 {
+      color: #d4af37;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+    
+    .feature-card p {
+      color: #a0a0a0;
+      line-height: 1.6;
+    }
+    
+    .testimonials {
+      padding: 4rem 2rem;
+      background: #1a2332;
+      text-align: center;
+    }
+    
+    .testimonials h2 {
+      color: #fff;
+      margin-bottom: 3rem;
+      font-size: 2rem;
+    }
+    
+    .testimonial-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+    
+    .testimonial {
+      background: #0f1419;
+      padding: 2rem;
+      border-radius: 12px;
+      border-top: 3px solid #d4af37;
+    }
+    
+    .testimonial p {
+      color: #a0a0a0;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    
+    .testimonial-author {
+      color: #d4af37;
+      font-weight: 600;
+    }
+    
+    .cta-section {
+      background: linear-gradient(135deg, #d4af37 0%, #c99b24 100%);
+      padding: 3rem 2rem;
+      text-align: center;
+      color: #1a2332;
+    }
+    
+    .cta-section h2 {
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+    
+    .cta-section p {
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+    
+    footer {
+      background: #0f1419;
+      color: #a0a0a0;
+      padding: 2rem;
+      text-align: center;
+      border-top: 1px solid #333;
+    }
+  </style>
+  
+  <!-- Schema.org markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Baylis Property LTD",
+    "url": "https://baylisproperty.co.uk",
+    "logo": "https://baylisproperty.co.uk/assets/logo.svg",
+    "description": "Modern property management platform for residents and landlords",
+    "sameAs": [
+      "https://www.facebook.com/baylisproperty",
+      "https://twitter.com/baylisproperty"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to main content</a>
+  
+  <!-- Navigation -->
+  <header class="site-header">
+    <nav class="nav" aria-label="Main">
+      <div class="nav-inner container">
+        <a class="logo" href="/" aria-label="Baylis Property LTD Home">
+          <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="32" height="32">
+            <circle cx="100" cy="100" r="95" fill="#1a2332" stroke="#d4af37" stroke-width="2"/>
+            <rect x="60" y="70" width="80" height="90" fill="none" stroke="#d4af37" stroke-width="2"/>
+            <rect x="70" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="70" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="70" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="92" y="140" width="16" height="20" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <line x1="100" y1="140" x2="100" y2="160" stroke="#d4af37" stroke-width="1"/>
+            <polygon points="60,70 100,40 140,70" fill="none" stroke="#d4af37" stroke-width="2"/>
+          </svg>
+          <span>Baylis Property LTD</span>
+        </a>
+        <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
+          <a href="resident.html">Resident Portal</a>
+          <a href="landlord.html">Landlord Portal</a>
+          <a href="community.html">Community</a>
+          <a href="login.html">Login</a>
+          <a href="register.html">Register</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main id="content">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="95" fill="#1a2332" stroke="#d4af37" stroke-width="2"/>
+            <rect x="60" y="70" width="80" height="90" fill="none" stroke="#d4af37" stroke-width="2"/>
+            <rect x="70" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="70" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="70" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="92" y="140" width="16" height="20" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <line x1="100" y1="140" x2="100" y2="160" stroke="#d4af37" stroke-width="1"/>
+            <polygon points="60,70 100,40 140,70" fill="none" stroke="#d4af37" stroke-width="2"/>
+          </svg>
+        </div>
+        <h1>Baylis Property LTD</h1>
+        <p>Modern property management platform connecting residents and landlords</p>
+        <div class="hero-cta">
+          <a href="register.html" class="btn-primary">Get Started</a>
+          <a href="login.html" class="btn-secondary">Sign In</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>📋 Maintenance Requests</h3>
+          <p>Easily submit and track cleaning and repair requests with real-time updates and status notifications.</p>
+        </div>
+        <div class="feature-card">
+          <h3>👥 Community Hub</h3>
+          <p>Connect with residents and landlords, share updates, ask questions, and build a stronger community.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🏠 Property Management</h3>
+          <p>Manage multiple properties, track requests, and oversee community communications from one platform.</p>
+        </div>
+        <div class="feature-card">
+          <h3>📊 Real-time Updates</h3>
+          <p>Stay informed with instant notifications and real-time status updates on all your requests.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🔒 Secure & Private</h3>
+          <p>Your data is protected with industry-standard security measures and encrypted communications.</p>
+        </div>
+        <div class="feature-card">
+          <h3>📱 Mobile Friendly</h3>
+          <p>Access Baylis Property on any device with our fully responsive web application.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+      <h2>What Our Users Say</h2>
+      <div class="testimonial-grid">
+        <div class="testimonial">
+          <p>"Baylis Property has transformed how we manage our building. The maintenance request system is intuitive and efficient."</p>
+          <div class="testimonial-author">— Sarah, Property Manager</div>
+        </div>
+        <div class="testimonial">
+          <p>"As a resident, I appreciate how easy it is to submit requests and stay updated. The community hub is fantastic!"</p>
+          <div class="testimonial-author">— James, Resident</div>
+        </div>
+        <div class="testimonial">
+          <p>"Outstanding platform for property management. The landlord portal gives me complete control and visibility."</p>
+          <div class="testimonial-author">— Emma, Landlord</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <h2>Ready to Simplify Property Management?</h2>
+      <p>Join Baylis Property LTD today and experience modern property management</p>
+      <a href="register.html" class="btn-primary">Start Free</a>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Baylis Property LTD. All rights reserved.</p>
+    <p>Modern property management platform designed for residents and landlords.</p>
+  </footer>
+
+  <script defer src="js/script.js"></script>
+</body>
+</html>
