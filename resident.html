@@ -234,78 +234,230 @@
           const date = $('#cleaningDate')?.value;
           const type = $('#cleaningType')?.value;
           const address = $('#cleaningAddress')?.value?.trim();
-          if (!(date && type && address)) { setMsg($('#cleaningMsg'),'Fill all fields.'); return; }
-          const ok = await postJSON($('#cleaningForm').action, { name, date, type, address }, $('#cleaningMsg'));
-          if (ok) e.target.reset(), loadActivity(user);
+          const msgEl = $('#cleaningMsg');
+          const submitBtn = $('#cleaningSubmit');
+          const originalText = submitBtn?.textContent;
+          
+          if (!(date && type && address)) { 
+            if (msgEl) msgEl.textContent = 'Please fill all fields.'; 
+            return; 
+          }
+          
+          try {
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Scheduling...';
+            }
+            
+            const r = await fetch($('#cleaningForm').action, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ name, date, type, address })
+            });
+            
+            if (!r.ok) {
+              const data = await r.json();
+              throw new Error(data.error || 'Failed to submit');
+            }
+            
+            if (msgEl) msgEl.textContent = '✅ Cleaning request submitted!';
+            if (msgEl) msgEl.classList.add('success');
+            e.target.reset();
+            await loadActivity(user);
+            
+            // Scroll to results
+            document.querySelector('#myCleaning')?.scrollIntoView({ behavior: 'smooth' });
+            
+          } catch (err) {
+            if (msgEl) msgEl.textContent = '❌ ' + (err.message || 'Could not submit. Please try again.');
+            if (msgEl) msgEl.classList.add('error');
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalText;
+            }
+          }
         });
 
         $('#repairForm')?.addEventListener('submit', async (e) => {
           e.preventDefault();
           const issue = $('#repairIssue')?.value?.trim();
           const address = $('#repairAddress')?.value?.trim();
-          if (!(issue && address)) { setMsg($('#repairMsg'),'Fill all fields.'); return; }
-          const ok = await postJSON($('#repairForm').action, { name, issue, address }, $('#repairMsg'));
-          if (ok) e.target.reset(), loadActivity(user);
+          const msgEl = $('#repairMsg');
+          const submitBtn = $('#repairSubmit');
+          const originalText = submitBtn?.textContent;
+          
+          if (!(issue && address)) { 
+            if (msgEl) msgEl.textContent = 'Please fill all fields.'; 
+            return; 
+          }
+          
+          try {
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Submitting...';
+            }
+            
+            const r = await fetch($('#repairForm').action, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ name, issue, address })
+            });
+            
+            if (!r.ok) {
+              const data = await r.json();
+              throw new Error(data.error || 'Failed to submit');
+            }
+            
+            if (msgEl) msgEl.textContent = '✅ Repair request submitted!';
+            if (msgEl) msgEl.classList.add('success');
+            e.target.reset();
+            await loadActivity(user);
+            
+            // Scroll to results
+            document.querySelector('#myRepairs')?.scrollIntoView({ behavior: 'smooth' });
+            
+          } catch (err) {
+            if (msgEl) msgEl.textContent = '❌ ' + (err.message || 'Could not submit. Please try again.');
+            if (msgEl) msgEl.classList.add('error');
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalText;
+            }
+          }
         });
 
         $('#communityForm')?.addEventListener('submit', async (e) => {
           e.preventDefault();
           const message = $('#communityMessage')?.value?.trim();
-          if (!message) { setMsg($('#communityMsg'),'Write a message.'); return; }
-          const ok = await postJSON($('#communityForm').action, { name, message, email: user.email }, $('#communityMsg'));
-          if (ok) e.target.reset(), loadActivity(user);
+          const msgEl = $('#communityMsg');
+          const submitBtn = $('#communitySubmit');
+          const originalText = submitBtn?.textContent;
+          
+          if (!message) { 
+            if (msgEl) msgEl.textContent = 'Please write a message.'; 
+            return; 
+          }
+          
+          try {
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Posting...';
+            }
+            
+            const r = await fetch($('#communityForm').action, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ message })
+            });
+            
+            if (!r.ok) {
+              const data = await r.json();
+              throw new Error(data.error || 'Failed to post');
+            }
+            
+            if (msgEl) msgEl.textContent = '✅ Posted to community!';
+            if (msgEl) msgEl.classList.add('success');
+            e.target.reset();
+            await loadActivity(user);
+            
+            // Scroll to results
+            document.querySelector('#myPosts')?.scrollIntoView({ behavior: 'smooth' });
+            
+          } catch (err) {
+            if (msgEl) msgEl.textContent = '❌ ' + (err.message || 'Could not post. Please try again.');
+            if (msgEl) msgEl.classList.add('error');
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalText;
+            }
+          }
         });
       }
 
       // ---- Load my activity (server should filter by user in /profile/activity or provide /forms/my*) ----
       async function loadActivity(user) {
         try {
-          // Prefer a single endpoint:
-          const r = await fetch(`${apiBase}/profile/activity`, { credentials: 'include' });
+          // Fetch all requests and filter by current user
+          const r = await fetch(`${apiBase}/requests`, { credentials: 'include' });
           if (r.ok) {
-            const { requests = [], posts = [] } = await r.json();
-            renderLists(requests, posts);
+            const allRequests = await r.json();
+            // Filter requests by current user ID
+            const userRequests = Array.isArray(allRequests) ? allRequests.filter(req => req.userId === user.id) : [];
+            renderLists(userRequests, []);
             return;
           }
-        } catch { /* fall through */ }
-
-        // Fallback demo (if profile/activity not implemented): fetch all & filter client-side by name/email
-        try {
-          const [repairs, clean, msgs] = await Promise.all([
-            fetch(`${apiBase}/forms/repairs?mine=1`, { credentials:'include' }).then(x => x.ok ? x.json() : []),
-            fetch(`${apiBase}/forms/cleaning?mine=1`, { credentials:'include' }).then(x => x.ok ? x.json() : []),
-            fetch(`${apiBase}/forms/messages?mine=1`, { credentials:'include' }).then(x => x.ok ? x.json() : []),
-          ]);
-          const requests = [
-            ...(Array.isArray(clean) ? clean : clean?.data || []),
-            ...(Array.isArray(repairs) ? repairs : repairs?.data || []),
-          ];
-          renderLists(requests, (Array.isArray(msgs) ? msgs : msgs?.data || []));
-        } catch {
-          // Leave defaults
+        } catch (err) {
+          console.error('Error loading activity:', err);
         }
       }
 
       function renderLists(requests, posts) {
         const myC = $('#myCleaning'), myR = $('#myRepairs'), myP = $('#myPosts');
         const reqs = Array.isArray(requests) ? requests : [];
-        const cln = reqs.filter(r => !!r.type);
-        const rep = reqs.filter(r => !!r.issue);
+        
+        // Separate by type
+        const cln = reqs.filter(r => r.type === 'cleaning');
+        const rep = reqs.filter(r => r.type === 'repair');
 
+        // Render cleaning requests
         myC.innerHTML = cln.length ? '' : '<li class="muted">No cleaning requests yet.</li>';
         cln.forEach(x => {
           const when = fmtDate(x.createdAt || Date.now());
-          const row = `<strong data-field="name">${x.name || '—'}</strong> — <span data-field="info">"${x.type}"</span> on <span data-field="date">${x.date || when}</span> ${okBadge(x.status)}`;
-          const li = document.createElement('li'); li.innerHTML = row; myC.appendChild(li);
+          const status = x.status || 'open';
+          const row = `
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+              <div>
+                <strong>${x.name || '—'}</strong> 
+                <br>
+                <span class="muted" style="font-size: 0.9rem;">${x.cleaningType || x.type || '—'}</span>
+              </div>
+              <div style="text-align: right;">
+                <span class="muted" style="font-size: 0.85rem;">${x.date || when}</span>
+                <br>
+                ${okBadge(status)}
+              </div>
+            </div>
+          `;
+          const li = document.createElement('li'); 
+          li.innerHTML = row; 
+          li.style.borderLeft = '3px solid #d4af37';
+          li.style.paddingLeft = '0.75rem';
+          myC.appendChild(li);
         });
 
+        // Render repair requests
         myR.innerHTML = rep.length ? '' : '<li class="muted">No repair requests yet.</li>';
         rep.forEach(x => {
           const when = fmtDate(x.createdAt || Date.now());
-          const row = `<strong data-field="name">${x.name || '—'}</strong> — <span data-field="info">${x.issue || 'Repair'}</span> <span class="muted" data-field="date">${when}</span> ${okBadge(x.status)}`;
-          const li = document.createElement('li'); li.innerHTML = row; myR.appendChild(li);
+          const status = x.status || 'open';
+          const row = `
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+              <div>
+                <strong>${x.name || '—'}</strong>
+                <br>
+                <span class="muted" style="font-size: 0.9rem;">${x.issue || 'Repair request'}</span>
+              </div>
+              <div style="text-align: right;">
+                <span class="muted" style="font-size: 0.85rem;">${when}</span>
+                <br>
+                ${okBadge(status)}
+              </div>
+            </div>
+          `;
+          const li = document.createElement('li'); 
+          li.innerHTML = row; 
+          li.style.borderLeft = '3px solid #d4af37';
+          li.style.paddingLeft = '0.75rem';
+          myR.appendChild(li);
         });
 
+        // Render community posts
         const p = Array.isArray(posts) ? posts : [];
         myP.innerHTML = p.length ? '' : '<li class="muted">No community posts yet.</li>';
         p.forEach(m => {
@@ -318,9 +470,9 @@
         // KPIs
         const counts = reqs.reduce((a, x) => {
           const s = (x.status || 'open').toLowerCase();
-          if (s.includes('in')) a.in_progress++; else if (s.includes('done')) a.done++; else a.open++;
+          if (s.includes('in')) a.in_progress++; else if (s.includes('done') || s.includes('closed')) a.done++; else a.open++;
           return a;
-        }, { open:0, in_progress:0, done:0 });
+        }, { open: 0, in_progress: 0, done: 0 });
         $('#kpiOpen').textContent = counts.open;
         $('#kpiInProgress').textContent = counts.in_progress;
         $('#kpiDone').textContent = counts.done;

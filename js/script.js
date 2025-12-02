@@ -308,55 +308,135 @@ window.addEventListener('storage', (e) => {
   const load = (k) => { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch { return []; } };
 
   // Cleaning
-  const cleaningForm = $("#cleaningForm form");
-  const cleaningLog  = $("#cleaningSubmissions");
-  if (cleaningLog) load("log:cleaning").forEach(html => addLogItem(cleaningLog, html));
-  on(cleaningForm, "submit", (e) => {
+  const cleaningForm = $("#cleaningForm");
+  on(cleaningForm, "submit", async (e) => {
     e.preventDefault();
     if (!cleaningForm.checkValidity()) return cleaningForm.reportValidity();
-    const name = $("#cleaningName")?.value.trim();
-    const date = $("#cleaningDate")?.value;
-    const type = $("#cleaningType")?.value;
-    if (!(name && date && type && cleaningLog)) return;
-    const line = `🧼 <strong>${escapeHtml(name)}</strong> requested a "<em>${escapeHtml(type)}</em>" clean on ${escapeHtml(date)} <small class="muted">(${now()})</small>`;
-    addLogItem(cleaningLog, line);
-    save("log:cleaning", [line, ...load("log:cleaning")].slice(0, 50));
-    cleaningForm.reset();
-    showToast("✅ Cleaning request submitted");
+    
+    const msgEl = $("#cleaningMsg");
+    const submitBtn = cleaningForm.querySelector("button[type='submit']");
+    const originalText = submitBtn?.textContent;
+    
+    try {
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtn) submitBtn.textContent = "Submitting...";
+      
+      const formData = new FormData(cleaningForm);
+      const response = await fetch("/api/forms/cleaning", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to submit request");
+      }
+      
+      showToast("✅ Cleaning request submitted successfully!");
+      cleaningForm.reset();
+      if (msgEl) msgEl.textContent = "";
+      
+      // Redirect to requests view after short delay
+      setTimeout(() => {
+        window.location.href = "/resident#requests";
+      }, 1000);
+    } catch (err) {
+      if (msgEl) msgEl.textContent = err.message || "Error submitting request";
+      showToast("❌ " + (err.message || "Error submitting request"));
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+      if (submitBtn) submitBtn.textContent = originalText;
+    }
   });
 
   // Repair
-  const repairForm = $("#repairForm form");
-  const repairLog  = $("#repairSubmissions");
-  if (repairLog) load("log:repair").forEach(html => addLogItem(repairLog, html));
-  on(repairForm, "submit", (e) => {
+  const repairForm = $("#repairForm");
+  on(repairForm, "submit", async (e) => {
     e.preventDefault();
     if (!repairForm.checkValidity()) return repairForm.reportValidity();
-    const name  = $("#repairName")?.value.trim();
-    const issue = $("#repairIssue")?.value.trim();
-    if (!(name && issue && repairLog)) return;
-    const line = `🛠️ <strong>${escapeHtml(name)}</strong> reported: ${escapeHtml(issue)} <small class="muted">(${now()})</small>`;
-    addLogItem(repairLog, line);
-    save("log:repair", [line, ...load("log:repair")].slice(0, 50));
-    repairForm.reset();
-    showToast("✅ Repair request submitted");
+    
+    const msgEl = $("#repairMsg");
+    const submitBtn = repairForm.querySelector("button[type='submit']");
+    const originalText = submitBtn?.textContent;
+    
+    try {
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtn) submitBtn.textContent = "Submitting...";
+      
+      const formData = new FormData(repairForm);
+      const response = await fetch("/api/forms/repairs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to submit request");
+      }
+      
+      showToast("✅ Repair request submitted successfully!");
+      repairForm.reset();
+      if (msgEl) msgEl.textContent = "";
+      
+      // Redirect to requests view after short delay
+      setTimeout(() => {
+        window.location.href = "/resident#requests";
+      }, 1000);
+    } catch (err) {
+      if (msgEl) msgEl.textContent = err.message || "Error submitting request";
+      showToast("❌ " + (err.message || "Error submitting request"));
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+      if (submitBtn) submitBtn.textContent = originalText;
+    }
   });
 
   // Community
-  const communityForm = $("#communityPostForm form");
-  const communityFeed = $("#communityPosts");
-  if (communityFeed) load("log:community").forEach(html => addLogItem(communityFeed, html));
-  on(communityForm, "submit", (e) => {
+  const communityForm = $("#communityForm");
+  on(communityForm, "submit", async (e) => {
     e.preventDefault();
     if (!communityForm.checkValidity()) return communityForm.reportValidity();
-    const name = $("#posterName")?.value.trim();
-    const msg  = $("#posterMessage")?.value.trim();
-    if (!(name && msg && communityFeed)) return;
-    const line = `💬 <strong>${escapeHtml(name)}</strong>: ${escapeHtml(msg)} <small class="muted">(${now()})</small>`;
-    addLogItem(communityFeed, line);
-    save("log:community", [line, ...load("log:community")].slice(0, 100));
-    communityForm.reset();
-    showToast("💬 Post added to community");
+    
+    const msgEl = $("#communityMsg");
+    const submitBtn = communityForm.querySelector("button[type='submit']");
+    const originalText = submitBtn?.textContent;
+    
+    try {
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtn) submitBtn.textContent = "Posting...";
+      
+      const formData = new FormData(communityForm);
+      const response = await fetch("/api/forms/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to post message");
+      }
+      
+      showToast("✅ Message posted to community!");
+      communityForm.reset();
+      if (msgEl) msgEl.textContent = "";
+      
+      // Redirect to community page
+      setTimeout(() => {
+        window.location.href = "/community";
+      }, 1000);
+    } catch (err) {
+      if (msgEl) msgEl.textContent = err.message || "Error posting message";
+      showToast("❌ " + (err.message || "Error posting message"));
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+      if (submitBtn) submitBtn.textContent = originalText;
+    }
   });
 
   /* ========== Utils ========== */

@@ -233,6 +233,9 @@ input, select, textarea {
   font: 0.95rem inherit;
 }
 textarea { min-height: 120px; resize: vertical; }
+.form-msg { font-size: 0.9rem; padding: 0.5rem 0.75rem; border-radius: var(--radius-2xs); transition: all var(--t-fast); }
+.form-msg.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-left: 3px solid #22c55e; }
+.form-msg.error { background: rgba(239, 68, 68, 0.1); color: #dc2626; border-left: 3px solid #ef4444; }
 input:hover, select:hover, textarea:hover { border-color: var(--border-strong); background: var(--bg-light); }
 input:focus, select:focus, textarea:focus { border-color: var(--secondary); background: var(--accent-soft-bg); box-shadow: inset 0 0 0 1px var(--secondary), var(--ring); }
 input:disabled, select:disabled, textarea:disabled { opacity:.6; cursor:not-allowed; }
