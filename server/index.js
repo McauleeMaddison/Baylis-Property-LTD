@@ -256,14 +256,41 @@ app.post('/api/community/:id/comments', authRequired, asyncHandler(async (req, r
 
 // File routes
 const send = (res, file) => res.sendFile(path.join(root, file));
-app.get('/', (req, res) => send(res, 'index.html'));
-app.get('/resident', (req, res) => send(res, 'resident.html'));
-app.get('/landlord', (req, res) => send(res, 'landlord.html'));
-app.get('/community', (req, res) => send(res, 'community.html'));
-app.get('/profile', (req, res) => send(res, 'profile.html'));
-app.get('/settings', (req, res) => send(res, 'settings.html'));
+// Root should point to login — require authentication for dashboards
+app.get('/', (req, res) => res.redirect('/login'));
 app.get('/login', (req, res) => send(res, 'login.html'));
 app.get('/register', (req, res) => send(res, 'register.html'));
+
+// Protected dashboards — require a valid session
+app.get('/resident', async (req, res) => {
+  const user = await getUserFromReq(req);
+  if (!user) return res.redirect('/login');
+  // if landlord accidentally hits resident, send to landlord dashboard
+  if (user.role === 'landlord') return res.redirect('/landlord');
+  return send(res, 'resident.html');
+});
+app.get('/landlord', async (req, res) => {
+  const user = await getUserFromReq(req);
+  if (!user) return res.redirect('/login');
+  if (user.role !== 'landlord') return res.redirect('/resident');
+  return send(res, 'landlord.html');
+});
+
+// Other pages require auth as well
+app.get('/profile', async (req, res) => {
+  const user = await getUserFromReq(req);
+  if (!user) return res.redirect('/login');
+  return send(res, 'profile.html');
+});
+app.get('/settings', async (req, res) => {
+  const user = await getUserFromReq(req);
+  if (!user) return res.redirect('/login');
+  return send(res, 'settings.html');
+});
+
+// Leave community public for now, but API actions require auth
+app.get('/community', (req, res) => send(res, 'community.html'));
+
 app.get('/*.html', (req, res) => send(res, req.path.replace(/^\//, '')));
 
 app.use((req, res) => {

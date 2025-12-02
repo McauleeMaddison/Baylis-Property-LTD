@@ -4,7 +4,7 @@
 
   const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
   const DEMO = {
-    resident: { password: 'resident123', redirect: 'index.html' },
+    resident: { password: 'resident123', redirect: 'resident.html' },
     landlord: { password: 'landlord123', redirect: 'landlord.html' }
   };
   const MAX_ATTEMPTS = 5;
@@ -75,7 +75,8 @@
       // 1) Try real backend
       const res = await fetchJSON('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ username, password, role })
+        body: JSON.stringify({ username, password, role }),
+        credentials: 'include'
       });
 
       if (res && res.ok) {
@@ -380,6 +381,7 @@
     try {
       const res = await fetch(`${API_BASE}${path}`, {
         headers: { 'Content-Type': 'application/json' },
+        credentials: options.credentials || 'include',
         ...options
       });
       return res;
