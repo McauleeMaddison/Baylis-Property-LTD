@@ -1,12 +1,10 @@
 import session from 'express-session';
-import MongoStore from 'connect-mongo';
-import dotenv from 'dotenv';
-dotenv.config();
 
+// Using default MemoryStore for sessions (suitable for development).
+// For production you should replace with a persistent store (Redis, MySQL-backed, etc.).
 export default session({
   secret: 'baylis_secret',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie: { maxAge: 1000 * 60 * 60 * 24 }
 });

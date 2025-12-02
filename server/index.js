@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { connectMongo, models } from './dbManager.js';
+import { models } from './models/sqlModels.js';
 
 const { User, Request, CommunityPost, Session } = models;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -14,8 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const isProd = process.env.NODE_ENV === 'production';
 
-await connectMongo();
-seedDemoUsers();
+await seedDemoUsers();
 
 app.disable('x-powered-by');
 app.use(helmet());
@@ -193,8 +192,8 @@ app.post('/api/settings', authRequired, asyncHandler(async (req, res) => {
 }));
 app.get('/api/profile/activity', authRequired, asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const userReqs = await Request.find({ userId }).lean();
-  const userPosts = await CommunityPost.find({ userId }).lean();
+  const userReqs = await Request.find({ userId });
+  const userPosts = await CommunityPost.find({ userId });
   res.json({ requests: userReqs, posts: userPosts });
 }));
 
@@ -223,13 +222,13 @@ app.post('/api/forms/message', authRequired, asyncHandler(async (req, res) => {
   res.status(201).json(rec);
 }));
 app.get('/api/requests', authRequired, asyncHandler(async (req, res) => {
-  const list = await Request.find().lean();
+  const list = await Request.find();
   res.json(list);
 }));
 
 // Community
 app.get('/api/community', authRequired, asyncHandler(async (req, res) => {
-  const list = await CommunityPost.find().sort({ createdAt: -1 }).lean();
+  const list = await CommunityPost.find();
   res.json(list);
 }));
 app.post('/api/community', authRequired, asyncHandler(async (req, res) => {
