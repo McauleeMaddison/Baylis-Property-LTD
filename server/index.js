@@ -306,9 +306,13 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   res.status(500).json({ error: 'Server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ API & app server running at http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`✅ API & app server running at http://localhost:${PORT}`);
+  });
+}
+
+export default app;
 
 async function seedDemoUsers() {
   const existing = await User.findOne({ username: 'resident123' });

@@ -9,6 +9,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root_pw_temp
+          MYSQL_DATABASE: baylis_db
+          MYSQL_USER: Mcaulee
+          MYSQL_PASSWORD: Blazefj1312
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -proot_pw_temp"
+          --health-interval=5s --health-timeout=2s --health-retries=10
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
@@ -18,6 +31,22 @@ jobs:
       - name: Install server deps
         working-directory: server
         run: npm ci
+      - name: Run migrations (retry until ready)
+        env:
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_USER: Mcaulee
+          MYSQL_PASSWORD: Blazefj1312
+          MYSQL_DATABASE: baylis_db
+        run: |
+          for i in {1..30}; do
+            node server/migrate.js migrations/0001_init.sql && break || sleep 2
+          done
       - name: Run tests (server)
         working-directory: server
+        env:
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_USER: Mcaulee
+          MYSQL_PASSWORD: Blazefj1312
+          MYSQL_DATABASE: baylis_db
+          NODE_ENV: test
         run: npm test
