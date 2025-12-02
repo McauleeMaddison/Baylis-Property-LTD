@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -6,9 +6,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --production --silent
 
-# Copy app source
+# Copy app source (migrations & server code)
 COPY . .
 
 EXPOSE 5000
 
+# Start the server
 CMD ["node", "index.js"]

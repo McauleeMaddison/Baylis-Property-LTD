@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon server/index.js",
     "start": "node server/index.js",
+    "migrate": "node server/migrate.js migrations/0001_init.sql",
     "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles"
   },
   "dependencies": {

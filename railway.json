@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/railwayapp/railway/master/packages/cli/schemas/railway.json",
+  "build": {
+    "builder": "dockerfile",
+    "buildCommand": "cd server && npm ci --production"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "startCommand": "node server/index.js",
+    "restartPolicyMaxRetries": 3
+  }
+}
