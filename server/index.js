@@ -307,8 +307,9 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 });
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`✅ API & app server running at http://localhost:${PORT}`);
+  const HOST = process.env.HOST || '0.0.0.0';
+  app.listen(PORT, HOST, () => {
+    console.log(`✅ API & app server running at http://${HOST}:${PORT}`);
   });
 }
 
