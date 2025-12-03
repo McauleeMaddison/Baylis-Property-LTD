@@ -5,19 +5,142 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import dotenv from 'dotenv';
 import { models } from './models/sqlModels.js';
 
-const { User, Request, CommunityPost, Session } = models;
+dotenv.config();
+
+const { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge } = models;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const isProd = process.env.NODE_ENV === 'production';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me';
+const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || 'sid';
+const CSRF_COOKIE = process.env.CSRF_COOKIE_NAME || 'csrfToken';
+const SESSION_TTL_MS = Number(process.env.SESSION_TTL_MS || 1000 * 60 * 60 * 24 * 7);
+const TRUST_PROXY = Number(process.env.TRUST_PROXY || 1);
+const FORCE_HTTPS = process.env.FORCE_HTTPS !== 'false';
+const OTP_WINDOW_MS = Number(process.env.OTP_WINDOW_MS || 1000 * 60 * 5);
+const RESET_WINDOW_MS = Number(process.env.RESET_WINDOW_MS || 1000 * 60 * 15);
+const MAX_OTP_ATTEMPTS = Number(process.env.OTP_MAX_ATTEMPTS || 5);
+const REQUIRE_2FA = process.env.REQUIRE_2FA !== 'false';
+const APP_BASE_URL = process.env.APP_BASE_URL || (isProd ? process.env.APP_URL || '' : 'http://localhost:5000');
+
+if (!process.env.SESSION_SECRET) {
+  console.warn('⚠️  SESSION_SECRET not set. Using fallback "change-me" secret. Configure a strong SESSION_SECRET in production.');
+}
 
 await seedDemoUsers();
 
+const sessionCookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: isProd,
+  maxAge: SESSION_TTL_MS,
+  path: '/',
+};
+const csrfCookieOptions = {
+  httpOnly: false,
+  sameSite: 'strict',
+  secure: isProd,
+  maxAge: SESSION_TTL_MS,
+  path: '/',
+};
+const parseList = (value, fallback = []) => (value ? value.split(',').map((v) => v.trim()).filter(Boolean) : fallback);
+const connectHosts = ["'self'", ...parseList(process.env.CSP_CONNECT_SRC)];
+const cspDirectives = {
+  defaultSrc: ["'self'"],
+  scriptSrc: ["'self'", "'unsafe-inline'"],
+  styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+  imgSrc: ["'self'", 'data:', 'https:'],
+  fontSrc: ["'self'", 'data:', 'https:'],
+  connectSrc: connectHosts,
+  frameAncestors: ["'none'"],
+  objectSrc: ["'none'"],
+  upgradeInsecureRequests: isProd ? [] : undefined,
+};
+const randomToken = (size = 32) => crypto.randomBytes(size).toString('hex');
+const hashToken = (token) => crypto.createHmac('sha256', SESSION_SECRET).update(token).digest('hex');
+const hashOtpCode = (challengeId, code) => hashToken(`${challengeId}:${code}`);
+const minutes = (ms) => Math.round(ms / 60000);
+
+const sendEmail = async (to, subject, body) => {
+  if (!to) {
+    console.warn(`[email] Missing recipient. Subject: ${subject}\n${body}`);
+    return;
+  }
+  console.log(`\n📧 EMAIL to ${to}\nSubject: ${subject}\n${body}\n`);
+};
+const sendSms = async (to, message) => {
+  if (!to) {
+    console.warn(`[sms] Missing phone number. Message: ${message}`);
+    return;
+  }
+  console.log(`\n📱 SMS to ${to}\n${message}\n`);
+};
+
+const requiresTwoFactor = (user) => {
+  const pref = user.settings?.security?.twoFactorEnabled;
+  if (typeof pref === 'boolean') return pref;
+  return REQUIRE_2FA;
+};
+
+async function issueOtpChallenge(user) {
+  await OtpChallenge.deleteExpired();
+  const challengeId = randomToken(24);
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const delivery = user.contact?.phone ? 'sms' : 'email';
+  const expiresAt = new Date(Date.now() + OTP_WINDOW_MS);
+  await OtpChallenge.create({
+    userId: user.id,
+    challengeId,
+    codeHash: hashOtpCode(challengeId, code),
+    delivery,
+    expiresAt,
+  });
+  const msg = `Your Baylis verification code is ${code}. It expires in ${minutes(OTP_WINDOW_MS)} minutes.`;
+  if (delivery === 'sms') await sendSms(user.contact?.phone, msg);
+  else await sendEmail(user.contact?.email || user.email, 'Your verification code', msg);
+  return { challengeId, delivery };
+}
+
+async function issuePasswordReset(user) {
+  await PasswordResetToken.deleteExpired();
+  const token = randomToken(32);
+  const delivery = user.contact?.phone ? 'sms' : 'email';
+  const expiresAt = new Date(Date.now() + RESET_WINDOW_MS);
+  await PasswordResetToken.create({
+    userId: user.id,
+    tokenHash: hashToken(token),
+    delivery,
+    expiresAt,
+  });
+  const linkBase = APP_BASE_URL ? APP_BASE_URL.replace(/\/$/, '') : '';
+  const link = linkBase ? `${linkBase}/reset.html?token=${token}` : token;
+  const msg = `Use reset code ${token} to update your password. This expires in ${minutes(RESET_WINDOW_MS)} minutes.${linkBase ? `\nReset link: ${link}` : ''}`;
+  if (delivery === 'sms') await sendSms(user.contact?.phone, msg);
+  else await sendEmail(user.contact?.email || user.email, 'Password reset instructions', msg);
+}
+
 app.disable('x-powered-by');
-app.use(helmet());
+app.set('trust proxy', TRUST_PROXY);
+app.use(helmet({
+  contentSecurityPolicy: isProd ? { directives: cspDirectives } : false,
+  crossOriginEmbedderPolicy: false,
+  referrerPolicy: { policy: 'no-referrer' },
+  hsts: isProd ? { maxAge: 60 * 60 * 24 * 365, preload: true } : false,
+}));
+if (isProd && FORCE_HTTPS) {
+  app.use((req, res, next) => {
+    if (req.secure || req.headers['x-forwarded-proto'] === 'https') return next();
+    if (req.method === 'GET' || req.method === 'HEAD') {
+      return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+    }
+    return res.status(403).send('HTTPS required');
+  });
+}
 app.use(morgan('dev'));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false }));
@@ -36,8 +159,9 @@ const rateLimit = (max = 100, windowMs = 60_000) => (req, res, next) => {
   if (bucket.count > max) return res.status(429).json({ error: 'Too many requests, slow down.' });
   next();
 };
+const apiLimiter = rateLimit(Number(process.env.RATE_LIMIT_MAX || 600), Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000));
+app.use('/api', apiLimiter);
 
-function uid() { return crypto.randomUUID(); }
 function parseCookies(req) {
   const header = req.headers.cookie;
   if (!header) return {};
@@ -47,31 +171,70 @@ function parseCookies(req) {
     return acc;
   }, {});
 }
-async function setSession(res, userId) {
-  const sid = uid();
-  await Session.create({ sid, userId });
-  res.cookie('sid', sid, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: isProd,
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-    path: '/',
-  });
-}
-async function clearSession(req, res) {
-  const cookies = parseCookies(req);
-  const sid = cookies.sid;
-  if (sid) await Session.deleteOne({ sid });
-  res.clearCookie('sid');
-}
-async function getUserFromReq(req) {
-  const sid = parseCookies(req).sid;
+const READONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+async function getActiveSession(req) {
+  if (req.sessionRecord) return req.sessionRecord;
+  const sid = parseCookies(req)[SESSION_COOKIE];
   if (!sid) return null;
-  const sess = await Session.findOne({ sid });
-  if (!sess) return null;
-  const user = await User.findById(sess.userId);
+  const session = await Session.findBySid(sid);
+  if (!session) return null;
+  const now = Date.now();
+  if (session.expiresAt && session.expiresAt.getTime() <= now) {
+    await Session.deleteOne({ sid });
+    return null;
+  }
+  const nextExpiry = new Date(now + SESSION_TTL_MS);
+  await Session.touch(sid, nextExpiry);
+  const hydrated = { ...session, sid };
+  req.sessionRecord = hydrated;
+  return hydrated;
+}
+
+async function setSession(req, res, userId) {
+  const sid = randomToken(48);
+  const csrfToken = randomToken(48);
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  await Session.create({
+    sid,
+    userId,
+    csrfDigest: hashToken(csrfToken),
+    expiresAt,
+    ipAddress: req.ip,
+    userAgent: (req.headers['user-agent'] || '').slice(0, 500),
+  });
+  res.cookie(SESSION_COOKIE, sid, sessionCookieOptions);
+  res.cookie(CSRF_COOKIE, csrfToken, csrfCookieOptions);
+}
+
+async function rotateCsrfToken(req, res, sessionRecord = null) {
+  const session = sessionRecord || await getActiveSession(req);
+  if (!session) throw new Error('No active session to rotate CSRF token for.');
+  const csrfToken = randomToken(48);
+  await Session.updateCsrf(session.sid, hashToken(csrfToken));
+  res.cookie(CSRF_COOKIE, csrfToken, csrfCookieOptions);
+  return csrfToken;
+}
+
+async function clearSession(req, res) {
+  const sid = parseCookies(req)[SESSION_COOKIE];
+  if (sid) await Session.deleteOne({ sid });
+  res.clearCookie(SESSION_COOKIE, { path: '/' });
+  res.clearCookie(CSRF_COOKIE, { path: '/' });
+  req.sessionRecord = null;
+}
+
+async function getUserFromReq(req) {
+  const session = await getActiveSession(req);
+  if (!session) return null;
+  const user = await User.findById(session.userId);
+  if (!user) {
+    await Session.deleteOne({ sid: session.sid });
+    return null;
+  }
   return user;
 }
+
 function publicUser(u) {
   if (!u) return null;
   const obj = u.toObject ? u.toObject() : u;
@@ -85,6 +248,17 @@ const authRequired = asyncHandler(async (req, res, next) => {
   const user = await getUserFromReq(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   req.user = user;
+  next();
+});
+
+const csrfRequired = asyncHandler(async (req, res, next) => {
+  if (READONLY_METHODS.has(req.method)) return next();
+  const token = req.get('x-csrf-token') || req.get('x-xsrf-token') || req.body?._csrf;
+  if (!token) return res.status(403).json({ error: 'Missing CSRF token' });
+  const session = req.sessionRecord || await getActiveSession(req);
+  if (!session) return res.status(401).json({ error: 'Unauthorized' });
+  const digest = hashToken(token);
+  if (digest !== session.csrfDigest) return res.status(403).json({ error: 'Invalid CSRF token' });
   next();
 });
 
@@ -113,7 +287,7 @@ app.post('/api/auth/register', rateLimit(30, 60_000), asyncHandler(async (req, r
     profile: { displayName: username },
     contact: { email },
   });
-  await setSession(res, user.id);
+  await setSession(req, res, user.id);
   res.status(201).json({ user: publicUser(user) });
 }));
 
@@ -123,28 +297,29 @@ app.post('/api/auth/login', rateLimit(60, 60_000), asyncHandler(async (req, res)
   if (!user) return res.status(401).json({ error: 'Invalid credentials' });
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
-  await setSession(res, user.id);
+  if (requiresTwoFactor(user)) {
+    const challenge = await issueOtpChallenge(user);
+    return res.json({ require2FA: true, challengeId: challenge.challengeId, delivery: challenge.delivery });
+  }
+  await setSession(req, res, user.id);
   res.json({ user: publicUser(user) });
 }));
 
-app.get('/api/auth/me', asyncHandler(async (req, res) => {
-  const user = await getUserFromReq(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  res.json({ user: publicUser(user) });
-}));
+app.get('/api/auth/me', authRequired, (req, res) => {
+  res.json({ user: publicUser(req.user) });
+});
 
-app.post('/api/auth/logout', asyncHandler(async (req, res) => {
+app.post('/api/auth/logout', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   await clearSession(req, res);
   res.json({ ok: true });
 }));
-app.post('/api/auth/logout-all', asyncHandler(async (req, res) => {
-  const user = await getUserFromReq(req);
-  if (user) await Session.deleteMany({ userId: user.id });
+app.post('/api/auth/logout-all', authRequired, csrfRequired, asyncHandler(async (req, res) => {
+  await Session.deleteMany({ userId: req.user.id });
   await clearSession(req, res);
   res.json({ ok: true });
 }));
 
-app.post('/api/auth/change-password', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/auth/change-password', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { currentPassword = '', newPassword = '' } = req.body || {};
   if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Missing fields' });
   const ok = await bcrypt.compare(currentPassword, req.user.passwordHash);
@@ -155,12 +330,71 @@ app.post('/api/auth/change-password', authRequired, asyncHandler(async (req, res
   res.json({ ok: true });
 }));
 
-app.post('/api/auth/verify-otp', authRequired, (req, res) => {
-  res.json({ user: publicUser(req.user) });
-});
+app.post('/api/auth/request-reset', rateLimit(20, 60_000), asyncHandler(async (req, res) => {
+  const { email = '', username = '' } = req.body || {};
+  const emailTrim = email.trim();
+  const usernameTrim = username.trim().toLowerCase();
+  let user = null;
+  if (emailTrim) user = await User.findOne({ email: emailTrim });
+  if (!user && usernameTrim) user = await User.findOne({ username: usernameTrim });
+  if (user) {
+    await issuePasswordReset(user);
+  }
+  res.json({ ok: true });
+}));
+
+app.post('/api/auth/reset', rateLimit(40, 60_000), asyncHandler(async (req, res) => {
+  const { token = '', password = '' } = req.body || {};
+  if (!token || !password) return res.status(400).json({ error: 'Token and password are required' });
+  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  await PasswordResetToken.deleteExpired();
+  const tokenHash = hashToken(token);
+  const record = await PasswordResetToken.findByTokenHash(tokenHash);
+  if (!record || record.used) return res.status(400).json({ error: 'Invalid or expired token' });
+  if (record.expiresAt && record.expiresAt.getTime() <= Date.now()) {
+    await PasswordResetToken.markUsed(record.id);
+    return res.status(400).json({ error: 'Reset token has expired' });
+  }
+  const user = await User.findById(record.userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  user.passwordHash = await bcrypt.hash(password, 10);
+  await user.save();
+  await PasswordResetToken.markUsed(record.id);
+  res.json({ ok: true });
+}));
+
+app.post('/api/auth/verify-otp', rateLimit(40, 60_000), asyncHandler(async (req, res) => {
+  const { challengeId = '', code = '' } = req.body || {};
+  if (!challengeId || !code) return res.status(400).json({ error: 'Challenge and code are required' });
+  const challenge = await OtpChallenge.findByChallengeId(challengeId);
+  if (!challenge) return res.status(400).json({ error: 'Challenge expired or invalid' });
+  if (challenge.expiresAt && challenge.expiresAt.getTime() <= Date.now()) {
+    await OtpChallenge.delete(challengeId);
+    return res.status(400).json({ error: 'Code expired' });
+  }
+  if (challenge.attempts >= MAX_OTP_ATTEMPTS) {
+    await OtpChallenge.delete(challengeId);
+    return res.status(429).json({ error: 'Too many attempts. Please log in again.' });
+  }
+  const matches = hashOtpCode(challenge.challengeId, code) === challenge.codeHash;
+  if (!matches) {
+    await OtpChallenge.incrementAttempts(challengeId);
+    return res.status(401).json({ error: 'Invalid verification code' });
+  }
+  await OtpChallenge.delete(challengeId);
+  const user = await User.findById(challenge.userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  await setSession(req, res, user.id);
+  res.json({ user: publicUser(user) });
+}));
+
+app.get('/api/security/csrf', authRequired, asyncHandler(async (req, res) => {
+  const token = await rotateCsrfToken(req, res, req.sessionRecord);
+  res.json({ token });
+}));
 
 // Profile & settings
-app.post('/api/profile/about', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/profile/about', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { displayName = '', unit = '', bio = '' } = req.body || {};
   req.user.profile.displayName = displayName || req.user.username;
   req.user.profile.unit = unit;
@@ -168,7 +402,7 @@ app.post('/api/profile/about', authRequired, asyncHandler(async (req, res) => {
   await req.user.save();
   res.json({ user: publicUser(req.user) });
 }));
-app.post('/api/profile/contact', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/profile/contact', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { email = '', phone = '', preferred = 'email' } = req.body || {};
   req.user.contact.email = email;
   req.user.contact.phone = phone;
@@ -176,14 +410,14 @@ app.post('/api/profile/contact', authRequired, asyncHandler(async (req, res) => 
   await req.user.save();
   res.json({ user: publicUser(req.user) });
 }));
-app.post('/api/profile/prefs', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/profile/prefs', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { emailUpdates = false, communityVisible = true } = req.body || {};
   req.user.prefs.emailUpdates = !!emailUpdates;
   req.user.prefs.communityVisible = !!communityVisible;
   await req.user.save();
   res.json({ user: publicUser(req.user) });
 }));
-app.post('/api/settings', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/settings', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   req.user.settings = req.body || {};
   await req.user.save();
   res.json({ ok: true });
@@ -195,7 +429,7 @@ app.get('/api/profile/activity', authRequired, asyncHandler(async (req, res) => 
   res.json({ requests: userReqs, posts: userPosts });
 }));
 
-app.post('/api/forms/cleaning', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/forms/cleaning', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { name = req.user.username, address = '', date = '', type = '' } = req.body || {};
   const err = requireFields({ address, date, type }, { address: { min: 3 }, date: { min: 2 }, type: { min: 2 } });
   if (err) return res.status(400).json({ error: err });
@@ -204,7 +438,7 @@ app.post('/api/forms/cleaning', authRequired, asyncHandler(async (req, res) => {
   await req.user.save();
   res.status(201).json(rec);
 }));
-app.post('/api/forms/repairs', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/forms/repairs', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { name = req.user.username, address = '', issue = '' } = req.body || {};
   const err = requireFields({ address, issue }, { address: { min: 3 }, issue: { min: 3 } });
   if (err) return res.status(400).json({ error: err });
@@ -213,7 +447,7 @@ app.post('/api/forms/repairs', authRequired, asyncHandler(async (req, res) => {
   await req.user.save();
   res.status(201).json(rec);
 }));
-app.post('/api/forms/message', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/forms/message', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { message = '' } = req.body || {};
   const rec = await Request.create({ userId: req.user.id, type: 'message', name: req.user.username, message });
   res.status(201).json(rec);
@@ -227,7 +461,7 @@ app.get('/api/community', authRequired, asyncHandler(async (req, res) => {
   const list = await CommunityPost.find();
   res.json(list);
 }));
-app.post('/api/community', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/community', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { title = '', message = '' } = req.body || {};
   if (!message.trim()) return res.status(400).json({ error: 'Message required' });
   const post = await CommunityPost.create({
@@ -240,7 +474,7 @@ app.post('/api/community', authRequired, asyncHandler(async (req, res) => {
   await req.user.save();
   res.status(201).json(post);
 }));
-app.post('/api/community/:id/comments', authRequired, asyncHandler(async (req, res) => {
+app.post('/api/community/:id/comments', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const post = await CommunityPost.findById(req.params.id);
   if (!post) return res.status(404).json({ error: 'Post not found' });
   const { message = '' } = req.body || {};
@@ -310,8 +544,8 @@ async function seedDemoUsers() {
   const existing = await User.findOne({ username: 'resident123' });
   if (existing) return;
   const demo = [
-    { username: 'resident123', role: 'resident', email: 'resident@example.com', password: 'resident123' },
-    { username: 'landlord123', role: 'landlord', email: 'landlord@example.com', password: 'landlord123' },
+    { username: 'resident123', role: 'resident', email: 'resident@example.com', phone: '+15551112222', password: 'resident123' },
+    { username: 'landlord123', role: 'landlord', email: 'landlord@example.com', phone: '+15552223333', password: 'landlord123' },
   ];
   for (const d of demo) {
     const hash = await bcrypt.hash(d.password, 10);
@@ -321,7 +555,7 @@ async function seedDemoUsers() {
       role: d.role,
       passwordHash: hash,
       profile: { displayName: d.username },
-      contact: { email: d.email },
+      contact: { email: d.email, phone: d.phone },
     });
   }
 }

@@ -41,6 +41,35 @@ CREATE TABLE IF NOT EXISTS sessions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   sid VARCHAR(255) UNIQUE NOT NULL,
   user_id INT NOT NULL,
+  csrf_digest CHAR(64) NOT NULL,
+  ip_address VARCHAR(255) DEFAULT NULL,
+  user_agent VARCHAR(500) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  expires_at TIMESTAMP NULL
+  last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP NULL,
+  INDEX idx_sessions_sid (sid),
+  INDEX idx_sessions_user (user_id)
+);
+
+CREATE TABLE IF NOT EXISTS password_resets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  token_hash CHAR(64) NOT NULL UNIQUE,
+  delivery VARCHAR(50) DEFAULT 'email',
+  expires_at TIMESTAMP NOT NULL,
+  used TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_password_resets_user (user_id)
+);
+
+CREATE TABLE IF NOT EXISTS otp_challenges (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  challenge_id CHAR(64) NOT NULL UNIQUE,
+  code_hash CHAR(64) NOT NULL,
+  delivery VARCHAR(50) DEFAULT 'sms',
+  expires_at TIMESTAMP NOT NULL,
+  attempts INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_otp_user (user_id)
 );

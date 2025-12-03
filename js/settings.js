@@ -2,6 +2,10 @@
 window.addEventListener('DOMContentLoaded', async () => {
   const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  const getCsrfToken = () => {
+    const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+  };
 
   const form = $('#settingsForm');
   const msg = $('#settingsMsg');
@@ -334,6 +338,8 @@ window.addEventListener('DOMContentLoaded', async () => {
       options.headers || {},
       token ? { 'Authorization': `Bearer ${token}` } : {}
     );
+    const csrf = getCsrfToken();
+    if (csrf) headers['X-CSRF-Token'] = csrf;
     try {
       const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
       if (res.status === 401) {

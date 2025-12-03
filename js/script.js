@@ -274,6 +274,15 @@ window.addEventListener('storage', (e) => {
     }
   });
 
+  const getCsrfToken = () => {
+    const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+  };
+  const csrfHeaders = (headers = {}) => {
+    const token = getCsrfToken();
+    return token ? { ...headers, 'X-CSRF-Token': token } : { ...headers };
+  };
+
   const now = () => new Date().toLocaleString();
 
   const addLogItem = (ul, html) => {
@@ -300,7 +309,7 @@ window.addEventListener('storage', (e) => {
       const formData = new FormData(cleaningForm);
       const response = await fetch("/api/forms/cleaning", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: csrfHeaders({ "Content-Type": "application/json" }),
         credentials: "include",
         body: JSON.stringify(Object.fromEntries(formData))
       });
@@ -343,7 +352,7 @@ window.addEventListener('storage', (e) => {
       const formData = new FormData(repairForm);
       const response = await fetch("/api/forms/repairs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: csrfHeaders({ "Content-Type": "application/json" }),
         credentials: "include",
         body: JSON.stringify(Object.fromEntries(formData))
       });
@@ -386,7 +395,7 @@ window.addEventListener('storage', (e) => {
       const formData = new FormData(communityForm);
       const response = await fetch("/api/forms/message", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: csrfHeaders({ "Content-Type": "application/json" }),
         credentials: "include",
         body: JSON.stringify(Object.fromEntries(formData))
       });

@@ -127,10 +127,27 @@ export const CommunityPost = {
   }
 };
 
+const mapSessionRow = (row) => {
+  if (!row) return null;
+  return {
+    sid: row.sid,
+    userId: row.user_id,
+    csrfDigest: row.csrf_digest,
+    expiresAt: row.expires_at ? new Date(row.expires_at) : null,
+    lastSeen: row.last_seen ? new Date(row.last_seen) : null,
+    ipAddress: row.ip_address,
+    userAgent: row.user_agent,
+  };
+};
+
 export const Session = {
-  async create(data) {
-    await db.query('INSERT INTO sessions (sid, user_id) VALUES (?, ?)', [data.sid, data.userId]);
-    return { sid: data.sid, userId: data.userId };
+  async create({ sid, userId, csrfDigest, expiresAt, ipAddress = null, userAgent = null }) {
+    await db.query(
+      `INSERT INTO sessions (sid, user_id, csrf_digest, expires_at, ip_address, user_agent)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [sid, userId, csrfDigest, expiresAt ? new Date(expiresAt) : null, ipAddress, userAgent]
+    );
+    return { sid, userId };
   },
   async deleteOne(filter = {}) {
     if (filter.sid) await db.query('DELETE FROM sessions WHERE sid = ?', [filter.sid]);
@@ -138,15 +155,84 @@ export const Session = {
   async deleteMany(filter = {}) {
     if (filter.userId) await db.query('DELETE FROM sessions WHERE user_id = ?', [filter.userId]);
   },
-  async findOne(filter = {}) {
-    if (filter.sid) {
-      const [rows] = await db.query('SELECT * FROM sessions WHERE sid = ? LIMIT 1', [filter.sid]);
-      const r = rows[0];
-      if (!r) return null;
-      return { sid: r.sid, userId: r.user_id };
-    }
-    return null;
+  async findBySid(sid) {
+    const [rows] = await db.query('SELECT * FROM sessions WHERE sid = ? LIMIT 1', [sid]);
+    return mapSessionRow(rows[0]);
+  },
+  async touch(sid, expiresAt) {
+    await db.query('UPDATE sessions SET expires_at = ?, last_seen = CURRENT_TIMESTAMP WHERE sid = ?', [expiresAt, sid]);
+  },
+  async updateCsrf(sid, csrfDigest) {
+    await db.query('UPDATE sessions SET csrf_digest = ? WHERE sid = ?', [csrfDigest, sid]);
   }
 };
 
-export const models = { User, Request, CommunityPost, Session };
+const mapResetRow = (row) => {
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    tokenHash: row.token_hash,
+    delivery: row.delivery,
+    expiresAt: row.expires_at ? new Date(row.expires_at) : null,
+    used: !!row.used,
+  };
+};
+
+export const PasswordResetToken = {
+  async create({ userId, tokenHash, delivery = 'email', expiresAt }) {
+    const [result] = await db.query(
+      `INSERT INTO password_resets (user_id, token_hash, delivery, expires_at) VALUES (?, ?, ?, ?)`,
+      [userId, tokenHash, delivery, expiresAt]
+    );
+    return result.insertId;
+  },
+  async findByTokenHash(tokenHash) {
+    const [rows] = await db.query('SELECT * FROM password_resets WHERE token_hash = ? LIMIT 1', [tokenHash]);
+    return mapResetRow(rows[0]);
+  },
+  async markUsed(id) {
+    await db.query('UPDATE password_resets SET used = 1 WHERE id = ?', [id]);
+  },
+  async deleteExpired() {
+    await db.query('DELETE FROM password_resets WHERE used = 1 OR expires_at < NOW()');
+  }
+};
+
+const mapOtpRow = (row) => {
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    challengeId: row.challenge_id,
+    codeHash: row.code_hash,
+    delivery: row.delivery,
+    expiresAt: row.expires_at ? new Date(row.expires_at) : null,
+    attempts: row.attempts || 0,
+  };
+};
+
+export const OtpChallenge = {
+  async create({ userId, challengeId, codeHash, delivery = 'sms', expiresAt }) {
+    await db.query(
+      `INSERT INTO otp_challenges (user_id, challenge_id, code_hash, delivery, expires_at) VALUES (?, ?, ?, ?, ?)`,
+      [userId, challengeId, codeHash, delivery, expiresAt]
+    );
+    return { challengeId };
+  },
+  async findByChallengeId(challengeId) {
+    const [rows] = await db.query('SELECT * FROM otp_challenges WHERE challenge_id = ? LIMIT 1', [challengeId]);
+    return mapOtpRow(rows[0]);
+  },
+  async incrementAttempts(challengeId) {
+    await db.query('UPDATE otp_challenges SET attempts = attempts + 1 WHERE challenge_id = ?', [challengeId]);
+  },
+  async delete(challengeId) {
+    await db.query('DELETE FROM otp_challenges WHERE challenge_id = ?', [challengeId]);
+  },
+  async deleteExpired() {
+    await db.query('DELETE FROM otp_challenges WHERE expires_at < NOW() OR attempts >= 5');
+  }
+};
+
+export const models = { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge };

@@ -1,5 +1,9 @@
 window.addEventListener('DOMContentLoaded', () => {
   const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
+  const getCsrfToken = () => {
+    const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+  };
 
   const username = (localStorage.getItem('username') || 'User').trim();
   const role = (localStorage.getItem('role') || 'resident').toLowerCase();
@@ -181,6 +185,8 @@ window.addEventListener('DOMContentLoaded', () => {
       options.headers || {},
       token ? { 'Authorization': `Bearer ${token}` } : {}
     );
+    const csrf = getCsrfToken();
+    if (csrf) headers['X-CSRF-Token'] = csrf;
     const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
     if (res.status === 401) {
       toast('Session expired. Please log in again.');

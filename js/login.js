@@ -9,9 +9,13 @@
   };
   const MAX_ATTEMPTS = 5;
   const LOCK_SECONDS = 30;
+  const getCsrfToken = () => {
+    const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+  };
 
-  const $  = sel => document.querySelector(sel);
-  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const $  = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
   const form        = $('#loginForm');
   const usernameEl  = $('#username');
   const passwordEl  = $('#password');
@@ -26,7 +30,6 @@
   const otpCodeEl   = $('#otpCode');
   const otpSubmit   = $('#otpSubmitBtn');
   const otpBack     = $('#otpBackBtn');
-
   const forgotLink  = $('#forgotPassword');
 
   let pendingLogin = null;
@@ -38,7 +41,6 @@
   showPwBtn?.addEventListener('click', togglePassword);
   passwordEl?.addEventListener('keydown', capsDetector);
   passwordEl?.addEventListener('keyup', capsDetector);
-
   roleEl?.addEventListener('change', () => {
     if (!usernameEl) return;
     usernameEl.placeholder = roleEl.value === 'landlord'
@@ -46,99 +48,133 @@
       : 'Resident username';
   });
 
-  forgotLink?.addEventListener('click', (e) => {
-    e.preventDefault();
-    toast('Reset flow not implemented yet. (Create /auth/request-reset)');
-  });
-
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (isLocked()) return;
-
-    clearMsg();
-    const { username, password, role } = readForm();
-    const valid = validate({ username, password });
-    if (!valid) return;
-
-    setLoading(true);
-    setLoading(true);
-
-    try {
-      const res = await fetchJSON('/auth/login', {
-        body: JSON.stringify({ username, password, role }),
-        credentials: 'include'
-      });
-
-      if (res && res.ok) {
-      if (res && res.ok) {
-        const data = await res.json();
-        if (data.require2FA) {
-          pendingLogin = { username, role, tmpToken: data.tmpToken || null };
-          showOTP();
-          setLoading(false);
-          return;
-        }
-        completeLogin({ token: data.token, username, role });
-      }
-        return;
-      }
-
-      if (DEMO[role] && password === DEMO[role].password) {
-        completeLogin({ token: `demo.${role}.${Date.now()}`, username, role, isDemo:true });
-
-      failAttempt('Invalid credentials. Please try again.');
-    } catch (err) {
-      // network or server error -> fallback to demo only if credentials match
-      if (DEMO[role] && password === DEMO[role].password) {
-      failAttempt('Invalid credentials. Please try again.');
-    } catch (err) {
-      if (DEMO[role] && password === DEMO[role].password) {
-    } finally {
-      setLoading(false);
-    }
-  });
-
-    }
-  });
-
-  otpSubmit?.addEventListener('click', async () => {er the 6-digit code.', false);
-
-    setLoading(true);
-    try {
-    setLoading(true);
-    try {
-      if (pendingLogin.tmpToken) {
-        const res = await fetchJSON('/auth/verify-otp', {
-          method: 'POST',
-          body: JSON.stringify({ code, tmpToken: pendingLogin.tmpToken })
-        });
-        if (res && res.ok) {
-          const data = await res.json();
-          completeLogin({ token: data.token, username: pendingLogin.username, role: pendingLogin.role });
-          return;
-        }
-        setMsg('Invalid code. Please try again.', false);
-      } else {
-        if (code === '000000') {
-          setMsg('Invalid code. Try 000000 (demo).', false);
-        }
-      }
-    } catch {
-      setMsg('Network error. Please retry.', false);
-    } finally {
-      setLoading(false);
-    }
-  });
-
+  forgotLink?.addEventListener('click', handleForgotPassword);
+  form?.addEventListener('submit', handleLoginSubmit);
+  otpSubmit?.addEventListener('click', handleOtpSubmit);
   otpBack?.addEventListener('click', () => {
     pendingLogin = null;
     hideOTP();
   });
 
-    hideOTP();
-  });
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+    if (isLocked()) return;
+    const emailOrUser = window.prompt('Enter the email or username for your account:');
+    if (!emailOrUser) return;
+    setMsg('Sending reset instructions…', true);
+    try {
+      const payload = /\S+@\S+\.\S+/.test(emailOrUser)
+        ? { email: emailOrUser.trim() }
+        : { username: emailOrUser.trim() };
+      const res = await fetchJSON('/auth/request-reset', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'include'
+      });
+      if (!res?.ok) throw new Error('Reset request failed');
+      toast('If the account exists, a reset code was sent via email/SMS.');
+      const token = window.prompt('Enter the reset code you received (or leave blank to skip):');
+      if (!token) return;
+      const newPassword = window.prompt('Enter a new password (min 6 characters):');
+      if (!newPassword || newPassword.length < 6) {
+        toast('Password must be at least 6 characters.');
+        return;
+      }
+      const confirmPw = window.prompt('Confirm the new password:');
+      if (newPassword !== confirmPw) {
+        toast('Passwords did not match.');
+        return;
+      }
+      await submitPasswordReset(token.trim(), newPassword.trim());
+    } catch (err) {
+      console.error(err);
+      setMsg('Unable to request a reset right now. Please try again later.', false);
+    }
+  }
 
-  function readForm() {oleEl?.value || 'resident').trim();
+  async function handleLoginSubmit(e) {
+    e.preventDefault();
+    if (isLocked()) return;
+
+    clearMsg();
+    const { username, password, role } = readForm();
+    if (!validate({ username, password })) return;
+
+    setLoading(true);
+    try {
+      const res = await fetchJSON('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password, role }),
+        credentials: 'include'
+      });
+      if (res?.ok) {
+        const data = await res.json();
+        if (data.require2FA && data.challengeId) {
+          pendingLogin = { username, role, challengeId: data.challengeId };
+          showOTP();
+          setLoading(false);
+          return;
+        }
+        completeLogin({ token: data.token || 'session', username: data.user?.username || username, role: data.user?.role || role });
+        return;
+      }
+      if (DEMO[role] && password === DEMO[role].password) {
+        completeLogin({ token: `demo.${role}.${Date.now()}`, username, role, isDemo: true });
+        return;
+      }
+      if (res?.status === 401) {
+        failAttempt('Invalid credentials. Please try again.');
+      } else {
+        const data = await res?.json().catch(() => ({}));
+        setMsg(data?.error || 'Unable to sign in right now.', false);
+      }
+    } catch (err) {
+      if (DEMO[role] && password === DEMO[role].password) {
+        completeLogin({ token: `demo.${role}.${Date.now()}`, username, role, isDemo: true });
+      } else {
+        setMsg('Unable to reach the server. Please check your connection.', false);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleOtpSubmit() {
+    if (!pendingLogin) return hideOTP();
+    const code = (otpCodeEl?.value || '').trim();
+    if (!code || code.length < 6) return setMsg('Enter the 6-digit verification code.', false);
+    setLoading(true);
+    try {
+      const res = await fetchJSON('/auth/verify-otp', {
+        method: 'POST',
+        body: JSON.stringify({ challengeId: pendingLogin.challengeId, code }),
+        credentials: 'include'
+      });
+      if (res?.ok) {
+        const data = await res.json();
+        const context = { ...pendingLogin };
+        pendingLogin = null;
+        hideOTP();
+        completeLogin({
+          token: data.token || 'session',
+          username: data.user?.username || context.username,
+          role: data.user?.role || context.role
+        });
+        return;
+      }
+      const data = await res?.json().catch(() => ({}));
+      setMsg(data?.error || 'Invalid code. Please try again.', false);
+    } catch {
+      setMsg('Unable to verify the code. Please try again.', false);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function readForm() {
+    const username = (usernameEl?.value || '').trim();
+    const password = (passwordEl?.value || '').trim();
+    const role = (roleEl?.value || 'resident').trim();
     return { username, password, role };
   }
 
@@ -182,7 +218,7 @@
     const visible = passwordEl.type === 'text';
     passwordEl.type = visible ? 'password' : 'text';
     showPwBtn?.setAttribute('aria-pressed', String(!visible));
-    showPwBtn && (showPwBtn.textContent = visible ? 'Show' : 'Hide');
+    if (showPwBtn) showPwBtn.textContent = visible ? 'Show' : 'Hide';
   }
 
   function capsDetector(e) {
@@ -192,18 +228,17 @@
   }
 
   function prefill() {
-    // Keep last attempted role/user
     const lastRole = localStorage.getItem('lastRole');
     const lastUser = localStorage.getItem('lastUser');
-  function prefill() {
-    const lastRole = localStorage.getItem('lastRole');
-    const lastUser = localStorage.getItem('lastUser');
+    if (roleEl && lastRole) roleEl.value = lastRole;
+    if (usernameEl && lastUser) usernameEl.value = lastUser;
+
     const remembered = localStorage.getItem('rememberedUser');
     if (remembered) {
       try {
-        const u = JSON.parse(remembered);
-        if (usernameEl) usernameEl.value = u.username || usernameEl.value;
-        if (roleEl && u.role) roleEl.value = u.role;
+        const saved = JSON.parse(remembered);
+        if (usernameEl) usernameEl.value = saved.username || usernameEl.value;
+        if (roleEl && saved.role) roleEl.value = saved.role;
         if (rememberEl) rememberEl.checked = true;
       } catch {}
     }
@@ -241,13 +276,13 @@
     const now = Date.now();
     if (until && until > now) {
       return { locked: true, until, remaining: Math.ceil((until - now) / 1000) };
-      return { locked: true, until, remaining: Math.ceil((until - now) / 1000) };
     }
     if (until && until <= now) {
       localStorage.removeItem('loginLockedUntil');
       localStorage.setItem('loginFails', '0');
     }
     return { locked: false, until: 0, remaining: 0 };
+  }
 
   function tickLock(until) {
     updateLockMsg();
@@ -274,7 +309,9 @@
   }
 
   function lockUI(locked) {
-    [usernameEl, passwordEl, roleEl, rememberEl, showPwBtn, submitBtn].forEach(el => el && (el.disabled = locked));
+    [usernameEl, passwordEl, roleEl, rememberEl, showPwBtn, submitBtn].forEach((el) => {
+      if (el) el.disabled = locked;
+    });
   }
 
   function setLoading(loading) {
@@ -286,9 +323,8 @@
   }
 
   function showOTP() {
-    if (!otpSection) return;
     form?.classList.add('hidden');
-    otpSection.classList.remove('hidden');
+    otpSection?.classList.remove('hidden');
     otpCodeEl?.focus();
     setMsg('A verification code was sent to your email/phone.', true);
   }
@@ -296,26 +332,18 @@
   function hideOTP() {
     otpSection?.classList.add('hidden');
     form?.classList.remove('hidden');
+    otpCodeEl && (otpCodeEl.value = '');
     clearMsg();
   }
 
   function completeLogin({ token, username, role, isDemo = false }) {
-    // Persist auth
-    localStorage.setItem('token', token);
+    localStorage.setItem('token', token || 'session');
     localStorage.setItem('username', username);
     localStorage.setItem('role', role);
     localStorage.setItem('isDemo', isDemo ? 'true' : 'false');
+    localStorage.setItem('lastRole', role);
+    localStorage.setItem('lastUser', username);
 
-    // Remember me / last attempt
-    localStorage.setItem('lastRole', role);
-    localStorage.setItem('lastUser', username);
-    if (rememberEl?.checked) {
-      localStorage.setItem('rememberedUser', JSON.stringify({ username, role }));
-    } else {
-      localStorage.removeItem('rememberedUser');
-    }
-    localStorage.setItem('lastRole', role);
-    localStorage.setItem('lastUser', username);
     if (rememberEl?.checked) {
       localStorage.setItem('rememberedUser', JSON.stringify({ username, role }));
     } else {
@@ -329,11 +357,19 @@
 
     const defaultLanding = getDefaultLanding();
     const fallback = role === 'landlord' ? DEMO.landlord.redirect : DEMO.resident.redirect;
-    const to = defaultLanding || fallback;pSettings');
+    const to = defaultLanding || fallback;
+    setTimeout(() => { window.location.href = to; }, 300);
+  }
+
+  function getDefaultLanding() {
+    try {
+      const raw = localStorage.getItem('appSettings');
       if (!raw) return '';
-      const s = JSON.parse(raw);
-      return s?.general?.defaultLanding || '';
-    } catch { return ''; }
+      const settings = JSON.parse(raw);
+      return settings?.general?.defaultLanding || '';
+    } catch {
+      return '';
+    }
   }
 
   function setMsg(text, ok) {
@@ -349,14 +385,38 @@
     if (!msgDiv) return;
     msgDiv.textContent = '';
     msgDiv.className = '';
+    msgDiv.removeAttribute('role');
+    msgDiv.removeAttribute('aria-live');
+  }
+
+  async function submitPasswordReset(token, password) {
+    try {
+      const res = await fetchJSON('/auth/reset', {
+        method: 'POST',
+        body: JSON.stringify({ token, password }),
+        credentials: 'include'
+      });
+      if (res?.ok) {
+        toast('✅ Password reset! Please sign in with your new password.');
+        return true;
+      }
+      const data = await res?.json().catch(() => ({}));
+      setMsg(data?.error || 'Could not reset password. Please check the code and try again.', false);
+    } catch {
+      setMsg('Unable to reset the password right now. Please try again.', false);
+    }
+    return false;
   }
 
   async function fetchJSON(path, options = {}) {
     try {
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      const csrf = getCsrfToken();
+      if (csrf) headers['X-CSRF-Token'] = csrf;
       const res = await fetch(`${API_BASE}${path}`, {
-        headers: { 'Content-Type': 'application/json' },
-        credentials: options.credentials || 'include',
-        ...options
+        ...options,
+        headers,
+        credentials: options.credentials || 'include'
       });
       return res;
     } catch {
@@ -364,12 +424,16 @@
     }
   }
 
-  function toast(t) {
-    if (typeof window.showToast === 'function') return window.showToast(t);
+  function toast(text) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(text);
+      return;
+    }
     const el = document.createElement('div');
-    el.className = 'toast'; el.textContent = t;
+    el.className = 'toast';
+    el.textContent = text;
     document.body.appendChild(el);
-    setTimeout(()=> el.classList.add('show'), 60);
-    setTimeout(()=> el.remove(), 3000);
+    setTimeout(() => el.classList.add('show'), 60);
+    setTimeout(() => el.remove(), 3200);
   }
 })();

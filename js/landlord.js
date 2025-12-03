@@ -10,6 +10,10 @@
   };
 
   const API_BASE = (document.body?.getAttribute("data-api-base") || window.API_BASE || "/api");
+  const getCsrfToken = () => {
+    const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : "";
+  };
   const HAS_APP_STORE = !!(window.APP && APP.store && typeof APP.store.getList === "function");
 
   const STATUS = { open: "Open", in_progress: "In Progress", done: "Done" };
@@ -477,6 +481,8 @@
         options.headers || {},
         token ? { Authorization: `Bearer ${token}` } : {}
       );
+      const csrf = getCsrfToken();
+      if (csrf) headers["X-CSRF-Token"] = csrf;
       const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
       if (res.status === 401) {
         toast("Session expired. Please log in again.");

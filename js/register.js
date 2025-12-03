@@ -1,5 +1,9 @@
 window.addEventListener('DOMContentLoaded', () => {
   const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
+  const getCsrfToken = () => {
+    const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+  };
 
   const form       = document.getElementById('registerForm');
   const msg        = document.getElementById('registerMsg');
@@ -48,9 +52,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
     lock(true);
     try {
+      const headers = { 'Content-Type':'application/json' };
+      const csrf = getCsrfToken();
+      if (csrf) headers['X-CSRF-Token'] = csrf;
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
-        headers: { 'Content-Type':'application/json' },
+        headers,
         body: JSON.stringify({ username, password, role })
       });
 
