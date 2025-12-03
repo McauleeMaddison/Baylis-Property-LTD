@@ -23,7 +23,6 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(root, { index: false }));
 
-// Simple in-memory rate limiter (per IP)
 const rateBuckets = new Map();
 const rateLimit = (max = 100, windowMs = 60_000) => (req, res, next) => {
   const now = Date.now();
@@ -38,7 +37,6 @@ const rateLimit = (max = 100, windowMs = 60_000) => (req, res, next) => {
   next();
 };
 
-// Helpers
 function uid() { return crypto.randomUUID(); }
 function parseCookies(req) {
   const header = req.headers.cookie;
@@ -197,7 +195,6 @@ app.get('/api/profile/activity', authRequired, asyncHandler(async (req, res) => 
   res.json({ requests: userReqs, posts: userPosts });
 }));
 
-// Requests
 app.post('/api/forms/cleaning', authRequired, asyncHandler(async (req, res) => {
   const { name = req.user.username, address = '', date = '', type = '' } = req.body || {};
   const err = requireFields({ address, date, type }, { address: { min: 3 }, date: { min: 2 }, type: { min: 2 } });
@@ -226,7 +223,6 @@ app.get('/api/requests', authRequired, asyncHandler(async (req, res) => {
   res.json(list);
 }));
 
-// Community
 app.get('/api/community', authRequired, asyncHandler(async (req, res) => {
   const list = await CommunityPost.find();
   res.json(list);
@@ -254,9 +250,8 @@ app.post('/api/community/:id/comments', authRequired, asyncHandler(async (req, r
   res.status(201).json(post.comments[0]);
 }));
 
-// File routes
 const send = (res, file) => res.sendFile(path.join(root, file));
-// Root redirects role-based: landlord -> /landlord, resident -> /resident, otherwise to /login
+
 app.get('/', asyncHandler(async (req, res) => {
   const user = await getUserFromReq(req);
   if (!user) return res.redirect('/login');
@@ -266,11 +261,9 @@ app.get('/', asyncHandler(async (req, res) => {
 app.get('/login', (req, res) => send(res, 'login.html'));
 app.get('/register', (req, res) => send(res, 'register.html'));
 
-// Protected dashboards — require a valid session
 app.get('/resident', async (req, res) => {
   const user = await getUserFromReq(req);
   if (!user) return res.redirect('/login');
-  // if landlord accidentally hits resident, send to landlord dashboard
   if (user.role === 'landlord') return res.redirect('/landlord');
   return send(res, 'resident.html');
 });
@@ -281,7 +274,6 @@ app.get('/landlord', async (req, res) => {
   return send(res, 'landlord.html');
 });
 
-// Other pages require auth as well
 app.get('/profile', async (req, res) => {
   const user = await getUserFromReq(req);
   if (!user) return res.redirect('/login');
@@ -293,7 +285,6 @@ app.get('/settings', async (req, res) => {
   return send(res, 'settings.html');
 });
 
-// Leave community public for now, but API actions require auth
 app.get('/community', (req, res) => send(res, 'community.html'));
 
 app.get('/*.html', (req, res) => send(res, req.path.replace(/^\//, '')));

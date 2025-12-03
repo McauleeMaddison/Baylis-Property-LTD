@@ -1,8 +1,6 @@
-// js/landlord.js
 (function () {
   "use strict";
 
-  // ---------- Small helpers ----------
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
   const toast = (t) => (typeof window.showToast === "function" ? window.showToast(t) : alert(t));
@@ -17,17 +15,14 @@
   const STATUS = { open: "Open", in_progress: "In Progress", done: "Done" };
   const prettyStatus = (s) => (s === "in_progress" ? "In Progress" : (s?.charAt(0).toUpperCase() + s?.slice(1)));
 
-  // DOM refs (all optional; code guards each)
   let ulClean, ulRepair, ulPosts,
       metricOpen, metricInProgress, metricDone, metricPosts,
       search, filterType, filterStatus, btnRefresh, btnExport,
       kanban;
 
-  // Canonical in-memory list of requests
   let allRequests = [];
   let currentFilter = { q: "", type: "all", status: "all" };
 
-  // ---------- Boot ----------
   window.addEventListener("DOMContentLoaded", async () => {
     // Gather refs
     ulClean  = $("#allCleaningRequests");
@@ -60,23 +55,19 @@
     await fetchRequests(false);
     renderAll();
 
-    // Posts metric
     await updatePostsMetric();
   });
 
-  // ---------- Data sources: APP.store → API → DOM harvest ----------
   async function fetchRequests(force) {
-    // 1) Try local APP.store first (preferred for offline and instant UX)
     if (HAS_APP_STORE) {
       const localReqs = readFromAppStore();
       if (localReqs.length) {
         allRequests = localReqs;
-        if (force) populateListsFromState(); // refresh the ULs if asked
+        if (force) populateListsFromState();
         return;
       }
     }
 
-    // 2) Try API
     const apiRes = await readFromAPI();
     if (apiRes.length) {
       allRequests = apiRes;
@@ -84,14 +75,12 @@
       return;
     }
 
-    // 3) Fallback: harvest from existing ULs
     const harvested = harvestFromLists();
     if (harvested.length) {
       allRequests = harvested;
       return;
     }
 
-    // 4) Final fallback: empty
     allRequests = [];
   }
 
@@ -131,13 +120,15 @@
     // Prefer APP.store community data if present
     if (metricPosts) {
       if (HAS_APP_STORE) {
+  async function updatePostsMetric() {
+    if (metricPosts) {
+      if (HAS_APP_STORE) {
         try {
           const posts = APP.store.getList("log:community") || [];
           metricPosts.textContent = String(posts.length);
           return;
         } catch {}
       }
-      // else try API
       try {
         const res = await authedFetch("/posts", { method: "GET" });
         if (res?.ok) {
@@ -146,17 +137,11 @@
           return;
         }
       } catch {}
-      // else fallback to DOM list
       metricPosts.textContent = String(ulPosts?.children?.length || 0);
     }
   }
 
-  // ---------- Rendering ----------
   function renderAll() {
-    const filtered = applyFilters(allRequests, currentFilter);
-    renderKanban(filtered);
-    recomputeMetrics(filtered);
-  }
 
   function populateListsFromState() {
     if (ulClean) ulClean.innerHTML = "";
@@ -207,6 +192,9 @@
     });
 
     // Group and insert cards
+      kanban.appendChild(wrap);
+    });
+
     const byStatus = groupBy(requests, (r) => r.status || "open");
     Object.entries(byStatus).forEach(([status, list]) => {
       const host = kanban.querySelector(`.kanban-list[data-status="${CSS_ESCAPE(status)}"]`);
@@ -219,11 +207,7 @@
     enableDnD();
   }
 
-  function makeCard(r) {
-    const card = document.createElement("div");
-    card.className = "kanban-card";
-    card.tabIndex = 0;
-    card.draggable = true;
+  function makeCard(r) {e;
 
     card.dataset.id = r.id;
     card.dataset.type = r.type;
@@ -325,21 +309,18 @@
         card.dataset.status = status;
         const badge = card.querySelector(".badge");
         if (badge) badge.textContent = prettyStatus(status);
-        const dest = kanban?.querySelector(`.kanban-list[data-status="${CSS_ESCAPE(status)}"]`);
+        if (badge) badge.textContent = prettyStatus(newStatus);
+        const dest = kanban?.querySelector(`.kanban-list[data-status="${CSS_ESCAPE(newStatus)}"]`);
         if (dest && card.parentElement !== dest) dest.appendChild(card);
       }
       recomputeMetrics(applyFilters(allRequests, currentFilter));
-      syncListBadge(id, status);
+      syncListBadge(id, newStatus);
     }
 
-    // If APP.store exists and no API, persist locally (best-effort)
     if (HAS_APP_STORE && !API_BASE) {
-      // We don't have stable IDs in legacy lists; skip deep persistence.
     }
 
-    // Try API persistence
     if (API_BASE) {
-      try {
         const res = await authedFetch(`/requests/${encodeURIComponent(id)}`, {
           method: "PATCH",
           body: JSON.stringify({ status })
@@ -383,7 +364,6 @@
     if (metricInProgress)  metricInProgress.textContent = String(counts.in_progress || 0);
     if (metricDone)        metricDone.textContent = String(counts.done || 0);
 
-    // Column pills
     ["open", "in_progress", "done"].forEach((k) => {
       const el = $("#count-" + k);
       if (el) el.textContent = String(items.filter((r) => r.status === k).length);
@@ -408,13 +388,12 @@
         return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
       }).join(",")
     ).join("\n");
+    ).join("\n");
 
-    // Prefer APP.store downloader
     if (HAS_APP_STORE && APP.store.download) {
       APP.store.download(`baylis-requests-${Date.now()}.csv`, csv, "text/csv");
       return;
     }
-    // Fallback
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = Object.assign(document.createElement("a"), { href: url, download: `baylis-requests-${Date.now()}.csv` });
@@ -422,9 +401,7 @@
     setTimeout(() => URL.revokeObjectURL(url), 300);
   }
 
-  // ---------- Utilities ----------
-  function normalizeReq(r) {
-    const type = (r.type === "repair") ? "repair" : "cleaning";
+  function normalizeReq(r) { "repair") ? "repair" : "cleaning";
     const status = normStatus(r.status);
     return {
       id: r._id || r.id || `${type}_${Math.random().toString(36).slice(2)}`,

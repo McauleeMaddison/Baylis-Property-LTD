@@ -6,7 +6,7 @@
   var body = document.body;
   if (!body) return;
   var required = (body.dataset && body.dataset.requiredRole) || '';
-  if (!required) return; // public page
+  if (!required) return;
 
   var token = localStorage.getItem('token');
   var role  = (localStorage.getItem('role') || '').toLowerCase();
@@ -22,12 +22,10 @@
 "use strict";
 
 window.addEventListener("DOMContentLoaded", () => {
-  /* ========== Shorthands ========== */
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
   const on = (el, ev, fn, opts) => el && el.addEventListener(ev, fn, opts);
 
-  /* ========== Refs ========== */
   const header        = $("#mainHeader");
   const hamburgerBtn  = document.querySelector("[data-hamb]");
   const navLinks      = document.querySelector("[data-links]");
@@ -37,12 +35,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const userDropdown  = $("#userDropdown");
   const logoutBtn     = $("#logoutBtn");
 
-  // Optional landlord gate (only present on certain pages)
   const landlordLoginForm = $("#landlordLoginForm");
   const landlordDashboard = $("#landlordDashboard");
   const landlordGate      = $("#landlordLoginGate");
 
-  /* ========== Role-aware nav visibility ========== */
   (function roleNav() {
     const role = (localStorage.getItem("role") || "").toLowerCase();
     if (!role) return;
@@ -52,7 +48,6 @@ window.addEventListener("DOMContentLoaded", () => {
     if (welcome) welcome.textContent = localStorage.getItem("username") || "User";
   })();
 
-  /* ========== Mobile nav ========== */
   const setNavOpen = (open) => {
     if (!navLinks || !hamburgerBtn) return;
     navLinks.classList.toggle("show", !!open);
@@ -63,35 +58,30 @@ window.addEventListener("DOMContentLoaded", () => {
 
   on(hamburgerBtn, "click", () => setNavOpen(navLinks?.dataset.open !== "true"));
 
-  // Auto-close nav on link click (mobile)
   on(navLinks, "click", (e) => {
     const link = e.target.closest("a");
     if (!link) return;
     setNavOpen(false);
   });
 
-  // Close nav with ESC
   on(document, "keydown", (e) => {
     if (e.key === "Escape") setNavOpen(false);
   });
 
-  // Close on outside click
   on(document, "click", (e) => {
     if (!navLinks || !hamburgerBtn) return;
     if (!navLinks.contains(e.target) && !hamburgerBtn.contains(e.target)) setNavOpen(false);
   });
 
-  /* ========== Dark mode (sync icon + persist + cross-tab sync) ========== */
   const updateDarkMode = (enabled) => {
     document.body.classList.toggle("dark", !!enabled);
     if (darkIcon) darkIcon.textContent = enabled ? "🌙" : "🌞";
     try { localStorage.setItem("darkMode", enabled ? "true" : "false"); } catch {}
   };
 
-   /* ===== Accent theme ===== */
-const applyAccent = (name) => {
+   const applyAccent = (name) => {
   if (!name || name === 'blue') {
-    document.documentElement.setAttribute('data-accent', 'blue'); // explicit default
+    document.documentElement.setAttribute('data-accent', 'blue');
   } else {
     document.documentElement.setAttribute('data-accent', name);
   }
@@ -100,7 +90,6 @@ const applyAccent = (name) => {
 
 applyAccent(localStorage.getItem('accent') || 'blue');
 
-// Click handlers for swatches
 document.querySelectorAll('[data-accent-option]').forEach(btn => {
   btn.addEventListener('click', () => {
     const choice = btn.getAttribute('data-accent-option');
@@ -109,7 +98,6 @@ document.querySelectorAll('[data-accent-option]').forEach(btn => {
   });
 });
 
-// Sync across tabs
 window.addEventListener('storage', (e) => {
   if (e.key === 'accent') applyAccent(e.newValue || 'blue');
 });
@@ -123,12 +111,10 @@ window.addEventListener('storage', (e) => {
   } else {
     updateDarkMode(darkEnabled);
   }
-  // Sync across tabs
   on(window, "storage", (e) => {
     if (e.key === "darkMode") updateDarkMode(e.newValue === "true");
   });
 
-  /* ========== Header auto-hide on scroll (throttled) ========== */
   if (header) {
     let lastY = window.scrollY;
     let ticking = false;
@@ -149,11 +135,10 @@ window.addEventListener('storage', (e) => {
 
   /* ========== Avatar dropdown (outside click + ESC + focus return) ========== */
   on(avatarBtn, "click", (e) => {
-    e.stopPropagation();
-    const expanded = avatarBtn.getAttribute("aria-expanded") === "true";
-    avatarBtn.setAttribute("aria-expanded", String(!expanded));
-    userDropdown?.classList.toggle("hidden");
-    if (!expanded) {
+    on(window, "scroll", onScroll, { passive: true });
+  }
+
+  on(avatarBtn, "click", (e) => {
       const first = userDropdown?.querySelector("a,button");
       first && first.focus?.();
     }
@@ -173,11 +158,10 @@ window.addEventListener('storage', (e) => {
       avatarBtn?.setAttribute("aria-expanded", "false");
       avatarBtn?.focus();
     }
+    }
   });
 
-  /* ========== Logout ========== */
   on(logoutBtn, "click", (e) => {
-    e.preventDefault();
     showToast("👋 Logged out successfully");
     setTimeout(() => {
       localStorage.removeItem("token");
@@ -185,17 +169,15 @@ window.addEventListener('storage', (e) => {
       localStorage.removeItem("username");
       window.location.href = "login.html";
     }, 900);
+    }, 900);
   });
 
-  /* ========== One-at-a-time form panels (accessible + deep-link) ========== */
   const panels = $$(".form-wrapper");
   const btns   = $$(".toggle-form-btn");
 
-  // Respect reduced motion
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  btns.forEach(btn => {
-    const targetId = btn.dataset.target;
+  btns.forEach(btn => {n.dataset.target;
     btn.setAttribute("aria-controls", targetId);
     btn.setAttribute("aria-expanded", "false");
     on(btn, "click", () => {
@@ -207,9 +189,10 @@ window.addEventListener('storage', (e) => {
         b.setAttribute("aria-expanded", String(open));
       });
     });
+      });
+    });
   });
 
-  // Open a panel if URL hash refers to it (e.g., index.html#repairForm)
   if (location.hash) {
     const id = location.hash.slice(1);
     if (document.getElementById(id)) {
@@ -219,9 +202,7 @@ window.addEventListener('storage', (e) => {
     }
   }
 
-  function openPanel(id) {
-    panels.forEach(p => {
-      if (p.id === id) slideToggle(p, true);
+  function openPanel(id) {deToggle(p, true);
       else slideToggle(p, false);
     });
   }
@@ -233,6 +214,9 @@ window.addEventListener('storage', (e) => {
     if (!open && isOpen) slideUp(el);
   }
 
+  function slideDown(el) {
+    if (prefersReduced) { el.classList.remove("hidden"); return; }
+    el.classList.remove("hidden");
   function slideDown(el) {
     if (prefersReduced) { el.classList.remove("hidden"); return; }
     el.classList.remove("hidden");
@@ -266,11 +250,7 @@ window.addEventListener('storage', (e) => {
     });
   }
 
-  /* ========== Toast (global, accessible) ========== */
-  window.showToast = function (msg) {
-    const el = document.createElement("div");
-    el.className = "toast";
-    el.setAttribute("role", "status");
+  window.showToast = function (msg) {;
     el.setAttribute("aria-live", "polite");
     el.textContent = msg;
     document.body.appendChild(el);
@@ -278,11 +258,10 @@ window.addEventListener('storage', (e) => {
     setTimeout(() => el.classList.remove("show"), 3200);
     setTimeout(() => el.remove(), 3600);
   };
+    setTimeout(() => el.remove(), 3600);
+  };
 
-  /* ========== Landlord login gate (optional section) ========== */
-  on(landlordLoginForm, "submit", (e) => {
-    e.preventDefault();
-    const u = $("#landlordUsername")?.value.trim();
+  on(landlordLoginForm, "submit", (e) => {e.trim();
     const p = $("#landlordPassword")?.value.trim();
     if (u === "admin" && p === "landlord123") {
       landlordDashboard?.classList.remove("hidden");
@@ -292,8 +271,9 @@ window.addEventListener('storage', (e) => {
       showToast("❌ Invalid credentials");
     }
   });
+    }
+  });
 
-  /* ========== Submission helpers (with optional local persistence) ========== */
   const now = () => new Date().toLocaleString();
 
   const addLogItem = (ul, html) => {
@@ -303,15 +283,11 @@ window.addEventListener('storage', (e) => {
     ul.prepend(li);
   };
 
-  // Simple persist utils
   const save = (k, arr) => { try { localStorage.setItem(k, JSON.stringify(arr)); } catch {} };
   const load = (k) => { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch { return []; } };
 
-  // Cleaning
   const cleaningForm = $("#cleaningForm");
-  on(cleaningForm, "submit", async (e) => {
-    e.preventDefault();
-    if (!cleaningForm.checkValidity()) return cleaningForm.reportValidity();
+  on(cleaningForm, "submit", async (e) => {rn cleaningForm.reportValidity();
     
     const msgEl = $("#cleaningMsg");
     const submitBtn = cleaningForm.querySelector("button[type='submit']");
@@ -351,13 +327,12 @@ window.addEventListener('storage', (e) => {
     }
   });
 
-  // Repair
+      if (submitBtn) submitBtn.textContent = originalText;
+    }
+  });
+
   const repairForm = $("#repairForm");
   on(repairForm, "submit", async (e) => {
-    e.preventDefault();
-    if (!repairForm.checkValidity()) return repairForm.reportValidity();
-    
-    const msgEl = $("#repairMsg");
     const submitBtn = repairForm.querySelector("button[type='submit']");
     const originalText = submitBtn?.textContent;
     
@@ -396,13 +371,12 @@ window.addEventListener('storage', (e) => {
   });
 
   // Community
+      if (submitBtn) submitBtn.textContent = originalText;
+    }
+  });
+
   const communityForm = $("#communityForm");
-  on(communityForm, "submit", async (e) => {
-    e.preventDefault();
-    if (!communityForm.checkValidity()) return communityForm.reportValidity();
-    
-    const msgEl = $("#communityMsg");
-    const submitBtn = communityForm.querySelector("button[type='submit']");
+  on(communityForm, "submit", async (e) => {ector("button[type='submit']");
     const originalText = submitBtn?.textContent;
     
     try {
@@ -440,12 +414,11 @@ window.addEventListener('storage', (e) => {
   });
 
   /* ========== Utils ========== */
-  function escapeHtml(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
+      if (submitBtn) submitBtn.textContent = originalText;
+    }
+  });
+
+  function escapeHtml(str) {t;")
       .replaceAll("'", "&#039;");
   }
 });

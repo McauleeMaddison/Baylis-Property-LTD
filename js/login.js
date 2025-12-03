@@ -10,11 +10,8 @@
   const MAX_ATTEMPTS = 5;
   const LOCK_SECONDS = 30;
 
-  // ---- El helpers
   const $  = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
-
-  // ---- Refs
   const form        = $('#loginForm');
   const usernameEl  = $('#username');
   const passwordEl  = $('#password');
@@ -25,30 +22,24 @@
   const submitBtn   = $('#submitBtn');
   const capsWarn    = $('#capsWarning');
 
-  // OTP step (optional)
   const otpSection  = $('#otpSection');
   const otpCodeEl   = $('#otpCode');
   const otpSubmit   = $('#otpSubmitBtn');
   const otpBack     = $('#otpBackBtn');
 
-  // Forgot password (optional)
   const forgotLink  = $('#forgotPassword');
 
-  // ---- State
-  let pendingLogin = null; // { username, role, tmpToken? }
+  let pendingLogin = null;
   let lockTimer = null;
 
-  // ---- Init UI (prefill & lock state)
   prefill();
   applyLockState();
 
-  // ---- Events
   showPwBtn?.addEventListener('click', togglePassword);
   passwordEl?.addEventListener('keydown', capsDetector);
   passwordEl?.addEventListener('keyup', capsDetector);
 
   roleEl?.addEventListener('change', () => {
-    // tiny UX: adjust username placeholder per role
     if (!usernameEl) return;
     usernameEl.placeholder = roleEl.value === 'landlord'
       ? 'Landlord username'
@@ -70,58 +61,52 @@
     if (!valid) return;
 
     setLoading(true);
+    setLoading(true);
 
     try {
-      // 1) Try real backend
       const res = await fetchJSON('/auth/login', {
-        method: 'POST',
         body: JSON.stringify({ username, password, role }),
         credentials: 'include'
       });
 
       if (res && res.ok) {
+      if (res && res.ok) {
         const data = await res.json();
-        // If backend demands OTP, pause here for 2FA
         if (data.require2FA) {
           pendingLogin = { username, role, tmpToken: data.tmpToken || null };
           showOTP();
           setLoading(false);
           return;
         }
-        // Otherwise, complete login
         completeLogin({ token: data.token, username, role });
+      }
         return;
       }
 
-      // 2) Graceful fallback to DEMO credentials (local only)
       if (DEMO[role] && password === DEMO[role].password) {
-        // No token in demo; still set a fake token so the app acts authenticated
         completeLogin({ token: `demo.${role}.${Date.now()}`, username, role, isDemo:true });
-        return;
-      }
 
       failAttempt('Invalid credentials. Please try again.');
     } catch (err) {
       // network or server error -> fallback to demo only if credentials match
       if (DEMO[role] && password === DEMO[role].password) {
-        completeLogin({ token: `demo.${role}.${Date.now()}`, username, role, isDemo:true });
-      } else {
-        failAttempt('Unable to reach server. Check your connection.');
-      }
+      failAttempt('Invalid credentials. Please try again.');
+    } catch (err) {
+      if (DEMO[role] && password === DEMO[role].password) {
     } finally {
       setLoading(false);
     }
   });
 
-  // OTP handlers (if you opt-in to 2FA)
-  otpSubmit?.addEventListener('click', async () => {
-    if (!pendingLogin) return hideOTP();
-    const code = (otpCodeEl?.value || '').trim();
-    if (!code || code.length < 6) return setMsg('Enter the 6-digit code.', false);
+    }
+  });
+
+  otpSubmit?.addEventListener('click', async () => {er the 6-digit code.', false);
 
     setLoading(true);
     try {
-      // If we had a tmpToken from login, verify against API; else accept demo code 000000
+    setLoading(true);
+    try {
       if (pendingLogin.tmpToken) {
         const res = await fetchJSON('/auth/verify-otp', {
           method: 'POST',
@@ -134,10 +119,7 @@
         }
         setMsg('Invalid code. Please try again.', false);
       } else {
-        // Demo OTP: 000000
         if (code === '000000') {
-          completeLogin({ token: `demo.${pendingLogin.role}.${Date.now()}`, username: pendingLogin.username, role: pendingLogin.role, isDemo:true });
-        } else {
           setMsg('Invalid code. Try 000000 (demo).', false);
         }
       }
@@ -153,14 +135,10 @@
     hideOTP();
   });
 
-  // =====================================================================================
-  // Functions
-  // =====================================================================================
+    hideOTP();
+  });
 
-  function readForm() {
-    const username = (usernameEl?.value || '').trim();
-    const password = (passwordEl?.value || '').trim();
-    const role     = (roleEl?.value || 'resident').trim();
+  function readForm() {oleEl?.value || 'resident').trim();
     return { username, password, role };
   }
 
@@ -217,10 +195,9 @@
     // Keep last attempted role/user
     const lastRole = localStorage.getItem('lastRole');
     const lastUser = localStorage.getItem('lastUser');
-
-    if (roleEl && lastRole) roleEl.value = lastRole;
-    if (usernameEl && lastUser) usernameEl.value = lastUser;
-
+  function prefill() {
+    const lastRole = localStorage.getItem('lastRole');
+    const lastUser = localStorage.getItem('lastUser');
     const remembered = localStorage.getItem('rememberedUser');
     if (remembered) {
       try {
@@ -264,14 +241,13 @@
     const now = Date.now();
     if (until && until > now) {
       return { locked: true, until, remaining: Math.ceil((until - now) / 1000) };
+      return { locked: true, until, remaining: Math.ceil((until - now) / 1000) };
     }
-    // cleanup expired lock
     if (until && until <= now) {
       localStorage.removeItem('loginLockedUntil');
       localStorage.setItem('loginFails', '0');
     }
     return { locked: false, until: 0, remaining: 0 };
-  }
 
   function tickLock(until) {
     updateLockMsg();
@@ -338,24 +314,22 @@
     } else {
       localStorage.removeItem('rememberedUser');
     }
+    localStorage.setItem('lastRole', role);
+    localStorage.setItem('lastUser', username);
+    if (rememberEl?.checked) {
+      localStorage.setItem('rememberedUser', JSON.stringify({ username, role }));
+    } else {
+      localStorage.removeItem('rememberedUser');
+    }
 
-    // Reset lock state
     localStorage.setItem('loginFails', '0');
     localStorage.removeItem('loginLockedUntil');
 
     toast('✅ Signed in');
 
-    // Redirect: use Settings default if present; otherwise per role
     const defaultLanding = getDefaultLanding();
     const fallback = role === 'landlord' ? DEMO.landlord.redirect : DEMO.resident.redirect;
-    const to = defaultLanding || fallback;
-
-    setTimeout(() => (window.location.href = to), 300);
-  }
-
-  function getDefaultLanding() {
-    try {
-      const raw = localStorage.getItem('appSettings');
+    const to = defaultLanding || fallback;pSettings');
       if (!raw) return '';
       const s = JSON.parse(raw);
       return s?.general?.defaultLanding || '';

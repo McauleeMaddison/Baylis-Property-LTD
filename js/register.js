@@ -1,4 +1,3 @@
-// js/register.js
 window.addEventListener('DOMContentLoaded', () => {
   const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
 
@@ -16,7 +15,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const pwBar      = document.getElementById('pwBar');
   const pwLabel    = document.getElementById('pwLabel');
 
-  // ---- Show/Hide password
   togglePw?.addEventListener('click', () => {
     const hidden = pwEl.type === 'password';
     pwEl.type = hidden ? 'text' : 'password';
@@ -24,7 +22,6 @@ window.addEventListener('DOMContentLoaded', () => {
     togglePw.textContent = hidden ? '🙈' : '👁️';
   });
 
-  // ---- Password strength meter
   pwEl?.addEventListener('input', () => {
     const score = scorePassword(pwEl.value);
     const { width, label, color } = meter(score);
@@ -33,7 +30,6 @@ window.addEventListener('DOMContentLoaded', () => {
     if (pwLabel) pwLabel.textContent = `Strength: ${label}`;
   });
 
-  // ---- Submit handler
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearMsg();
@@ -41,14 +37,13 @@ window.addEventListener('DOMContentLoaded', () => {
     const username = (usernameEl?.value || '').trim();
     const role     = roleEl?.value || '';
     const password = pwEl?.value || '';
-    const confirm  = confirmEl?.value || '';
+    const confirmed   = confirmEl?.value || '';
     const agreed   = !!acceptTos?.checked;
 
-    // Client-side validation
     if (!username || username.length < 3)  return setMsg('Username must be at least 3 characters.');
     if (!role)                              return setMsg('Please select a role.');
     if (!password || password.length < 6)   return setMsg('Password must be at least 6 characters.');
-    if (password !== confirm)               return setMsg('Passwords do not match.');
+    if (password !== confirmed)             return setMsg('Passwords do not match.');
     if (!agreed)                             return setMsg('Please accept the Terms & Privacy.');
 
     lock(true);
@@ -61,12 +56,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
       if (res.status === 201) {
         setMsg('✅ Account created! Redirecting to login…', true);
-        // Small delay for UX, then go to login
         setTimeout(() => window.location.href = 'login.html', 900);
         return;
       }
 
-      // Handle common errors
       let data = {};
       try { data = await res.json(); } catch {}
       if (res.status === 409) return setMsg('That username is already taken.');
@@ -79,7 +72,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ---- Helpers
   function lock(on) {
     if (!btn) return;
     btn.disabled = on;

@@ -1,13 +1,9 @@
-// js/profile.js
 window.addEventListener('DOMContentLoaded', () => {
   const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
 
-  // ---- Current user context
   const username = (localStorage.getItem('username') || 'User').trim();
   const role = (localStorage.getItem('role') || 'resident').toLowerCase();
-  const userKey = `profile:${username}`; // per-user profile blob
-
-  // ---- Elements
+  const userKey = `profile:${username}`;
   const avatarImg       = $('#profileAvatar');
   const avatarInput     = $('#avatarInput');
 
@@ -37,29 +33,24 @@ window.addEventListener('DOMContentLoaded', () => {
   const listReq         = $('#activityRequests');
   const listPosts       = $('#activityPosts');
 
-  // ---- Init profile header
   const capRole = role.charAt(0).toUpperCase() + role.slice(1);
   if (nameEl) nameEl.textContent = username;
   if (roleEl) roleEl.textContent = capRole;
   if (statRole) statRole.textContent = `Role: ${capRole}`;
   document.title = `Profile • ${username} | Baylis Properties`;
 
-  // ---- Load + hydrate local profile
   let profile = loadProfile();
   hydrateProfile(profile);
 
-  // ---- Avatar upload & preview (saved as data URL in localStorage)
   avatarInput?.addEventListener('change', async () => {
     const file = avatarInput.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) return toast('Please choose an image file.');
 
     const dataUrl = await fileToDataURL(file);
-    // (Optional) simple downscale for huge images
-    const scaled = await scaleImage(dataUrl, 256); // max 256px
+    const scaled = await scaleImage(dataUrl, 256);
     avatarImg.src = scaled;
 
-    // Update header avatar if present
     const headerAvatar = document.querySelector('.avatar-btn img, .avatar img');
     if (headerAvatar) headerAvatar.src = scaled;
 
@@ -68,7 +59,6 @@ window.addEventListener('DOMContentLoaded', () => {
     toast('🖼️ Avatar updated');
   });
 
-  // ---- ABOUT form
   aboutForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const displayName = (aboutDisplay?.value || '').trim();
@@ -81,7 +71,6 @@ window.addEventListener('DOMContentLoaded', () => {
     setMsg(aboutMsg, '✅ About saved', true);
   });
 
-  // ---- CONTACT form
   contactForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     profile.contact.email = (contactEmail?.value || '').trim();
@@ -91,7 +80,6 @@ window.addEventListener('DOMContentLoaded', () => {
     setMsg(contactMsg, '✅ Contact saved', true);
   });
 
-  // ---- PREFS form
   prefsForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     profile.prefs.emailUpdates = !!prefEmail?.checked;
@@ -100,14 +88,8 @@ window.addEventListener('DOMContentLoaded', () => {
     setMsg(prefsMsg, '✅ Preferences saved', true);
   });
 
-  // ---- Load activity (requests + posts). Uses token; residents get own, landlords filtered by name.
   loadActivity().catch(() => {
-    // Non-fatal; leave defaults
   });
-
-  // =====================================================================================
-  // Helpers
-  // =====================================================================================
 
   function $(sel) { return document.querySelector(sel); }
 
@@ -133,13 +115,17 @@ window.addEventListener('DOMContentLoaded', () => {
       about:   { displayName: username, unit: '', bio: '' },
       contact: { email: '', phone: '', pref: 'email' },
       prefs:   { emailUpdates: true, communityVisible: true },
+  function loadProfile() {
+    const def = {
+      about:   { displayName: username, unit: '', bio: '' },
+      contact: { email: '', phone: '', pref: 'email' },
+      prefs:   { emailUpdates: true, communityVisible: true },
       avatar:  null
     };
     try {
       const raw = localStorage.getItem(userKey);
       if (!raw) return def;
       const parsed = JSON.parse(raw);
-      // shallow merge to survive new fields
       return { ...def, ...parsed, about: { ...def.about, ...parsed.about }, contact: { ...def.contact, ...parsed.contact }, prefs: { ...def.prefs, ...parsed.prefs } };
     } catch { return def; }
   }
@@ -149,35 +135,25 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function hydrateProfile(p) {
-    // Avatar
     if (p.avatar && avatarImg) {
       avatarImg.src = p.avatar;
       const headerAvatar = document.querySelector('.avatar-btn img, .avatar img');
       if (headerAvatar) headerAvatar.src = p.avatar;
     }
 
-    // About
     if (aboutDisplay) aboutDisplay.value = p.about.displayName || username;
     if (aboutUnit)    aboutUnit.value    = p.about.unit || '';
     if (aboutBio)     aboutBio.value     = p.about.bio || '';
 
-    // Contact
     if (contactEmail) contactEmail.value = p.contact.email || '';
     if (contactPhone) contactPhone.value = p.contact.phone || '';
     if (contactPref)  contactPref.value  = p.contact.pref  || 'email';
 
-    // Prefs
     if (prefEmail)   prefEmail.checked   = !!p.prefs.emailUpdates;
     if (prefVisible) prefVisible.checked = !!p.prefs.communityVisible;
   }
 
   async function fileToDataURL(file) {
-    return new Promise((res, rej) => {
-      const fr = new FileReader();
-      fr.onload = () => res(fr.result);
-      fr.onerror = rej;
-      fr.readAsDataURL(file);
-    });
   }
 
   async function scaleImage(dataUrl, maxSize = 256) {
@@ -228,13 +204,17 @@ window.addEventListener('DOMContentLoaded', () => {
       const r = await authedFetch('/requests', { method:'GET' });
       if (r.ok) {
         const arr = await r.json();
+  async function loadActivity() {
+    try {
+      const r = await authedFetch('/requests', { method:'GET' });
+      if (r.ok) {
+        const arr = await r.json();
         const mine = filterMine(arr);
         renderRequests(mine);
         if (statReq) statReq.textContent = `Requests: ${mine.length}`;
       }
     } catch {}
 
-    // Posts
     try {
       const p = await authedFetch('/posts', { method:'GET' });
       if (p.ok) {
@@ -247,18 +227,15 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function filterMine(items) {
-    // API already restricts to user for residents. For landlords, filter by name match as a fallback.
     return items.filter(x => {
       if (!x) return false;
       if (role === 'resident') return true;
-      // landlord: fallback filter by creator name field (case-insensitive)
       return (x.name || '').toLowerCase() === username.toLowerCase();
     });
   }
 
   function filterMinePosts(posts) {
     if (role === 'resident') return posts.filter(p => (p.name || '').toLowerCase() === username.toLowerCase());
-    // landlord: show user-authored posts first
     return posts.filter(p => (p.name || '').toLowerCase() === username.toLowerCase());
   }
 
@@ -292,12 +269,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function escapeHtml(str) {
-    return String(str)
-      .replaceAll('&','&amp;')
-      .replaceAll('<','&lt;')
-      .replaceAll('>','&gt;')
-      .replaceAll('"','&quot;')
-      .replaceAll("'",'&#039;');
+  function escapeHtml(str) {;');
   }
 });

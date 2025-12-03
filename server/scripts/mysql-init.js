@@ -1,6 +1,5 @@
 import { db } from '../mysql.js';
 
-// Create tables for users, requests, community posts, sessions
 await db.query(`CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(255) UNIQUE NOT NULL,

@@ -1,4 +1,3 @@
-// index.js - Resident Dashboard
 (() => {
   const fallbackQs  = (s, r=document) => r.querySelector(s);
   const fallbackQsa = (s, r=document) => [...r.querySelectorAll(s)];
@@ -6,7 +5,6 @@
   const qs  = (window.APP?.utils?.qs)  || fallbackQs;
   const qsa = (window.APP?.utils?.qsa) || fallbackQsa;
 
-  // Defensive store access
   const safeGetList = (key) => {
     try {
       const list = window.APP?.store?.getList?.(key);
@@ -14,7 +12,6 @@
     } catch { return []; }
   };
 
-  // ==== Dashboard bits ====
   function updateWelcome() {
     const el = qs("#userWelcome");
     if (!el) return;
@@ -105,7 +102,6 @@
     }
   }
 
-  // ==== Hamburger / Nav logic ====
   function setupHamburger() {
     const btn = qs("#hamburgerBtn");
     const nav = qs("#primaryNav");
@@ -125,27 +121,23 @@
 
     btn.addEventListener("click", () => (isOpen() ? closeNav() : openNav()));
 
-    // Click outside to close (mobile)
     document.addEventListener("click", (e) => {
       if (!isOpen()) return;
       const within = nav.contains(e.target) || btn.contains(e.target);
       if (!within) closeNav();
     });
 
-    // ESC to close
     document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && isOpen()) closeNav();
       if (e.key === "Escape" && isOpen()) closeNav();
     });
 
-    // Reset state on resize to desktop
     const mq = window.matchMedia("(min-width: 768px)");
     mq.addEventListener?.("change", () => {
-      if (mq.matches) { // desktop
-        closeNav();
+      if (mq.matches) {
       }
     });
 
-    // Close when a nav link is activated (nice on mobile)
     nav.addEventListener("click", (e) => {
       const a = e.target.closest("a");
       if (a) closeNav();

@@ -3,29 +3,24 @@ window.addEventListener('DOMContentLoaded', async () => {
   const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
-  // ---- Elements
   const form = $('#settingsForm');
   const msg = $('#settingsMsg');
 
-  // General
   const showTips = $('#showTips');
   const defaultLanding = $('#defaultLanding');
   const timeFormat = $('#timeFormat');
 
-  // Appearance
   const darkModeSetting = $('#darkModeSetting');
   const accentColor = $('#accentColor');
   const uiDensity = $('#uiDensity');
   const baseFontSize = $('#baseFontSize');
   const cornerRadius = $('#cornerRadius');
 
-  // Notifications
   const notifRequests = $('#notifRequests');
   const notifCommunity = $('#notifCommunity');
   const notifDigest = $('#notifDigest');
   const digestDay = $('#digestDay');
 
-  // Security & Privacy
   const currentPw = $('#currentPassword');
   const newPw = $('#newPassword');
   const confirmNewPw = $('#confirmNewPassword');
@@ -35,15 +30,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   const clearLocalBtn = $('#clearLocalBtn');
   const resetDefaultsBtn = $('#resetDefaults');
 
-  // Live Preview bits
   const previewBtnPrimary = $('#previewBtnPrimary');
   const previewBtnGhost = $('#previewBtnGhost');
 
-  // Optional header toggle (sync icon + checkbox)
   const headerDarkToggle = $('#darkModeToggle');
   const headerDarkIcon = $('#darkModeIcon');
 
-  // ---- Defaults & State
   const DEFAULTS = {
     general: {
       showTips: false,
@@ -51,9 +43,9 @@ window.addEventListener('DOMContentLoaded', async () => {
       timeFormat: '24h'
     },
     appearance: {
-      darkMode: localStorage.getItem('darkMode') === 'true', // honor existing value
+      darkMode: localStorage.getItem('darkMode') === 'true',
       accentColor: '#4a90e2',
-      uiDensity: 'comfortable', // comfortable | compact | spacious
+      uiDensity: 'comfortable',
       baseFontSize: 16,
       cornerRadius: 12
     },
@@ -65,20 +57,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // Load from localStorage -> state
   let settings = loadSettings();
 
-  // ---- Auth guard (best-effort)
   const authedUser = await guard();
   if (!authedUser) return;
 
-  // ---- Init UI from settings
   hydrateForm(settings);
   applySettings(settings, { preview: true, persist: false });
 
-  // ---- Handlers
-
-  // Live updates on appearance knobs
   accentColor?.addEventListener('input', () => {
     settings.appearance.accentColor = accentColor.value;
     applySettings(settings, { persist: false });
@@ -100,16 +86,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     applySettings(settings, { persist: false });
   });
 
-  // Digest day enabled only if digest is on
   notifDigest?.addEventListener('change', () => {
     digestDay.disabled = !notifDigest.checked;
   });
   digestDay.disabled = !settings.notifications.digest;
 
-  // Save Settings
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
-    // pull latest values
     settings = readFormToSettings(settings);
     saveSettings(settings);
     applySettings(settings, { preview: true, persist: false });
@@ -117,7 +100,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => setMsg(''), 2500);
   });
 
-  // Reset to defaults
   resetDefaultsBtn?.addEventListener('click', () => {
     if (!confirm('Reset all settings to defaults?')) return;
     settings = structuredClone(DEFAULTS);
@@ -128,7 +110,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => setMsg(''), 2000);
   });
 
-  // Change password (best-effort; backend endpoint may not exist yet)
   changePwBtn?.addEventListener('click', async () => {
     const current = currentPw?.value || '';
     const next = newPw?.value || '';
@@ -153,24 +134,21 @@ window.addEventListener('DOMContentLoaded', async () => {
     } catch {
       toast('Network error.');
     }
+    }
   });
 
-  // Sign out of all devices (best-effort; backend may not exist yet)
   signOutAllBtn?.addEventListener('click', async () => {
-    if (!confirm('Sign out of all devices?')) return;
     try {
+      const res = await authedFetch('/auth/logout-all', { method: 'POST' });
       const res = await authedFetch('/auth/logout-all', { method: 'POST' });
       if (!res?.ok) throw new Error();
     } catch {}
-    // Local fallback
     localStorage.removeItem('token');
     toast('🧹 Signed out. Please log in again.');
     setTimeout(() => (window.location.href = 'login.html'), 800);
   });
 
-  // Export my data (settings + optional API data if available)
   exportDataBtn?.addEventListener('click', async () => {
-    const payload = {
       exportedAt: new Date().toISOString(),
       user: {
         username: localStorage.getItem('username') || null,
@@ -178,8 +156,9 @@ window.addEventListener('DOMContentLoaded', async () => {
       },
       settings,
       data: {}
+      settings,
+      data: {}
     };
-    // Try to include server data (ignore errors)
     try {
       const [reqRes, postRes] = await Promise.all([
         authedFetch('/requests', { method: 'GET' }),
@@ -192,10 +171,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     toast('📁 Export started');
   });
 
-  // Clear local data (tokens + settings)
-  clearLocalBtn?.addEventListener('click', () => {
+  clearLocalBtn?.addEventListener('click', () => {ything, list keys here
     if (!confirm('Clear local app data (including login token)?')) return;
-    const keepKeys = []; // if you want to keep anything, list keys here
+    const keepKeys = [];
     const allKeys = Object.keys(localStorage);
     allKeys.forEach(k => {
       if (!keepKeys.includes(k)) localStorage.removeItem(k);
@@ -204,11 +182,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => (window.location.href = 'login.html'), 700);
   });
 
-  // ===== Helpers =====
-
-  async function guard() {
-    try {
-      const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+  async function guard() {tch(`${API_BASE}/auth/me`, { credentials: 'include' });
       if (!res.ok) throw new Error('auth');
       const { user } = await res.json();
       if (!user) throw new Error('no-user');
@@ -223,11 +197,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   function loadSettings() {
     // Try namespaced blob first
+  function loadSettings() {
     try {
       const raw = localStorage.getItem('appSettings');
       if (!raw) return structuredClone(DEFAULTS);
       const parsed = JSON.parse(raw);
-      // merge with defaults to survive new fields
       return deepMerge(structuredClone(DEFAULTS), parsed);
     } catch {
       return structuredClone(DEFAULTS);
@@ -236,13 +210,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   function saveSettings(s) {
     try { localStorage.setItem('appSettings', JSON.stringify(s)); } catch {}
-    // Keep legacy darkMode flag in sync for other pages
     localStorage.setItem('darkMode', s.appearance.darkMode ? 'true' : 'false');
   }
 
-  function hydrateForm(s) {
-    // General
-    if (showTips) showTips.checked = !!s.general.showTips;
+  function hydrateForm(s) {checked = !!s.general.showTips;
     if (defaultLanding) defaultLanding.value = s.general.defaultLanding;
     if (timeFormat) timeFormat.value = s.general.timeFormat;
 
