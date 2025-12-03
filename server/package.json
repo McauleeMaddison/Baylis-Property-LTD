@@ -4,8 +4,8 @@
   "type": "module",
   "main": "server/index.js",
   "scripts": {
-    "dev": "nodemon server/index.js",
-    "start": "node server/index.js",
+    "dev": "nodemon index.js",
+    "start": "node index.js",
     "migrate": "node server/migrate.js migrations/0001_init.sql",
     "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles"
   },
