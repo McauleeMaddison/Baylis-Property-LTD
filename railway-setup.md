@@ -1,21 +1,25 @@
 # Deploy to Railway in 5 Minutes
 
 ## Step 1: Create Railway Account
+
 1. Go to https://railway.app
 2. Click "Start Project"
 3. Sign in with GitHub (authorize Railway to access your repos)
 
 ## Step 2: Create New Project
+
 1. Click "New Project" → "Deploy from GitHub repo"
 2. Select `Baylis-Property-LTD` repository
 3. Railway will auto-detect Node.js and create the deployment
 
 ## Step 3: Add MySQL Database
+
 1. In your Railway dashboard, click "Add Service"
 2. Select "MySQL"
 3. Railway creates a MySQL instance automatically
 
 ## Step 4: Configure Environment Variables
+
 In Railway dashboard, go to **Variables** and add:
 
 ```
@@ -31,6 +35,7 @@ GOOGLE_SHEET_ID=your-sheet-id-here
 ```
 
 ## Step 5: Run Database Migration
+
 1. Once deployed, go to the **Deploy** tab
 2. Click the three dots menu → "View Logs"
 3. In the terminal at bottom, run:
@@ -39,6 +44,7 @@ GOOGLE_SHEET_ID=your-sheet-id-here
    ```
 
 ## Step 6: Connect Custom Domain
+
 1. Go to **Settings** → **Domain**
 2. Click "Add Domain"
 3. Enter your domain: `baylisproperty.co.uk`
@@ -46,17 +52,20 @@ GOOGLE_SHEET_ID=your-sheet-id-here
 5. Go to your domain registrar (GoDaddy, Namecheap, etc.) and add those DNS records
 
 ## Step 7: Google Search Console
+
 1. Go to https://search.google.com/search-console
 2. Add property: `https://baylisproperty.co.uk`
 3. Verify via DNS or HTML file (Railway or registrar dashboard)
 4. Submit sitemap: `https://baylisproperty.co.uk/sitemap.xml`
 
 ## Costs
+
 - Railway: ~$5-10/month
 - Domain: ~$8/year
 - **Total: ~$15-20/year**
 
 ## Your Deployed URLs
+
 - Live app: `https://baylisproperty.co.uk`
 - Admin dashboard: `https://railway.app`
 - Database: Managed by Railway (no SSH needed)
