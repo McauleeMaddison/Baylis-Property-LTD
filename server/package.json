@@ -4,9 +4,10 @@
   "type": "module",
   "main": "server/index.js",
   "scripts": {
+    "prestart": "npm run migrate",
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "migrate": "node server/migrate.js migrations/0001_init.sql",
+    "migrate": "node migrate.js ../migrations/0001_init.sql",
     "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles"
   },
   "dependencies": {
