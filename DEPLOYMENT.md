@@ -3,16 +3,19 @@
 ## Prerequisites
 - Domain name (e.g., `baylisproperty.co.uk`)
 - SSL/TLS certificate (recommended: Let's Encrypt)
-- Server hosting (AWS, DigitalOcean, Heroku, Railway, Render, etc.)
+- Server hosting (Render, Fly.io, DigitalOcean, etc.)
 
 ## Deployment Options
 
-### Option 1: Railway (Recommended - Easiest)
+### Option 1: Render (Recommended - Easiest)
 1. Push code to GitHub
-2. Connect your GitHub repo to Railway
-3. Add environment variables (MYSQL_*, GOOGLE_API_KEY, etc.)
-4. Deploy with one click
-5. Add custom domain in Railway dashboard
+2. On Render: **New + → Web Service → GitHub**, select this repo
+3. Build command: `npm install && cd server && npm install`
+4. Start command: `cd server && npm start`
+5. Add environment variables (MYSQL_*, GOOGLE_API_KEY, etc.) plus link the Render MySQL service
+6. Open the service shell and run `cd /opt/render/project/src/server && npm run migrate`
+7. Add a custom domain under **Custom Domains**
+8. See [`RENDER-DEPLOYMENT.md`](RENDER-DEPLOYMENT.md) for step-by-step screenshots
 
 ### Option 2: DigitalOcean App Platform
 1. Create a DigitalOcean account
@@ -77,17 +80,12 @@ sudo certbot certonly --nginx -d baylisproperty.co.uk -d www.baylisproperty.co.u
 3. Submit sitemap: https://baylisproperty.co.uk/sitemap.xml
 4. Monitor search performance and fix any crawl errors
 
-### 3. SEO Optimization
+### 3. SEO & Monitoring
 - Sitemap: ✅ `/sitemap.xml`
 - robots.txt: ✅ `/robots.txt`
 - Meta tags: ✅ Added to all HTML pages
-- Open Graph tags: Consider adding for social sharing
-- Structured data: Consider adding JSON-LD schema
-
-### 4. Monitoring
-- Set up error tracking (Sentry, Rollbar)
-- Monitor uptime (UptimeRobot, Pingdom)
-- Log aggregation (LogRocket, DataDog)
+- Consider Open Graph tags + JSON-LD schema for richer previews
+- Add monitoring (Sentry/Rollbar, UptimeRobot, Render health checks)
 
 ## Domain Setup
 1. Register domain (Namecheap, GoDaddy, Google Domains)
@@ -101,7 +99,7 @@ sudo certbot certonly --nginx -d baylisproperty.co.uk -d www.baylisproperty.co.u
 # Export dev database
 mysqldump -u root -p baylis_db > backup.sql
 
-# Import to production
+# Import to production (Render managed MySQL exposes standard MySQL endpoint)
 mysql -u prod_user -p -h prod-host baylis_db < backup.sql
 
 # Run migrations

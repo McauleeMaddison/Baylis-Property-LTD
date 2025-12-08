@@ -95,24 +95,17 @@ node server/migrate.js migrations/0001_init.sql
 ```
 
 ### Local test workflow (repeatable)
-- Quick path: run `./scripts/test-db.sh` from the repo root. The script:
-  1. Starts `docker compose up -d db`
-  2. Waits for MySQL to accept connections
-  3. Executes `node server/migrate.js migrations/0001_init.sql`
-  4. Runs `npm run test:api` with the necessary `MYSQL_*` vars exported
-  5. Prints a reminder to shut down MySQL with `docker compose down` when finished
-- Manual steps (if you need finer control):
-  1. `docker compose up -d db` – start MySQL 8 with credentials from `docker-compose.yml`.
-  2. Run `node server/migrate.js migrations/0001_init.sql` with the same env vars as above (or `server/scripts/mysql-init.js` if you prefer JS seeding).
-  3. Export the same `MYSQL_*` before running tests, e.g.:
-     ```bash
-     MYSQL_HOST=127.0.0.1 \
-     MYSQL_USER=baylis_user \
-     MYSQL_PASSWORD=baylis_pass \
-     MYSQL_DATABASE=baylis_db \
-     npm run test:api
-     ```
-  4. Stop MySQL with `docker compose down` when you’re done.
+1. `docker compose up -d db` – start MySQL 8 with credentials from `docker-compose.yml`.
+2. Run `node server/migrate.js migrations/0001_init.sql` (or `server/scripts/mysql-init.js`) after exporting the same credentials:
+   ```bash
+   MYSQL_HOST=127.0.0.1 \
+   MYSQL_USER=baylis_user \
+   MYSQL_PASSWORD=baylis_pass \
+   MYSQL_DATABASE=baylis_db \
+   node server/migrate.js migrations/0001_init.sql
+   ```
+3. Run API tests or start the server with those variables available.
+4. Stop MySQL with `docker compose down` when you’re done.
 
 Running the Server
 ------------------
@@ -132,9 +125,12 @@ npm test      # runs Jest/Supertest API suite (add tests under server/tests/)
 ```
 E2E scaffolding exists in the root package (`npm run cypress:open`) if Cypress is installed; failures won’t block CI by default.
 
+- For a full Render walkthrough (GitHub integration, managed MySQL, migrations, custom domains) see [`RENDER-DEPLOYMENT.md`](RENDER-DEPLOYMENT.md).
+
 Deployment Guidance
 -------------------
-- **Railway / Render / Fly**: configure build command `npm install && cd server && npm install`, start command `npm --prefix server start`, add all env vars via the platform UI, and run `node scripts/mysql-init.js` once via the shell.
+- **Render (recommended)**: build command `npm install && cd server && npm install`, start command `cd server && npm start`, then follow `RENDER-DEPLOYMENT.md` to provision MySQL, set env vars, and run `npm run migrate` via the Render shell.
+- **Fly / other PaaS**: configure build command `npm install && cd server && npm install`, start command `npm --prefix server start`, add env vars via the platform UI, and run `node scripts/mysql-init.js` once via the shell.
 - **Traditional VPS**: clone repo, install Node + MySQL, set env vars in `/etc/environment` or process manager (PM2/systemd), `npm --prefix server install`, `node scripts/mysql-init.js`, then `pm2 start npm --name baylis -- start --prefix server`.
 - Ensure HTTPS termination (Cloudflare, Nginx, or platform-provided certs) and set `FORCE_HTTPS=true` plus `TRUST_PROXY=1` behind reverse proxies.
 
