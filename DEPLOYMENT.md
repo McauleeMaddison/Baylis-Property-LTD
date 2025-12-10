@@ -12,7 +12,9 @@
 2. On Render: **New + → Web Service → GitHub**, select this repo
 3. Build command: `npm install && cd server && npm install`
 4. Start command: `cd server && npm start`
-5. Add environment variables (MYSQL_*, GOOGLE_API_KEY, etc.) plus link the Render MySQL service
+5. Add environment variables (MYSQL_*, GOOGLE_API_KEY, etc.) plus link either:
+   - A Render-managed database (Postgres, etc.) if you adjust the code, or
+   - A Railway MySQL instance following [`RAILWAY-MYSQL.md`](RAILWAY-MYSQL.md) (fastest path since the app already uses MySQL)
 6. Open the service shell and run `cd /opt/render/project/src/server && npm run migrate`
 7. Add a custom domain under **Custom Domains**
 8. See [`RENDER-DEPLOYMENT.md`](RENDER-DEPLOYMENT.md) for step-by-step screenshots
