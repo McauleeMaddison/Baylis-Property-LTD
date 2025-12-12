@@ -1,5 +1,5 @@
 {
-  "name": "baylis-property-ltd-root",
+  "name": "baylis-property-ltd-server",
   "version": "1.0.0",
   "type": "module",
   "main": "server/index.js",
