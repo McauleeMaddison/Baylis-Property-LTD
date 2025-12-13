@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="css/style.css" />
   <script defer src="js/script.js"></script>
   <script>window.API_BASE = '/api';</script>
+  <script defer src="js/landlord.js"></script>
   <link rel="prefetch" href="resident.html" />
 </head>
 <body class="page page--landlord" data-required-role="landlord" data-api-base="/api">
@@ -144,136 +145,6 @@
       <a href="settings.html">Settings</a>
     </div>
   </footer>
-
-  <script>
-    (function () {
-      const $ = (sel, ctx=document) => ctx.querySelector(sel);
-      const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
-
-      $('#year').textContent = new Date().getFullYear();
-
-      const hamb = document.querySelector('[data-hamb]');
-      const links = document.querySelector('[data-links]');
-      if (hamb && links) {
-        const setOpen = (open) => {
-          hamb.setAttribute('aria-expanded', String(open));
-          links.dataset.open = String(open);
-          document.body.classList.toggle('nav-open', open);
-        };
-        hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
-        links.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-        document.addEventListener('click', (e) => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
-      }
-
-      const apiBase = document.body.getAttribute('data-api-base') || window.API_BASE || '/api';
-
-      async function ensureLandlord() {
-        const required = document.body.getAttribute('data-required-role');
-        if (!required) return;
-        try {
-          const r = await fetch(`${apiBase}/auth/me`, { credentials: 'include' });
-          if (!r.ok) throw new Error('not-auth');
-          const { user } = await r.json();
-          if (user?.role !== required) {
-            window.location.href = '/login';
-            return;
-          }
-          $('#userWelcome').textContent = user.email || 'Landlord';
-        } catch {
-          window.location.href = '/login';
-        }
-      }
-
-      function recomputeMetrics() {
-        const ulClean  = $('#allCleaningRequests');
-        const ulRepair = $('#allRepairRequests');
-        const ulPosts  = $('#allCommunityPosts');
-
-        const allLis = [...(ulClean?.children || []), ...(ulRepair?.children || [])]
-          .filter(li => !li.classList.contains('muted'));
-
-        const map = { open: 0, in_progress: 0, done: 0 };
-        allLis.forEach(li => {
-          const badge = li.querySelector('.badge')?.textContent?.toLowerCase() || '';
-          if (badge.includes('in progress')) map.in_progress++;
-          else if (badge.includes('done'))    map.done++;
-          else if (badge.includes('open'))    map.open++;
-        });
-
-        $('#metricOpen').textContent       = map.open ?? 0;
-        $('#metricInProgress').textContent = map.in_progress ?? 0;
-        $('#metricDone').textContent       = map.done ?? 0;
-        $('#metricPosts').textContent      = (ulPosts?.children?.length || 0) - (ulPosts?.querySelectorAll('.muted').length || 0);
-      }
-
-      function applyFilters() {
-        const q = ($('#reqSearch')?.value || '').toLowerCase();
-        const t = ($('#filterType')?.value || 'all');
-        const s = ($('#filterStatus')?.value || 'all').replace('_', ' ');
-
-        const filterList = (ul, typeLabel) => {
-          if (!ul) return;
-          $$('#' + ul.id + ' > li').forEach(li => {
-            if (li.classList.contains('muted')) return;
-            const text = li.textContent.toLowerCase();
-            const status = li.querySelector('.badge')?.textContent?.toLowerCase() || '';
-            let ok = true;
-            if (q && !text.includes(q)) ok = false;
-            if (t !== 'all' && t !== typeLabel) ok = false;
-            if (s !== 'all' && !status.includes(s)) ok = false;
-            li.style.display = ok ? '' : 'none';
-          });
-        };
-        filterList($('#allCleaningRequests'), 'cleaning');
-        filterList($('#allRepairRequests'),   'repair');
-      }
-
-      function exportCSV() {
-        const rows = [['Type','Name','Details','Date/Info','Status']];
-        const harvest = (ul, type) => {
-          if (!ul) return;
-          $$('#' + ul.id + ' > li').forEach(li => {
-            if (li.classList.contains('muted') || li.style.display === 'none') return;
-            const name  = li.querySelector('[data-field="name"]')?.textContent?.trim() || '';
-            const info  = li.querySelector('[data-field="info"]')?.textContent?.trim() || '';
-            const date  = li.querySelector('[data-field="date"]')?.textContent?.trim() || '';
-            const stat  = (li.querySelector('.badge')?.textContent || '').trim();
-            rows.push([type, name, info, date, stat]);
-          });
-        };
-        harvest($('#allCleaningRequests'), 'cleaning');
-        harvest($('#allRepairRequests'),   'repair');
-
-        const csv = rows.map(r => r.map(v => {
-          const s = String(v ?? '');
-          return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
-        }).join(',')).join('\n');
-
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = Object.assign(document.createElement('a'), { href: url, download: `baylis-requests-${Date.now()}.csv` });
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 500);
-      }
-
-      $('#reqSearch')?.addEventListener('input',  applyFilters);
-      $('#filterType')?.addEventListener('change', applyFilters);
-      $('#filterStatus')?.addEventListener('change', applyFilters);
-      $('#btnRefresh')?.addEventListener('click', () => window.location.reload());
-      $('#btnExport')?.addEventListener('click', exportCSV);
-
-      const obs = new MutationObserver(() => { applyFilters(); recomputeMetrics(); });
-      ['#allCleaningRequests', '#allRepairRequests', '#allCommunityPosts'].forEach(sel => {
-        const el = $(sel);
-        if (el) obs.observe(el, { childList: true, subtree: true });
-      });
-
-      ensureLandlord();
-      applyFilters();
-      recomputeMetrics();
-    })();
-  </script>
 
   <style>
     .metric { font-size: 1.8rem; font-weight: 700; }

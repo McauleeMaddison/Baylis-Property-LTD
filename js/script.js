@@ -331,6 +331,11 @@
             form.reset();
             msgEl && (msgEl.textContent = "");
             window.showToast(options.successMessage);
+            try {
+              window.dispatchEvent(new CustomEvent("baylis:form-success", {
+                detail: { endpoint: options.endpoint, payload: Object.assign({}, payload) }
+              }));
+            } catch (_) {}
             if (options.redirect) {
               setTimeout(function () { window.location.href = options.redirect; }, 1000);
             }
@@ -342,6 +347,11 @@
               msgEl.focus?.();
             }
             window.showToast("❌ " + text);
+            try {
+              window.dispatchEvent(new CustomEvent("baylis:form-error", {
+                detail: { endpoint: options.endpoint, payload: Object.assign({}, payload), error: text }
+              }));
+            } catch (_) {}
           })
           .finally(function () {
             if (submitBtn) {
