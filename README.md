@@ -5,6 +5,13 @@ Modern property-management platform for landlords and residents. The application
 
 ---
 
+Live Demo
+---------
+- **Frontend & API**: https://baylis-property-ltd.onrender.com (static pages auto-target the Render API at `/api`)
+- **API base**: `https://baylis-property-ltd.onrender.com/api` (overridden to `/api` automatically for local development)
+
+---
+
 Table of Contents
 -----------------
 1. [Features](#features)
