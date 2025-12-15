@@ -137,6 +137,7 @@ E2E scaffolding exists in the root package (`npm run cypress:open`) if Cypress i
 Deployment Guidance
 -------------------
 - **Render (recommended)**: build command `npm install && cd server && npm install`, start command `cd server && npm start`, then follow `RENDER-DEPLOYMENT.md` to provision hosting, and [`RAILWAY-MYSQL.md`](RAILWAY-MYSQL.md) if you want to plug in Railway’s free MySQL.
+- **Database note**: Render cannot reach private hosts such as `mysql.railway.internal`. Always supply the public hostname/port shown by your provider (Railway “Public Networking” endpoint, Render managed MySQL, etc.) in the `MYSQL_*` variables.
 - **Fly / other PaaS**: configure build command `npm install && cd server && npm install`, start command `npm --prefix server start`, add env vars via the platform UI, and run `node scripts/mysql-init.js` once via the shell.
 - **Traditional VPS**: clone repo, install Node + MySQL, set env vars in `/etc/environment` or process manager (PM2/systemd), `npm --prefix server install`, `node scripts/mysql-init.js`, then `pm2 start npm --name baylis -- start --prefix server`.
 - Ensure HTTPS termination (Cloudflare, Nginx, or platform-provided certs) and set `FORCE_HTTPS=true` plus `TRUST_PROXY=1` behind reverse proxies.
