@@ -142,6 +142,16 @@ Deployment Guidance
 - **Traditional VPS**: clone repo, install Node + MySQL, set env vars in `/etc/environment` or process manager (PM2/systemd), `npm --prefix server install`, `node scripts/mysql-init.js`, then `pm2 start npm --name baylis -- start --prefix server`.
 - Ensure HTTPS termination (Cloudflare, Nginx, or platform-provided certs) and set `FORCE_HTTPS=true` plus `TRUST_PROXY=1` behind reverse proxies.
 
+Google Sheets Integration
+-------------------------
+1. Create a Google service account (IAM & Admin → Service Accounts) and generate a JSON key. Keep it private.
+2. Share the target Google Sheet with the service account email so it can read/write rows.
+3. Add the following env vars (see `server/.env.example`):  
+   - `GOOGLE_API_KEY` – REST key restricted to the Sheets API and your Render domain.  
+   - `GOOGLE_SHEET_ID` – the ID segment from the sheet URL (`/d/<ID>/edit`).  
+   - `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` – parsed from the JSON key (escape newlines).  
+4. Redeploy after updating Render’s Environment tab so the backend can authenticate with Google.
+
 Project Structure
 -----------------
 ```
