@@ -19,12 +19,20 @@
     filterStatus: document.getElementById("filterStatus"),
     refreshBtn: document.getElementById("btnRefresh"),
     exportBtn: document.getElementById("btnExport"),
+    auditBody: document.getElementById("auditTableBody"),
+    auditRefresh: document.getElementById("auditRefreshBtn"),
   };
 
   const state = {
     user: null,
     requests: [],
     posts: [],
+    auditLogs: [],
+  };
+
+  const toast = (text) => {
+    if (typeof window.showToast === "function") window.showToast(text);
+    else alert(text);
   };
 
   function fmtDate(value) {
@@ -62,9 +70,14 @@
 
   async function loadDashboard() {
     try {
-      const [requests, posts] = await Promise.all([fetchJSON("/requests"), fetchJSON("/community")]);
+      const [requests, posts, audit] = await Promise.all([
+        fetchJSON("/requests"),
+        fetchJSON("/community"),
+        fetchJSON("/security/audit?limit=50").catch(() => ({ logs: [] }))
+      ]);
       state.requests = Array.isArray(requests) ? requests : [];
       state.posts = Array.isArray(posts) ? posts : [];
+      state.auditLogs = Array.isArray(audit?.logs) ? audit.logs : [];
       render();
     } catch (err) {
       showError(err.message || "Unable to load data");
@@ -82,6 +95,7 @@
     renderRequests();
     renderCommunity();
     renderMetrics();
+    renderAudit();
   }
 
   function getFilteredRequests() {
@@ -180,6 +194,43 @@
     `;
   }
 
+  function renderAudit() {
+    if (!els.auditBody) return;
+    els.auditBody.innerHTML = "";
+    if (!state.auditLogs.length) {
+      els.auditBody.innerHTML = `<tr><td colspan="4" class="muted">No audit events yet.</td></tr>`;
+      return;
+    }
+    state.auditLogs.forEach((log) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(fmtDateTime(log.createdAt))}</td>
+        <td><strong>${escapeHtml(log.event || "event")}</strong></td>
+        <td><span class="badge">${escapeHtml((log.severity || "info").toUpperCase())}</span></td>
+        <td>${escapeHtml(formatAuditDetails(log))}</td>
+      `;
+      els.auditBody.appendChild(tr);
+    });
+  }
+
+  function fmtDateTime(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? "" : d.toLocaleString();
+  }
+
+  function formatAuditDetails(log) {
+    const parts = [];
+    if (log.userId) parts.push(`User #${log.userId}`);
+    const meta = log.metadata || {};
+    Object.keys(meta).forEach((key) => {
+      if (meta[key] === undefined || meta[key] === null) return;
+      const val = typeof meta[key] === "object" ? JSON.stringify(meta[key]) : String(meta[key]);
+      parts.push(`${key}: ${val}`);
+    });
+    return parts.length ? parts.join(" • ") : "—";
+  }
+
   function escapeHtml(value) {
     const div = document.createElement("div");
     div.textContent = value ?? "";
@@ -224,6 +275,22 @@
     els.filterStatus?.addEventListener("change", render);
     els.refreshBtn?.addEventListener("click", () => loadDashboard());
     els.exportBtn?.addEventListener("click", exportCsv);
+    els.auditRefresh?.addEventListener("click", refreshAuditLog);
+  }
+
+  async function refreshAuditLog() {
+    if (!els.auditRefresh) return;
+    els.auditRefresh.disabled = true;
+    try {
+      const audit = await fetchJSON("/security/audit?limit=50").catch(() => ({ logs: [] }));
+      state.auditLogs = Array.isArray(audit?.logs) ? audit.logs : [];
+      renderAudit();
+      toast("🔐 Audit log refreshed.");
+    } catch (err) {
+      toast(err.message || "Unable to refresh audit log.");
+    } finally {
+      els.auditRefresh.disabled = false;
+    }
   }
 
   async function boot() {

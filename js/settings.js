@@ -33,6 +33,17 @@
     const clearLocalBtn = $("#clearLocalBtn");
     const resetDefaultsBtn = $("#resetDefaults");
 
+    const twoFaStatusText = $("#twoFaStatusText");
+    const twoFaMeta = $("#twoFaMeta");
+    const twoFaEnableBtn = $("#twoFaEnableBtn");
+    const twoFaDisableBtn = $("#twoFaDisableBtn");
+    const twoFaFlow = $("#twoFaFlow");
+    const twoFaCode = $("#twoFaCode");
+    const twoFaVerifyBtn = $("#twoFaVerifyBtn");
+    const twoFaCancelBtn = $("#twoFaCancelBtn");
+    const twoFaResendBtn = $("#twoFaResendBtn");
+    const twoFaCountdown = $("#twoFaCountdown");
+
     const previewBtnPrimary = $("#previewBtnPrimary");
     const previewBtnGhost = $("#previewBtnGhost");
 
@@ -61,9 +72,19 @@
     });
 
     let settings = loadSettings(DEFAULTS);
+    const TWO_FA_RESEND_SECONDS = 45;
+    const twoFaState = {
+      enabled: false,
+      challenge: null,
+      timer: null,
+      remaining: 0,
+    };
 
     const user = await guard();
     if (!user) return;
+
+    twoFaState.enabled = !!(user.settings?.security?.twoFactorEnabled);
+    updateTwoFaStatus();
 
     hydrateForm(settings);
     applySettings(settings, { persist: false, preview: true });
@@ -91,6 +112,11 @@
     notifDigest?.addEventListener("change", () => {
       digestDay.disabled = !notifDigest.checked;
     });
+    twoFaEnableBtn?.addEventListener("click", () => startTwoFaChallenge("enable"));
+    twoFaDisableBtn?.addEventListener("click", () => startTwoFaChallenge("disable"));
+    twoFaVerifyBtn?.addEventListener("click", verifyTwoFactorCode);
+    twoFaCancelBtn?.addEventListener("click", () => resetTwoFaFlow());
+    twoFaResendBtn?.addEventListener("click", resendTwoFactorCode);
 
     form?.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -179,6 +205,155 @@
       toast("🧽 Local data cleared.");
       setTimeout(() => (window.location.href = "login.html"), 900);
     });
+
+    function twoFaActionLabel(mode) {
+      return mode === "disable" ? "disable" : "enable";
+    }
+
+    async function startTwoFaChallenge(mode) {
+      if (twoFaState.challenge) {
+        toast("Complete the current verification first.");
+        return;
+      }
+      const endpoint = mode === "disable" ? "/auth/twofactor/disable" : "/auth/twofactor/setup";
+      const res = await authedFetch(endpoint, { method: "POST" });
+      if (!res) return;
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast(data?.error || "Unable to start verification.");
+        return;
+      }
+      twoFaState.challenge = {
+        id: data.challengeId,
+        delivery: data.delivery || "email",
+        mode
+      };
+      if (twoFaFlow) twoFaFlow.classList.remove("hidden");
+      twoFaCode?.focus();
+      updateTwoFaMeta();
+      startTwoFaCountdown();
+    }
+
+    async function verifyTwoFactorCode() {
+      if (!twoFaState.challenge) return;
+      const code = (twoFaCode?.value || "").trim();
+      if (!code || code.length < 6) {
+        toast("Enter the 6-digit verification code.");
+        return;
+      }
+      twoFaVerifyBtn && (twoFaVerifyBtn.disabled = true);
+      try {
+        const res = await authedFetch("/auth/verify-otp", {
+          method: "POST",
+          body: JSON.stringify({ challengeId: twoFaState.challenge.id, code })
+        });
+        if (!res) return;
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast(data?.error || "Invalid verification code.");
+          return;
+        }
+        if (typeof data?.twoFactorEnabled === "boolean") {
+          twoFaState.enabled = data.twoFactorEnabled;
+        } else if (twoFaState.challenge.mode === "enable") {
+          twoFaState.enabled = true;
+        } else if (twoFaState.challenge.mode === "disable") {
+          twoFaState.enabled = false;
+        }
+        toast(twoFaState.enabled ? "🔐 Two-factor enabled." : "Two-factor disabled.");
+        resetTwoFaFlow(true);
+        updateTwoFaStatus();
+      } finally {
+        twoFaVerifyBtn && (twoFaVerifyBtn.disabled = false);
+      }
+    }
+
+    async function resendTwoFactorCode() {
+      if (!twoFaState.challenge || twoFaResendBtn?.disabled) return;
+      twoFaResendBtn.disabled = true;
+      try {
+        const res = await authedFetch("/auth/resend-otp", {
+          method: "POST",
+          body: JSON.stringify({ challengeId: twoFaState.challenge.id })
+        });
+        if (!res) {
+          twoFaResendBtn.disabled = false;
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast(data?.error || "Unable to resend code.");
+          twoFaResendBtn.disabled = false;
+          return;
+        }
+        twoFaState.challenge.id = data.challengeId;
+        twoFaState.challenge.delivery = data.delivery || twoFaState.challenge.delivery;
+        toast("Sent a fresh verification code.");
+        updateTwoFaMeta();
+        startTwoFaCountdown();
+      } catch {
+        twoFaResendBtn.disabled = false;
+        toast("Unable to resend code right now.");
+      }
+    }
+
+    function startTwoFaCountdown(seconds = TWO_FA_RESEND_SECONDS) {
+      clearInterval(twoFaState.timer);
+      twoFaState.remaining = seconds;
+      updateTwoFaCountdown();
+      twoFaResendBtn && (twoFaResendBtn.disabled = true);
+      twoFaState.timer = setInterval(() => {
+        twoFaState.remaining -= 1;
+        updateTwoFaCountdown();
+        if (twoFaState.remaining <= 0) {
+          clearInterval(twoFaState.timer);
+          twoFaState.timer = null;
+          twoFaCountdown && (twoFaCountdown.textContent = "You can resend a code now.");
+          twoFaResendBtn && (twoFaResendBtn.disabled = false);
+        }
+      }, 1000);
+    }
+
+    function updateTwoFaCountdown() {
+      if (!twoFaCountdown) return;
+      if (twoFaState.remaining <= 0) {
+        twoFaCountdown.textContent = "";
+      } else {
+        twoFaCountdown.textContent = `Resend available in ${twoFaState.remaining}s.`;
+      }
+    }
+
+    function resetTwoFaFlow(success = false) {
+      clearInterval(twoFaState.timer);
+      twoFaState.timer = null;
+      twoFaState.challenge = null;
+      twoFaCode && (twoFaCode.value = "");
+      if (twoFaFlow && !twoFaState.challenge) twoFaFlow.classList.add("hidden");
+      twoFaResendBtn && (twoFaResendBtn.disabled = false);
+      twoFaCountdown && (twoFaCountdown.textContent = "");
+      updateTwoFaMeta(success ? "Status updated." : "");
+    }
+
+    function updateTwoFaStatus() {
+      if (twoFaStatusText) twoFaStatusText.textContent = twoFaState.enabled ? "Enabled" : "Disabled";
+      if (twoFaEnableBtn) twoFaEnableBtn.disabled = twoFaState.enabled;
+      if (twoFaDisableBtn) twoFaDisableBtn.disabled = !twoFaState.enabled;
+      updateTwoFaMeta();
+    }
+
+    function updateTwoFaMeta(extraMessage = "") {
+      if (!twoFaMeta) return;
+      if (twoFaState.challenge) {
+        const channel = twoFaState.challenge.delivery === "sms" ? "text message" : "email";
+        const verb = twoFaActionLabel(twoFaState.challenge.mode);
+        twoFaMeta.textContent = `Enter the code we sent via ${channel} to ${verb} two-factor authentication. ${extraMessage}`.trim();
+      } else {
+        twoFaMeta.textContent = twoFaState.enabled
+          ? "Two-factor is active. You’ll enter a code at login."
+          : "Add a verification challenge after your password to keep intruders out.";
+        if (extraMessage) twoFaMeta.textContent += ` ${extraMessage}`;
+      }
+    }
 
     function loadSettings(defaults) {
       try {

@@ -10,7 +10,7 @@ import { models } from './models/sqlModels.js';
 
 dotenv.config();
 
-const { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge } = models;
+const { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge, AuditLog } = models;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 const app = express();
@@ -81,13 +81,23 @@ const sendSms = async (to, message) => {
   console.log(`\n📱 SMS to ${to}\n${message}\n`);
 };
 
+const recordAudit = async (event, { userId = null, severity = 'info', metadata = {} } = {}, req = null) => {
+  try {
+    const ipAddress = req?.ip || null;
+    const userAgent = req?.headers?.['user-agent'] ? req.headers['user-agent'].slice(0, 500) : null;
+    await AuditLog.create({ userId, event, severity, ipAddress, userAgent, metadata });
+  } catch (err) {
+    console.error('Failed to write audit log', err);
+  }
+};
+
 const requiresTwoFactor = (user) => {
   const pref = user.settings?.security?.twoFactorEnabled;
   if (typeof pref === 'boolean') return pref;
   return REQUIRE_2FA;
 };
 
-async function issueOtpChallenge(user) {
+async function issueOtpChallenge(user, context = 'login') {
   await OtpChallenge.deleteExpired();
   const challengeId = randomToken(24);
   const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -98,12 +108,13 @@ async function issueOtpChallenge(user) {
     challengeId,
     codeHash: hashOtpCode(challengeId, code),
     delivery,
+    context,
     expiresAt,
   });
   const msg = `Your Baylis verification code is ${code}. It expires in ${minutes(OTP_WINDOW_MS)} minutes.`;
   if (delivery === 'sms') await sendSms(user.contact?.phone, msg);
   else await sendEmail(user.contact?.email || user.email, 'Your verification code', msg);
-  return { challengeId, delivery };
+  return { challengeId, delivery, context };
 }
 
 async function issuePasswordReset(user) {
@@ -262,6 +273,19 @@ const csrfRequired = asyncHandler(async (req, res, next) => {
   next();
 });
 
+const requireRole = (...roles) => (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+  if (!roles.includes(req.user.role)) {
+    recordAudit('auth.role.denied', {
+      userId: req.user.id,
+      severity: 'warn',
+      metadata: { route: req.originalUrl, method: req.method, requiredRoles: roles, role: req.user.role },
+    }, req);
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  next();
+};
+
 function requireFields(obj, rules) {
   for (const [field, { min = 0, required = true }] of Object.entries(rules)) {
     const val = (obj?.[field] || '').toString().trim();
@@ -276,11 +300,12 @@ app.post('/api/auth/register', rateLimit(30, 60_000), asyncHandler(async (req, r
   const { username, email = '', role = 'resident', password = '' } = req.body || {};
   if (!username || username.length < 3) return res.status(400).json({ error: 'Username too short' });
   if (!password || password.length < 6) return res.status(400).json({ error: 'Password too short' });
-  const existing = await User.findOne({ username: username.toLowerCase() });
+  const normalizedUsername = username.toLowerCase();
+  const existing = await User.findOne({ username: normalizedUsername });
   if (existing) return res.status(409).json({ error: 'Username already taken' });
   const hash = await bcrypt.hash(password, 10);
   const user = await User.create({
-    username: username.toLowerCase(),
+    username: normalizedUsername,
     email,
     role: role.toLowerCase(),
     passwordHash: hash,
@@ -288,20 +313,30 @@ app.post('/api/auth/register', rateLimit(30, 60_000), asyncHandler(async (req, r
     contact: { email },
   });
   await setSession(req, res, user.id);
+  await recordAudit('auth.register', { userId: user.id, metadata: { username: normalizedUsername, role: user.role } }, req);
   res.status(201).json({ user: publicUser(user) });
 }));
 
 app.post('/api/auth/login', rateLimit(60, 60_000), asyncHandler(async (req, res) => {
   const { username = '', password = '' } = req.body || {};
-  const user = await User.findOne({ username: username.toLowerCase() });
-  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+  const normalizedUsername = username.toLowerCase();
+  const user = await User.findOne({ username: normalizedUsername });
+  if (!user) {
+    await recordAudit('auth.login.invalid', { metadata: { username: normalizedUsername, reason: 'unknown_user' }, severity: 'warn' }, req);
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
   const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+  if (!ok) {
+    await recordAudit('auth.login.invalid', { userId: user.id, metadata: { username: normalizedUsername, reason: 'bad_password' }, severity: 'warn' }, req);
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
   if (requiresTwoFactor(user)) {
-    const challenge = await issueOtpChallenge(user);
+    const challenge = await issueOtpChallenge(user, 'login');
+    await recordAudit('auth.login.otp_required', { userId: user.id, metadata: { delivery: challenge.delivery } }, req);
     return res.json({ require2FA: true, challengeId: challenge.challengeId, delivery: challenge.delivery });
   }
   await setSession(req, res, user.id);
+  await recordAudit('auth.login.success', { userId: user.id, metadata: { twoFactor: false } }, req);
   res.json({ user: publicUser(user) });
 }));
 
@@ -311,11 +346,13 @@ app.get('/api/auth/me', authRequired, (req, res) => {
 
 app.post('/api/auth/logout', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   await clearSession(req, res);
+  await recordAudit('auth.logout', { userId: req.user.id }, req);
   res.json({ ok: true });
 }));
 app.post('/api/auth/logout-all', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   await Session.deleteMany({ userId: req.user.id });
   await clearSession(req, res);
+  await recordAudit('auth.logout_all', { userId: req.user.id, severity: 'warn' }, req);
   res.json({ ok: true });
 }));
 
@@ -327,6 +364,7 @@ app.post('/api/auth/change-password', authRequired, csrfRequired, asyncHandler(a
   if (newPassword.length < 6) return res.status(400).json({ error: 'Password too short' });
   req.user.passwordHash = await bcrypt.hash(newPassword, 10);
   await req.user.save();
+  await recordAudit('auth.password.changed', { userId: req.user.id }, req);
   res.json({ ok: true });
 }));
 
@@ -339,6 +377,9 @@ app.post('/api/auth/request-reset', rateLimit(20, 60_000), asyncHandler(async (r
   if (!user && usernameTrim) user = await User.findOne({ username: usernameTrim });
   if (user) {
     await issuePasswordReset(user);
+    await recordAudit('auth.reset.requested', { userId: user.id, metadata: { via: emailTrim ? 'email' : 'username' } }, req);
+  } else {
+    await recordAudit('auth.reset.requested', { metadata: { username: usernameTrim || null, email: emailTrim || null, matched: false } }, req);
   }
   res.json({ ok: true });
 }));
@@ -360,6 +401,7 @@ app.post('/api/auth/reset', rateLimit(40, 60_000), asyncHandler(async (req, res)
   user.passwordHash = await bcrypt.hash(password, 10);
   await user.save();
   await PasswordResetToken.markUsed(record.id);
+  await recordAudit('auth.reset.completed', { userId: user.id }, req);
   res.json({ ok: true });
 }));
 
@@ -367,30 +409,94 @@ app.post('/api/auth/verify-otp', rateLimit(40, 60_000), asyncHandler(async (req,
   const { challengeId = '', code = '' } = req.body || {};
   if (!challengeId || !code) return res.status(400).json({ error: 'Challenge and code are required' });
   const challenge = await OtpChallenge.findByChallengeId(challengeId);
-  if (!challenge) return res.status(400).json({ error: 'Challenge expired or invalid' });
+  if (!challenge) {
+    await recordAudit('auth.otp.invalid', { metadata: { reason: 'missing_challenge' }, severity: 'warn' }, req);
+    return res.status(400).json({ error: 'Challenge expired or invalid' });
+  }
   if (challenge.expiresAt && challenge.expiresAt.getTime() <= Date.now()) {
     await OtpChallenge.delete(challengeId);
+    await recordAudit('auth.otp.invalid', { userId: challenge.userId, metadata: { reason: 'expired', context: challenge.context }, severity: 'warn' }, req);
     return res.status(400).json({ error: 'Code expired' });
   }
   if (challenge.attempts >= MAX_OTP_ATTEMPTS) {
     await OtpChallenge.delete(challengeId);
+    await recordAudit('auth.otp.invalid', { userId: challenge.userId, metadata: { reason: 'max_attempts', context: challenge.context }, severity: 'error' }, req);
     return res.status(429).json({ error: 'Too many attempts. Please log in again.' });
   }
   const matches = hashOtpCode(challenge.challengeId, code) === challenge.codeHash;
   if (!matches) {
     await OtpChallenge.incrementAttempts(challengeId);
+    await recordAudit('auth.otp.invalid', { userId: challenge.userId, metadata: { reason: 'bad_code', attempts: challenge.attempts + 1, context: challenge.context }, severity: 'warn' }, req);
     return res.status(401).json({ error: 'Invalid verification code' });
   }
   await OtpChallenge.delete(challengeId);
   const user = await User.findById(challenge.userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
-  await setSession(req, res, user.id);
-  res.json({ user: publicUser(user) });
+  if (challenge.context === 'login') {
+    await setSession(req, res, user.id);
+    await recordAudit('auth.login.success', { userId: user.id, metadata: { twoFactor: true } }, req);
+    return res.json({ user: publicUser(user) });
+  }
+  if (challenge.context === '2fa-enable') {
+    user.settings = user.settings || {};
+    user.settings.security = { ...(user.settings.security || {}), twoFactorEnabled: true };
+    await user.save();
+    await recordAudit('auth.2fa.enabled', { userId: user.id }, req);
+    return res.json({ ok: true, twoFactorEnabled: true });
+  }
+  if (challenge.context === '2fa-disable') {
+    user.settings = user.settings || {};
+    user.settings.security = { ...(user.settings.security || {}), twoFactorEnabled: false };
+    await user.save();
+    await recordAudit('auth.2fa.disabled', { userId: user.id, severity: 'warn' }, req);
+    return res.json({ ok: true, twoFactorEnabled: false });
+  }
+  await recordAudit('auth.otp.verified', { userId: user.id, metadata: { context: challenge.context } }, req);
+  res.json({ ok: true });
+}));
+
+app.post('/api/auth/resend-otp', rateLimit(20, 60_000), asyncHandler(async (req, res) => {
+  const { challengeId = '' } = req.body || {};
+  if (!challengeId) return res.status(400).json({ error: 'Challenge is required' });
+  const challenge = await OtpChallenge.findByChallengeId(challengeId);
+  if (!challenge) return res.status(404).json({ error: 'Challenge expired or invalid' });
+  const user = await User.findById(challenge.userId);
+  if (!user) {
+    await OtpChallenge.delete(challengeId);
+    return res.status(404).json({ error: 'User not found' });
+  }
+  await OtpChallenge.delete(challengeId);
+  const fresh = await issueOtpChallenge(user, challenge.context || 'login');
+  await recordAudit('auth.otp.resent', { userId: user.id, metadata: { context: fresh.context, delivery: fresh.delivery } }, req);
+  res.json({ challengeId: fresh.challengeId, delivery: fresh.delivery, context: fresh.context });
+}));
+
+app.post('/api/auth/twofactor/setup', authRequired, csrfRequired, asyncHandler(async (req, res) => {
+  const alreadyEnabled = !!req.user.settings?.security?.twoFactorEnabled;
+  if (alreadyEnabled) return res.status(400).json({ error: 'Two-factor is already enabled' });
+  const challenge = await issueOtpChallenge(req.user, '2fa-enable');
+  await recordAudit('auth.2fa.challenge', { userId: req.user.id, metadata: { action: 'enable', delivery: challenge.delivery } }, req);
+  res.json({ challengeId: challenge.challengeId, delivery: challenge.delivery });
+}));
+
+app.post('/api/auth/twofactor/disable', authRequired, csrfRequired, asyncHandler(async (req, res) => {
+  if (REQUIRE_2FA) return res.status(400).json({ error: 'Two-factor cannot be disabled in this environment' });
+  const enabled = !!req.user.settings?.security?.twoFactorEnabled;
+  if (!enabled) return res.status(400).json({ error: 'Two-factor is not enabled' });
+  const challenge = await issueOtpChallenge(req.user, '2fa-disable');
+  await recordAudit('auth.2fa.challenge', { userId: req.user.id, metadata: { action: 'disable', delivery: challenge.delivery } }, req);
+  res.json({ challengeId: challenge.challengeId, delivery: challenge.delivery });
 }));
 
 app.get('/api/security/csrf', authRequired, asyncHandler(async (req, res) => {
   const token = await rotateCsrfToken(req, res, req.sessionRecord);
   res.json({ token });
+}));
+
+app.get('/api/security/audit', authRequired, requireRole('landlord'), asyncHandler(async (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 100, 10), 500);
+  const logs = await AuditLog.findRecent(limit);
+  res.json({ logs });
 }));
 
 // Profile & settings
@@ -453,7 +559,12 @@ app.post('/api/forms/message', authRequired, csrfRequired, asyncHandler(async (r
   res.status(201).json(rec);
 }));
 app.get('/api/requests', authRequired, asyncHandler(async (req, res) => {
-  const list = await Request.find();
+  const list = req.user.role === 'landlord'
+    ? await Request.find()
+    : await Request.find({ userId: req.user.id });
+  if (req.user.role !== 'landlord') {
+    await recordAudit('requests.view.self', { userId: req.user.id }, req);
+  }
   res.json(list);
 }));
 

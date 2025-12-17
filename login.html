@@ -48,7 +48,6 @@
         </a>
         <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
         <div class="nav-links" id="navLinks" data-links data-open="false">
-          <a href="index.html">Dashboard</a>
           <a href="resident.html">Resident</a>
           <a href="landlord.html">Landlord</a>
           <a href="community.html">Community</a>
@@ -124,14 +123,16 @@
 
         <section id="otpSection" class="hidden" aria-label="Verify it is you">
           <h3 class="h3">Verify it’s you</h3>
-          <p class="muted">Enter the 6-digit code we sent to your email/phone.</p>
+          <p class="muted" id="otpStatus">Enter the 6-digit code we sent to your email/phone.</p>
+          <p class="muted" id="otpCountdown"></p>
           <div>
             <label class="field" for="otpCode">
               <span>One-time code</span>
               <input id="otpCode" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" autocomplete="one-time-code" />
             </label>
-            <div>
+            <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.5rem;">
               <button id="otpBackBtn" type="button" class="btn secondary">Back</button>
+              <button id="otpResendBtn" type="button" class="btn btn-ghost">Resend code</button>
               <button id="otpSubmitBtn" type="button" class="btn">Verify</button>
             </div>
           </div>

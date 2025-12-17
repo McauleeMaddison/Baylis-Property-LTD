@@ -1,10 +1,12 @@
-const express = require("express");
-const path = require("path");
-const helmet = require("helmet");
-const morgan = require("morgan");
+import express from "express";
+import path from "path";
+import helmet from "helmet";
+import morgan from "morgan";
+import { fileURLToPath } from "url";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const pub  = path.join(root, "");
 const assetsStatic = express.static(pub, { index: false });

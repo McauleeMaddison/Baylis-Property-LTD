@@ -207,16 +207,17 @@ const mapOtpRow = (row) => {
     challengeId: row.challenge_id,
     codeHash: row.code_hash,
     delivery: row.delivery,
+    context: row.context || 'login',
     expiresAt: row.expires_at ? new Date(row.expires_at) : null,
     attempts: row.attempts || 0,
   };
 };
 
 export const OtpChallenge = {
-  async create({ userId, challengeId, codeHash, delivery = 'sms', expiresAt }) {
+  async create({ userId, challengeId, codeHash, delivery = 'sms', context = 'login', expiresAt }) {
     await db.query(
-      `INSERT INTO otp_challenges (user_id, challenge_id, code_hash, delivery, expires_at) VALUES (?, ?, ?, ?, ?)`,
-      [userId, challengeId, codeHash, delivery, expiresAt]
+      `INSERT INTO otp_challenges (user_id, challenge_id, code_hash, delivery, context, expires_at) VALUES (?, ?, ?, ?, ?, ?)`,
+      [userId, challengeId, codeHash, delivery, context, expiresAt]
     );
     return { challengeId };
   },
@@ -235,4 +236,29 @@ export const OtpChallenge = {
   }
 };
 
-export const models = { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge };
+const mapAuditRow = (row) => ({
+  id: row.id,
+  userId: row.user_id,
+  event: row.event,
+  severity: row.severity,
+  ipAddress: row.ip_address,
+  userAgent: row.user_agent,
+  metadata: parseJSONField(row.metadata),
+  createdAt: row.created_at ? new Date(row.created_at) : null
+});
+
+export const AuditLog = {
+  async create({ userId = null, event, severity = 'info', ipAddress = null, userAgent = null, metadata = {} }) {
+    await db.query(
+      `INSERT INTO audit_logs (user_id, event, severity, ip_address, user_agent, metadata) VALUES (?, ?, ?, ?, ?, ?)`,
+      [userId, event, severity, ipAddress, userAgent, JSON.stringify(metadata || {})]
+    );
+  },
+  async findRecent(limit = 100) {
+    const safeLimit = Math.min(Math.max(Number(limit) || 50, 10), 500);
+    const [rows] = await db.query('SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT ?', [safeLimit]);
+    return rows.map(mapAuditRow);
+  }
+};
+
+export const models = { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge, AuditLog };

@@ -134,6 +134,32 @@
         <li class="muted">Loading…</li>
       </ul>
     </section>
+
+    <section class="dashboard-card" aria-label="Security audit log">
+      <div class="section-header" style="margin-bottom:var(--space-3);">
+        <p class="eyebrow">Security events</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem; flex-wrap:wrap;">
+          <h3 style="margin:0;">Audit log</h3>
+          <button type="button" id="auditRefreshBtn" class="btn btn-ghost btn-small">Refresh</button>
+        </div>
+        <p class="muted">Latest authentication and security events across the workspace.</p>
+      </div>
+      <div class="table-wrapper">
+        <table class="table" aria-live="polite">
+          <thead>
+            <tr>
+              <th scope="col">When</th>
+              <th scope="col">Event</th>
+              <th scope="col">Severity</th>
+              <th scope="col">Details</th>
+            </tr>
+          </thead>
+          <tbody id="auditTableBody">
+            <tr><td colspan="4" class="muted" id="auditEmpty">Loading audit events…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -148,6 +174,9 @@
 
   <style>
     .metric { font-size: 1.8rem; font-weight: 700; }
+    .table-wrapper { overflow-x:auto; }
+    #auditTableBody td { font-size: var(--fs-14); }
+    .eyebrow { text-transform: uppercase; letter-spacing: .2em; font-size: .75rem; color: var(--secondary); }
   </style>
 </body>
 </html>
