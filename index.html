@@ -81,39 +81,60 @@
 
   <main id="content">
     <section class="hero">
-      <div class="hero-content">
-        <div class="hero-logo">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
-            <circle cx="100" cy="100" r="95" fill="#1a2332" stroke="#d4af37" stroke-width="2"/>
-            <rect x="60" y="70" width="80" height="90" fill="none" stroke="#d4af37" stroke-width="2"/>
-            <rect x="70" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="90" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="110" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="70" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="90" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="110" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="70" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="90" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="110" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <rect x="92" y="140" width="16" height="20" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-            <line x1="100" y1="140" x2="100" y2="160" stroke="#d4af37" stroke-width="1"/>
-            <polygon points="60,70 100,40 140,70" fill="none" stroke="#d4af37" stroke-width="2"/>
-          </svg>
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <p class="eyebrow">Modern operations for growing portfolios</p>
+          <h1>Baylis Property LTD</h1>
+          <p class="hero-subtitle">A unified SaaS platform connecting residents, landlords, and on-site teams with transparent workflows, instant updates, and built‑in accountability.</p>
+          <div class="hero-cta">
+            <a href="register.html" class="btn btn-primary">Book a demo</a>
+            <a href="login.html" class="btn btn-secondary">Sign in</a>
+          </div>
+          <ul class="hero-points">
+            <li>Live task tracking across every building</li>
+            <li>Secure resident + landlord messaging threads</li>
+            <li>Automated updates to Google Sheets and BI tools</li>
+          </ul>
+          <div class="hero-metrics">
+            <div class="metric">
+              <span>2k+</span>
+              <p>maintenance tickets resolved each month</p>
+            </div>
+            <div class="metric">
+              <span>98%</span>
+              <p>resident satisfaction on response quality</p>
+            </div>
+          </div>
         </div>
-        <h1>Baylis Property LTD</h1>
-        <p>Modern property management platform connecting residents and landlords</p>
-        <div class="hero-cta">
-          <a href="register.html" class="btn-primary">Get Started</a>
-          <a href="login.html" class="btn-secondary">Sign In</a>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-card">
+            <p class="eyebrow">Portfolio snapshot</p>
+            <h3>City Garden Residences</h3>
+            <ul>
+              <li><strong>18</strong> active requests</li>
+              <li><strong>06</strong> scheduled inspections</li>
+              <li><strong>12</strong> open landlord threads</li>
+            </ul>
+            <div class="hero-progress">
+              <span>Resolution SLA</span>
+              <div class="progress-track"><span class="progress-bar"></span></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="features">
-      <div class="features-grid">
-        <div class="feature-card">
-          <h3>📋 Maintenance Requests</h3>
-          <p>Easily submit and track cleaning and repair requests with real-time updates and status notifications.</p>
+      <div class="container">
+        <div class="section-header">
+          <p class="eyebrow">Platform capabilities</p>
+          <h2>Everything teams need to operate calmly</h2>
+          <p>Reduce context switching with automation-ready workflows, built-in communications, and realtime visibility for every stakeholder.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>📋 Maintenance Requests</h3>
+            <p>Easily submit and track cleaning and repair requests with real-time updates and status notifications.</p>
         </div>
         <div class="feature-card">
           <h3>👥 Community Hub</h3>
@@ -135,15 +156,20 @@
           <h3>📱 Mobile Friendly</h3>
           <p>Access Baylis Property on any device with our fully responsive web application.</p>
         </div>
+        </div>
       </div>
     </section>
 
     <section class="testimonials">
-      <h2>What Our Users Say</h2>
-      <div class="testimonial-grid">
-        <div class="testimonial">
-          <p>"Baylis Property has transformed how we manage our building. The maintenance request system is intuitive and efficient."</p>
-          <div class="testimonial-author">— Sarah, Property Manager</div>
+      <div class="container">
+        <div class="section-header">
+          <p class="eyebrow">Social proof</p>
+          <h2>Loved by modern resident experience teams</h2>
+        </div>
+        <div class="testimonial-grid">
+          <div class="testimonial">
+            <p>"Baylis Property has transformed how we manage our building. The maintenance request system is intuitive and efficient."</p>
+            <div class="testimonial-author">— Sarah, Property Manager</div>
         </div>
         <div class="testimonial">
           <p>"As a resident, I appreciate how easy it is to submit requests and stay updated. The community hub is fantastic!"</p>
@@ -153,13 +179,22 @@
           <p>"Outstanding platform for property management. The landlord portal gives me complete control and visibility."</p>
           <div class="testimonial-author">— Emma, Landlord</div>
         </div>
+        </div>
       </div>
     </section>
 
     <section class="cta-section">
-      <h2>Ready to Simplify Property Management?</h2>
-      <p>Join Baylis Property LTD today and experience modern property management</p>
-      <a href="register.html" class="btn-primary">Start Free</a>
+      <div class="container cta-card">
+        <div>
+          <p class="eyebrow">Ready to modernize?</p>
+          <h2>Launch Baylis Property LTD across your portfolio</h2>
+          <p>Stand up a secure, branded resident and landlord experience in a weekend. Our onboarding team imports your data and configures workflows for you.</p>
+        </div>
+        <div class="cta-actions">
+          <a href="register.html" class="btn btn-primary">Start free</a>
+          <a href="mailto:hello@baylisproperty.co.uk" class="btn btn-ghost">Talk to sales</a>
+        </div>
+      </div>
     </section>
   </main>
 
