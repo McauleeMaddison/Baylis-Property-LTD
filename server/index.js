@@ -3,16 +3,50 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import { models } from './models/sqlModels.js';
 
-dotenv.config();
-
-const { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge, AuditLog } = models;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
+[
+  path.join(root, '.env'),
+  path.join(root, '.env.production'),
+  path.join(__dirname, '.env'),
+  path.join(__dirname, '.env.production'),
+].forEach((envPath) => dotenv.config({ path: envPath, override: false }));
+
+let models;
+const useMemory = process.env.USE_INMEMORY_DB === 'true';
+if (useMemory) {
+  ({ models } = await import('./models/memoryModels.js'));
+  console.warn('⚠️  Using in-memory data store (USE_INMEMORY_DB=true). Data will reset on restart.');
+} else {
+  try {
+    ({ models } = await import('./models/sqlModels.js'));
+  } catch (err) {
+    console.error('Failed to connect to MySQL. Falling back to in-memory store.', err.message);
+    ({ models } = await import('./models/memoryModels.js'));
+    console.warn('⚠️  Using in-memory data store because MySQL connection failed.');
+  }
+}
+
+let bcrypt;
+try {
+  ({ default: bcrypt } = await import('bcryptjs'));
+} catch (err) {
+  console.warn('⚠️  bcryptjs not available. Falling back to crypto SHA-256 hashes (not secure for production).');
+  bcrypt = {
+    async hash(value) {
+      return crypto.createHash('sha256').update(String(value)).digest('hex');
+    },
+    async compare(plain, hashed) {
+      const h = await this.hash(plain);
+      return h === hashed;
+    },
+  };
+}
+
+const { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge, AuditLog } = models;
 const app = express();
 const PORT = process.env.PORT || 5000;
 const isProd = process.env.NODE_ENV === 'production';

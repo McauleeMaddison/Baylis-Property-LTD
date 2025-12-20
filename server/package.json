@@ -4,7 +4,7 @@
   "type": "module",
   "main": "server/index.js",
   "scripts": {
-    "prestart": "npm run migrate",
+    "prestart": "node ./scripts/prestart.js",
     "dev": "nodemon index.js",
     "start": "node index.js",
     "migrate": "node migrate.js ../migrations/0001_init.sql",

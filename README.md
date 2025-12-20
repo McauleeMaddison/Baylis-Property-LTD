@@ -62,12 +62,15 @@ Set the following keys in `server/.env` (local) and in your hosting environment:
 | `NODE_ENV` | `development` or `production`. |
 | `PORT` | HTTP port for Express (default 5000). |
 | `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE` | MySQL connection details. |
+| `USE_INMEMORY_DB` | Set to `true` to run against an in-memory datastore (skips MySQL migrations; data resets on restart). |
 | `SESSION_SECRET` | Long random string for cookies/CSRF/OTP HMAC. |
 | `SESSION_COOKIE_NAME`, `CSRF_COOKIE_NAME`, `SESSION_TTL_MS` | Session/cookie tuning (defaults provided). |
 | `TRUST_PROXY`, `FORCE_HTTPS` | Reverse proxy settings. |
 | `OTP_WINDOW_MS`, `OTP_MAX_ATTEMPTS`, `RESET_WINDOW_MS`, `REQUIRE_2FA` | Security policies. |
 | `APP_BASE_URL` | Public site URL (used in password reset links). |
 | Optional: `GOOGLE_API_KEY`, `GOOGLE_SHEET_ID` | For sheet integrations if enabled. |
+
+The backend loads env files from both the repo root (`.env`, `.env.production`) and `server/.env*`, so you can choose the location that suits your deployment.
 
 Database Setup
 --------------
@@ -123,6 +126,7 @@ npm run dev   # nodemon index.js
 npm start     # node index.js
 ```
 Visit `http://localhost:5000`. OTP/reset codes appear in the server logs (look for 📧/📱 lines).
+- `npm start` runs a lightweight prestart check: if `USE_INMEMORY_DB=true`, migrations are skipped; otherwise migrations run automatically when MySQL env vars are present.
 
 Testing
 -------
