@@ -172,6 +172,18 @@ select:focus-visible, textarea:focus-visible {
   .nav-links.show { max-height: 520px; }
   .nav-links a { padding:.9rem 1rem; }
 }
+.legal-main { padding: 110px 0 64px; max-width: 960px; }
+.legal-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-soft-bd);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-3);
+}
+.legal-card h1 { margin-bottom: var(--space-2); }
+.legal-card h3 { margin-top: var(--space-3); }
 .hero {
   background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.15), transparent 55%), var(--bg-light);
   padding: var(--space-6) 0 var(--space-6);
