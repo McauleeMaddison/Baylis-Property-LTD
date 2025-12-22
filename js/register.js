@@ -4,6 +4,14 @@ window.addEventListener('DOMContentLoaded', () => {
     const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : '';
   };
+  const ensureCsrf = async () => {
+    if (getCsrfToken()) return;
+    try {
+      await fetch(`${API_BASE}/security/csrf`, { credentials: 'include' });
+    } catch (err) {
+      console.warn('CSRF prefetch failed', err);
+    }
+  };
 
   const form       = document.getElementById('registerForm');
   const msg        = document.getElementById('registerMsg');
@@ -38,6 +46,8 @@ window.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     clearMsg();
 
+    await ensureCsrf();
+
     const username = (usernameEl?.value || '').trim();
     const role     = roleEl?.value || '';
     const password = pwEl?.value || '';
@@ -58,6 +68,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers,
+        credentials: 'include',
         body: JSON.stringify({ username, password, role })
       });
 
