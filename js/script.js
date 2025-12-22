@@ -285,8 +285,13 @@
 
     /* ---- CSRF helpers ---- */
     var getCsrfToken = function () {
-      var match = document.cookie.match(/(?:^|;)\\s*csrfToken=([^;]+)/);
+      var match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
       return match ? decodeURIComponent(match[1]) : "";
+    };
+    var ensureCsrf = function () {
+      if (getCsrfToken()) return Promise.resolve();
+      var url = apiBase ? apiBase.replace(/\/$/, "") + "/security/csrf" : "/api/security/csrf";
+      return fetch(url, { credentials: "include" }).catch(function () {});
     };
     var csrfHeaders = function (headers) {
       var token = getCsrfToken();
@@ -295,9 +300,10 @@
 
     /* ---- Generic form handler ---- */
     var handleFormSubmit = function (form, msgEl, options) {
-      on(form, "submit", function (event) {
+      on(form, "submit", async function (event) {
         event.preventDefault();
         if (typeof form.reportValidity === "function" && !form.reportValidity()) return;
+        await ensureCsrf();
 
         var submitBtn = form.querySelector("button[type='submit'], input[type='submit']");
         var originalText = submitBtn?.textContent;
