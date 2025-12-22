@@ -155,10 +155,10 @@ select:focus-visible, textarea:focus-visible {
   color: var(--secondary); transition: background var(--t-fast), transform var(--t-fast);
 }
 .hamb:hover { background: var(--accent-soft-bg); transform: translateY(-1px); }
-.nav-links { display:flex; align-items:center; gap: .9rem; }
+.nav-links { display:flex; align-items:center; gap: 1.1rem; }
 .nav-links a, .nav-links button {
-  padding: .5rem .8rem; border-radius: var(--radius-2xs); font-weight:700; color: var(--text);
-  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast);
+  padding: .55rem 1rem; border-radius: var(--radius-2xs); font-weight:700; color: var(--text);
+  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast), border-color var(--t-fast);
 }
 .nav-links a:hover, .nav-links button:hover { background: var(--accent-soft-bg); color: var(--secondary); }
 .nav-links a[aria-current="page"] { color: var(--secondary); background: var(--accent-soft-bg); border-bottom: 2px solid var(--secondary); }
