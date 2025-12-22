@@ -97,9 +97,17 @@
       document.body.classList.toggle("nav-open", !!open);
     };
 
-    on(hamburgerBtn, "click", function () {
+    var toggleNav = function () {
       var isOpen = navLinks?.dataset.open === "true";
       setNavOpen(!isOpen);
+    };
+
+    on(hamburgerBtn, "click", function () { toggleNav(); });
+    on(hamburgerBtn, "pointerdown", function (event) {
+      if (event.pointerType === "touch") {
+        event.preventDefault();
+        toggleNav();
+      }
     });
     on(navLinks, "click", function (event) {
       if (event.target.closest("a")) setNavOpen(false);
