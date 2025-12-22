@@ -136,6 +136,9 @@ npm test      # runs Jest/Supertest API suite (add tests under server/tests/)
 ```
 E2E scaffolding exists in the root package (`npm run cypress:open`) if Cypress is installed; failures won’t block CI by default.
 
+- Tests default to the in-memory datastore (`USE_INMEMORY_DB=true`) so they run without MySQL; set `USE_INMEMORY_DB=false` if you want to exercise a real database.
+- To run migrations against MySQL directly, export `SERVER_ENV_FILE` to point at your env file (or copy your env into `server/.env`) before running `npm --prefix server run migrate`.
+
 - For a full Render walkthrough (GitHub integration, managed MySQL, migrations, custom domains) see [`RENDER-DEPLOYMENT.md`](RENDER-DEPLOYMENT.md).
 
 Deployment Guidance

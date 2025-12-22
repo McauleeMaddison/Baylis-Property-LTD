@@ -5,11 +5,15 @@ import { closeDbConnection } from './testUtils.js';
 describe('Auth endpoints', () => {
   const username = `testuser_${Date.now()}`;
   const password = 'testpass123';
+  let server;
+  let agent;
 
   test(
     'registers a new user',
     async () => {
-      const res = await request(app).post('/api/auth/register').send({ username, password });
+      server = app.listen(0, '127.0.0.1');
+      agent = request.agent(server);
+      const res = await agent.post('/api/auth/register').send({ username, password });
       expect(res.statusCode).toBe(201);
       expect(res.body).toHaveProperty('user');
       expect(res.body.user).toHaveProperty('username', username.toLowerCase());
@@ -20,7 +24,7 @@ describe('Auth endpoints', () => {
   test(
     'logs in the user',
     async () => {
-      const res = await request(app).post('/api/auth/login').send({ username, password });
+      const res = await agent.post('/api/auth/login').send({ username, password });
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('user');
       expect(res.body.user).toHaveProperty('username', username.toLowerCase());
@@ -30,5 +34,6 @@ describe('Auth endpoints', () => {
 
   afterAll(async () => {
     await closeDbConnection();
+    if (server) server.close();
   });
 });

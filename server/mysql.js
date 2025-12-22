@@ -33,6 +33,19 @@ export const connectionConfig = {
   database: process.env.MYSQL_DATABASE || "railway",
 };
 
+const sslMode = (process.env.MYSQL_SSL || "").toLowerCase();
+if (sslMode === "skip-verify") {
+  connectionConfig.ssl = { rejectUnauthorized: false };
+} else if (sslMode === "true" || sslMode === "required" || sslMode === "enable") {
+  connectionConfig.ssl = { rejectUnauthorized: true };
+}
+if (process.env.MYSQL_SSL_CA) {
+  connectionConfig.ssl = {
+    ...(connectionConfig.ssl || {}),
+    ca: process.env.MYSQL_SSL_CA,
+  };
+}
+
 export const createDbConnection = (overrides = {}) =>
   mysql.createConnection({
     ...connectionConfig,

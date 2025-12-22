@@ -1,4 +1,13 @@
-import { db } from '../mysql.js';
+let db = null;
+if (process.env.USE_INMEMORY_DB === 'true') {
+  // In-memory mode for fast local/Jest runs.
+  db = {
+    async query() { return [[], []]; },
+    async end() { /* no-op */ },
+  };
+} else {
+  ({ db } = await import('../mysql.js'));
+}
 
 export async function getCsrfToken(agent) {
   const res = await agent.get('/api/security/csrf');
@@ -14,7 +23,7 @@ export async function authedPost(agent, url, body = {}) {
 }
 
 export async function cleanupUser(userId) {
-  if (!userId) return;
+  if (!userId || process.env.USE_INMEMORY_DB === 'true') return;
   try {
     await db.query('DELETE FROM requests WHERE user_id = ?', [userId]);
     await db.query('DELETE FROM community_posts WHERE user_id = ?', [userId]);
@@ -28,7 +37,7 @@ export async function cleanupUser(userId) {
 
 let dbClosed = false;
 export async function closeDbConnection() {
-  if (dbClosed) return;
+  if (dbClosed || process.env.USE_INMEMORY_DB === 'true') return;
   dbClosed = true;
   try {
     await db.end();

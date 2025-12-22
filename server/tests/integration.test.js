@@ -6,10 +6,12 @@ describe('Integration: profile, community, requests', () => {
   const username = `itest_${Date.now()}`;
   const password = 'testpass123';
   let agent;
+  let server;
   let userId;
 
   beforeAll(async () => {
-    agent = request.agent(app);
+    server = app.listen(0, '127.0.0.1');
+    agent = request.agent(server);
     const res = await agent.post('/api/auth/register').send({ username, password });
     expect(res.statusCode).toBe(201);
     userId = res.body.user.id;
@@ -52,5 +54,6 @@ describe('Integration: profile, community, requests', () => {
   afterAll(async () => {
     await cleanupUser(userId);
     await closeDbConnection();
+    if (server) server.close();
   });
 });
