@@ -167,7 +167,7 @@ select:focus-visible, textarea:focus-visible {
   .nav-links {
     position:absolute; top:70px; left:0; right:0; flex-direction:column; align-items:stretch;
     background: var(--bg-light); border-top: 1px solid var(--border); box-shadow: var(--shadow);
-    max-height:0; overflow:hidden; transition:max-height var(--t-smooth);
+    max-height:0; overflow:hidden; transition:max-height var(--t-smooth); z-index: var(--z-dropdown);
   }
   .nav-links.show { max-height: 520px; }
   .nav-links a { padding:.9rem 1rem; }

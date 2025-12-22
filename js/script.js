@@ -94,6 +94,11 @@
       navLinks.classList.toggle("show", !!open);
       navLinks.dataset.open = String(!!open);
       hamburgerBtn.setAttribute("aria-expanded", String(!!open));
+      if (open) {
+        navLinks.style.maxHeight = navLinks.scrollHeight + "px";
+      } else {
+        navLinks.style.maxHeight = "0px";
+      }
       document.body.classList.toggle("nav-open", !!open);
     };
 
