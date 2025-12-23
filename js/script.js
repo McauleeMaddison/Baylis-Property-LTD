@@ -54,6 +54,7 @@
 
     var root            = document.documentElement;
     var header          = $("#mainHeader");
+    var navWrapper      = $(".nav-inner");
     var hamburgerBtn    = document.querySelector("[data-hamb]");
     var navLinks        = document.querySelector("[data-links]");
     var darkToggle      = $("#darkModeToggle");
@@ -89,6 +90,12 @@
     })();
 
     /* ---- Navigation toggle ---- */
+    var isMobileView = function () {
+      return window.matchMedia("(max-width: 768px)").matches;
+    };
+
+    var hoverTimeout = null;
+
     var setNavOpen = function (open) {
       if (!navLinks || !hamburgerBtn) return;
       navLinks.classList.toggle("show", !!open);
@@ -114,6 +121,38 @@
         toggleNav();
       }
     });
+    var scheduleClose = function () {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = setTimeout(function () { setNavOpen(false); }, 120);
+    };
+    if (hamburgerBtn) {
+      on(hamburgerBtn, "pointerenter", function (event) {
+        if (!isMobileView()) return;
+        if (event.pointerType === "mouse" || event.pointerType === "pen") {
+          clearTimeout(hoverTimeout);
+          setNavOpen(true);
+        }
+      });
+      on(hamburgerBtn, "pointerleave", function (event) {
+        if (!isMobileView()) return;
+        if (event.pointerType === "mouse" || event.pointerType === "pen") scheduleClose();
+      });
+    }
+    if (navWrapper) {
+      on(navWrapper, "pointerleave", function (event) {
+        if (!isMobileView()) return;
+        if (event.pointerType === "mouse" || event.pointerType === "pen") scheduleClose();
+      });
+    }
+    if (navLinks) {
+      on(navLinks, "pointerenter", function (event) {
+        if (event.pointerType === "mouse" || event.pointerType === "pen") clearTimeout(hoverTimeout);
+      });
+      on(navLinks, "pointerleave", function (event) {
+        if (!isMobileView()) return;
+        if (event.pointerType === "mouse" || event.pointerType === "pen") scheduleClose();
+      });
+    }
     on(navLinks, "click", function (event) {
       if (event.target.closest("a")) setNavOpen(false);
     });
