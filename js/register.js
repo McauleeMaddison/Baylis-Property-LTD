@@ -68,13 +68,19 @@ window.addEventListener('DOMContentLoaded', () => {
     lock(true);
     try {
       const headers = { 'Content-Type':'application/json' };
-      const csrf = getCsrfToken();
-      if (csrf) headers['X-CSRF-Token'] = csrf;
-      const res = await fetch(`${API_BASE}/auth/register`, {
+      const payload = { username, password, role };
+      const fetcher = typeof window.fetchWithCsrf === 'function'
+        ? window.fetchWithCsrf
+        : (url, opts) => {
+            const csrf = getCsrfToken();
+            if (csrf) opts.headers['X-CSRF-Token'] = csrf;
+            return fetch(url, opts);
+          };
+      const res = await fetcher(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers,
         credentials: 'include',
-        body: JSON.stringify({ username, password, role })
+        body: JSON.stringify(payload)
       });
 
       if (res.status === 201) {

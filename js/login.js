@@ -490,14 +490,13 @@
   async function fetchJSON(path, options = {}) {
     try {
       const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      const opts = { ...options, headers, credentials: options.credentials || 'include' };
+      if (typeof window.fetchWithCsrf === 'function') {
+        return window.fetchWithCsrf(`${API_BASE}${path}`, { apiBase: API_BASE, ...opts });
+      }
       const csrf = getCsrfToken();
       if (csrf) headers['X-CSRF-Token'] = csrf;
-      const res = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        headers,
-        credentials: options.credentials || 'include'
-      });
-      return res;
+      return fetch(`${API_BASE}${path}`, opts);
     } catch {
       return null;
     }

@@ -42,12 +42,15 @@
   }
 
   async function fetchJSON(path, { method = "GET", body = null, headers = {} } = {}) {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const opts = {
       method,
       credentials: "include",
       headers: Object.assign({ "Content-Type": "application/json" }, headers),
       body: body ? JSON.stringify(body) : null,
-    });
+    };
+    const res = typeof window.fetchWithCsrf === "function"
+      ? await window.fetchWithCsrf(`${API_BASE}${path}`, { apiBase: API_BASE, ...opts })
+      : await fetch(`${API_BASE}${path}`, opts);
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new Error(text || `Request failed (${res.status})`);

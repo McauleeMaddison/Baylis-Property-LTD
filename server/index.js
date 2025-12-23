@@ -56,6 +56,9 @@ const CSRF_COOKIE = process.env.CSRF_COOKIE_NAME || 'csrfToken';
 const SESSION_TTL_MS = Number(process.env.SESSION_TTL_MS || 1000 * 60 * 60 * 24 * 7);
 const TRUST_PROXY = Number(process.env.TRUST_PROXY || 1);
 const FORCE_HTTPS = process.env.FORCE_HTTPS !== 'false';
+const SECURE_COOKIES = process.env.SECURE_COOKIES
+  ? process.env.SECURE_COOKIES !== 'false'
+  : (isProd && FORCE_HTTPS);
 const OTP_WINDOW_MS = Number(process.env.OTP_WINDOW_MS || 1000 * 60 * 5);
 const RESET_WINDOW_MS = Number(process.env.RESET_WINDOW_MS || 1000 * 60 * 15);
 const MAX_OTP_ATTEMPTS = Number(process.env.OTP_MAX_ATTEMPTS || 5);
@@ -71,14 +74,14 @@ await seedDemoUsers();
 const sessionCookieOptions = {
   httpOnly: true,
   sameSite: 'lax',
-  secure: isProd,
+  secure: SECURE_COOKIES,
   maxAge: SESSION_TTL_MS,
   path: '/',
 };
 const csrfCookieOptions = {
   httpOnly: false,
   sameSite: 'strict',
-  secure: isProd,
+  secure: SECURE_COOKIES,
   maxAge: SESSION_TTL_MS,
   path: '/',
 };

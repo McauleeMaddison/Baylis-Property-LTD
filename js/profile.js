@@ -185,9 +185,14 @@ window.addEventListener('DOMContentLoaded', () => {
       options.headers || {},
       token ? { 'Authorization': `Bearer ${token}` } : {}
     );
-    const csrf = getCsrfToken();
-    if (csrf) headers['X-CSRF-Token'] = csrf;
-    const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    const request = { ...options, headers, credentials: 'include' };
+    const res = typeof window.fetchWithCsrf === 'function'
+      ? await window.fetchWithCsrf(`${API_BASE}${path}`, { apiBase: API_BASE, ...request })
+      : await (async () => {
+          const csrf = getCsrfToken();
+          if (csrf) request.headers['X-CSRF-Token'] = csrf;
+          return fetch(`${API_BASE}${path}`, request);
+        })();
     if (res.status === 401) {
       toast('Session expired. Please log in again.');
       localStorage.removeItem('token'); localStorage.removeItem('role');

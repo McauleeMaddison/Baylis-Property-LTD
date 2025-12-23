@@ -310,6 +310,13 @@
       var token = getCsrfToken();
       return token ? Object.assign({}, headers || {}, { "X-CSRF-Token": token }) : Object.assign({}, headers || {});
     };
+    var csrfFetch = function (path, options) {
+      if (typeof window.fetchWithCsrf === "function") {
+        return window.fetchWithCsrf(path, Object.assign({ apiBase: apiBase }, options));
+      }
+      var headers = csrfHeaders(options && options.headers);
+      return fetch(path, Object.assign({ credentials: "include" }, options || {}, { headers }));
+    };
 
     /* ---- Generic form handler ---- */
     var handleFormSubmit = function (form, msgEl, options) {
@@ -334,10 +341,9 @@
         var payload = {};
         formData.forEach(function (value, key) { payload[key] = value; });
 
-        fetch(options.endpoint.startsWith("http") ? options.endpoint : (apiBase ? apiBase.replace(/\\/$/, "") + options.endpoint : options.endpoint), {
+        csrfFetch(options.endpoint.startsWith("http") ? options.endpoint : (apiBase ? apiBase.replace(/\\/$/, "") + options.endpoint : options.endpoint), {
           method: "POST",
-          headers: csrfHeaders({ "Content-Type": "application/json" }),
-          credentials: "include",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         })
           .then(function (response) {
