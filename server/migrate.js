@@ -5,11 +5,17 @@ import { fileURLToPath } from "url";
 import { createDbConnection, connectionConfig } from "./mysql.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const envPath = process.env.SERVER_ENV_FILE
-  ? path.resolve(process.env.SERVER_ENV_FILE)
-  : path.resolve(__dirname, ".env");
+const envCandidates = [
+  process.env.SERVER_ENV_FILE ? path.resolve(process.env.SERVER_ENV_FILE) : null,
+  path.resolve(__dirname, ".env"),
+  path.resolve(__dirname, "..", ".env"),
+].filter(Boolean);
 
-dotenv.config({ path: envPath });
+for (const candidate of envCandidates) {
+  if (fs.existsSync(candidate)) {
+    dotenv.config({ path: candidate, override: false });
+  }
+}
 
 const argv = process.argv.slice(2);
 if (!argv.length) {
