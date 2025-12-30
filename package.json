@@ -8,7 +8,7 @@
     "dev": "nodemon server/index.js",
     "test": "npm run test:api && npm run test:e2e",
     "migrate": "npm --prefix server run migrate",
-    "test:api": "cross-env NODE_ENV=test REQUIRE_2FA=false SESSION_SECRET=test-secret node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --passWithNoTests",
+    "test:api": "cross-env USE_INMEMORY_DB=true NODE_ENV=test REQUIRE_2FA=false SESSION_SECRET=test-secret node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --passWithNoTests",
     "test:e2e": "cypress run || echo \"(Cypress optional)\"",
     "cypress:open": "cypress open"
   },
