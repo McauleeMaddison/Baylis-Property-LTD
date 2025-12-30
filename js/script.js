@@ -114,12 +114,9 @@
       setNavOpen(!isOpen);
     };
 
-    on(hamburgerBtn, "click", function () { toggleNav(); });
-    on(hamburgerBtn, "pointerdown", function (event) {
-      if (event.pointerType === "touch") {
-        event.preventDefault();
-        toggleNav();
-      }
+    on(hamburgerBtn, "click", function (event) {
+      event.preventDefault();
+      toggleNav();
     });
     var scheduleClose = function () {
       clearTimeout(hoverTimeout);
@@ -127,20 +124,20 @@
     };
     if (hamburgerBtn) {
       on(hamburgerBtn, "pointerenter", function (event) {
-        if (!isMobileView()) return;
+        if (isMobileView()) return;
         if (event.pointerType === "mouse" || event.pointerType === "pen") {
           clearTimeout(hoverTimeout);
           setNavOpen(true);
         }
       });
       on(hamburgerBtn, "pointerleave", function (event) {
-        if (!isMobileView()) return;
+        if (isMobileView()) return;
         if (event.pointerType === "mouse" || event.pointerType === "pen") scheduleClose();
       });
     }
     if (navWrapper) {
       on(navWrapper, "pointerleave", function (event) {
-        if (!isMobileView()) return;
+        if (isMobileView()) return;
         if (event.pointerType === "mouse" || event.pointerType === "pen") scheduleClose();
       });
     }
@@ -149,7 +146,7 @@
         if (event.pointerType === "mouse" || event.pointerType === "pen") clearTimeout(hoverTimeout);
       });
       on(navLinks, "pointerleave", function (event) {
-        if (!isMobileView()) return;
+        if (isMobileView()) return;
         if (event.pointerType === "mouse" || event.pointerType === "pen") scheduleClose();
       });
     }
