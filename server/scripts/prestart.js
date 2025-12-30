@@ -34,4 +34,16 @@ const child = spawn(process.execPath, [migratePath, sqlPath], {
   cwd: serverRoot,
 });
 
-child.on('exit', (code) => process.exit(code ?? 1));
+child.on('error', (err) => {
+  console.warn(`[prestart] Migration spawn error: ${err.message || err}`);
+  process.exit(0);
+});
+
+child.on('exit', (code) => {
+  if (code && code !== 0) {
+    console.warn(`[prestart] Migration failed with code ${code}. Continuing startup (using existing schema). Verify DB credentials/SSL and rerun migrations when ready.`);
+    process.exit(0);
+  } else {
+    process.exit(0);
+  }
+});

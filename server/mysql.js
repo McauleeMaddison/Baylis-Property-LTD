@@ -25,15 +25,17 @@ if (missingKeys.length) {
   );
 }
 
+const host = process.env.MYSQL_HOST || "127.0.0.1";
+
 export const connectionConfig = {
-  host: process.env.MYSQL_HOST || "127.0.0.1",
+  host,
   port: parsePort(process.env.MYSQL_PORT),
   user: process.env.MYSQL_USER || "root",
   password: process.env.MYSQL_PASSWORD || "",
   database: process.env.MYSQL_DATABASE || "railway",
 };
 
-const sslMode = (process.env.MYSQL_SSL || "").toLowerCase();
+const sslMode = (process.env.MYSQL_SSL || (host.includes("proxy.rlwy.net") ? "skip-verify" : "")).toLowerCase();
 if (sslMode === "skip-verify") {
   connectionConfig.ssl = { rejectUnauthorized: false };
 } else if (sslMode === "true" || sslMode === "required" || sslMode === "enable") {
