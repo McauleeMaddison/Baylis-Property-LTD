@@ -1,5 +1,6 @@
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -26,6 +27,7 @@ if (missingKeys.length) {
 }
 
 const host = process.env.MYSQL_HOST || "127.0.0.1";
+const isLocalHost = host === "localhost" || host === "127.0.0.1";
 
 export const connectionConfig = {
   host,
@@ -35,11 +37,21 @@ export const connectionConfig = {
   database: process.env.MYSQL_DATABASE || "railway",
 };
 
-const sslMode = (process.env.MYSQL_SSL || (host.includes("proxy.rlwy.net") ? "skip-verify" : "")).toLowerCase();
-if (sslMode === "skip-verify") {
+const sslRaw = (process.env.MYSQL_SSL || "").toLowerCase();
+const sslMode = sslRaw || (isLocalHost ? "disabled" : (host.includes("proxy.rlwy.net") ? "skip-verify" : "required"));
+if (sslMode === "disabled" || sslMode === "false" || sslMode === "0" || sslMode === "off") {
+  delete connectionConfig.ssl;
+} else if (sslMode === "skip-verify") {
   connectionConfig.ssl = { rejectUnauthorized: false };
-} else if (sslMode === "true" || sslMode === "required" || sslMode === "enable") {
+} else if (sslMode === "true" || sslMode === "required" || sslMode === "require" || sslMode === "enable" || sslMode === "1") {
   connectionConfig.ssl = { rejectUnauthorized: true };
+}
+if (process.env.MYSQL_SSL_CA_FILE) {
+  const caPath = path.resolve(process.env.MYSQL_SSL_CA_FILE);
+  connectionConfig.ssl = {
+    ...(connectionConfig.ssl || {}),
+    ca: await fs.promises.readFile(caPath, "utf8"),
+  };
 }
 if (process.env.MYSQL_SSL_CA) {
   connectionConfig.ssl = {
