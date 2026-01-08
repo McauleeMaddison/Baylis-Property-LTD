@@ -16,9 +16,12 @@ const parsePort = (value) => {
   return Number.isFinite(port) && port > 0 ? port : 3306;
 };
 
+const urlValue = process.env.DATABASE_URL || process.env.MYSQL_URL || process.env.MYSQL_CONNECTION_URL || "";
+const hasUrl = Boolean(urlValue);
+
 const requiredKeys = ["MYSQL_HOST", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_DATABASE"];
-const missingKeys = requiredKeys.filter((key) => !process.env[key]);
-if (missingKeys.length) {
+const missingKeys = requiredKeys.filter((key) => !process.env[key] || process.env[key] === "CHANGE_ME");
+if (!hasUrl && missingKeys.length) {
   console.warn(
     `⚠️  Missing MySQL env vars: ${missingKeys.join(
       ", "
@@ -27,7 +30,6 @@ if (missingKeys.length) {
 }
 
 const host = process.env.MYSQL_HOST || "127.0.0.1";
-const isLocalHost = host === "localhost" || host === "127.0.0.1";
 
 export const connectionConfig = {
   host,
@@ -37,8 +39,26 @@ export const connectionConfig = {
   database: process.env.MYSQL_DATABASE || "railway",
 };
 
+if (hasUrl) {
+  try {
+    const parsed = new URL(urlValue);
+    connectionConfig.host = parsed.hostname;
+    connectionConfig.port = parsePort(parsed.port || process.env.MYSQL_PORT);
+    connectionConfig.user = decodeURIComponent(parsed.username || "");
+    connectionConfig.password = decodeURIComponent(parsed.password || "");
+    connectionConfig.database = parsed.pathname.replace(/^\/+/, "");
+  } catch (err) {
+    console.warn(`⚠️  Invalid DATABASE_URL/MYSQL_URL: ${err.message}`);
+  }
+}
+
+const isLocalHost =
+  connectionConfig.host === "localhost" ||
+  connectionConfig.host === "127.0.0.1" ||
+  connectionConfig.host.endsWith(".local");
+
 const sslRaw = (process.env.MYSQL_SSL || "").toLowerCase();
-const sslMode = sslRaw || (isLocalHost ? "disabled" : (host.includes("proxy.rlwy.net") ? "skip-verify" : "required"));
+const sslMode = sslRaw || (isLocalHost ? "disabled" : (connectionConfig.host.includes("proxy.rlwy.net") ? "skip-verify" : "required"));
 if (sslMode === "disabled" || sslMode === "false" || sslMode === "0" || sslMode === "off") {
   delete connectionConfig.ssl;
 } else if (sslMode === "skip-verify") {
