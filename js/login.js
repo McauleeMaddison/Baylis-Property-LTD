@@ -3,10 +3,6 @@
   'use strict';
 
   const API_BASE = (document.body?.getAttribute('data-api-base') || window.API_BASE || '/api');
-  const DEMO = {
-    resident: { password: 'resident123', redirect: 'resident.html' },
-    landlord: { password: 'landlord123', redirect: 'landlord.html' }
-  };
   const MAX_ATTEMPTS = 5;
   const LOCK_SECONDS = 30;
   const getCsrfToken = () => {
@@ -132,10 +128,6 @@
         completeLogin({ token: data.token || 'session', username: data.user?.username || username, role: data.user?.role || role });
         return;
       }
-      if (DEMO[role] && password === DEMO[role].password) {
-        completeLogin({ token: `demo.${role}.${Date.now()}`, username, role, isDemo: true });
-        return;
-      }
       if (res?.status === 401) {
         failAttempt('Invalid credentials. Please try again.');
       } else {
@@ -143,11 +135,7 @@
         setMsg(data?.error || 'Unable to sign in right now.', false);
       }
     } catch (err) {
-      if (DEMO[role] && password === DEMO[role].password) {
-        completeLogin({ token: `demo.${role}.${Date.now()}`, username, role, isDemo: true });
-      } else {
-        setMsg('Unable to reach the server. Please check your connection.', false);
-      }
+      setMsg('Unable to reach the server. Please check your connection.', false);
     } finally {
       setLoading(false);
     }
@@ -435,7 +423,7 @@
     toast('✅ Signed in');
 
     const defaultLanding = getDefaultLanding();
-    const fallback = role === 'landlord' ? DEMO.landlord.redirect : DEMO.resident.redirect;
+    const fallback = role === 'landlord' ? 'landlord.html' : 'resident.html';
     const to = defaultLanding || fallback;
     setTimeout(() => { window.location.href = to; }, 300);
   }
