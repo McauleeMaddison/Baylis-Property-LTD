@@ -146,8 +146,9 @@ select:focus-visible, textarea:focus-visible {
 .site-header.hide-nav { transform: translateY(-100%); }
 .nav { height: 70px; display:flex; align-items:center; }
 .nav-inner { width:100%; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
-.logo { display:inline-flex; align-items:center; gap:.6rem; font-weight:800; letter-spacing:.04em; color: var(--secondary); }
-.logo img { width:32px; height:32px; object-fit:contain; filter: brightness(0) saturate(100%) invert(80%) sepia(70%) saturate(400%) hue-rotate(1deg); }
+.logo { display:inline-flex; align-items:center; gap:.6rem; font-weight:800; letter-spacing:.04em; color: var(--secondary); line-height: 1; }
+.logo img, .logo svg { width:32px; height:32px; object-fit:contain; display:block; flex:0 0 32px; }
+.logo img { filter: brightness(0) saturate(100%) invert(80%) sepia(70%) saturate(400%) hue-rotate(1deg); }
 .logo:hover { color: var(--secondary-600); transition: color var(--t-fast); transform: scale(1.02); }
 .hamb {
   display:none; font-size:1.35rem; border:2px solid var(--secondary);
@@ -155,7 +156,7 @@ select:focus-visible, textarea:focus-visible {
   color: var(--secondary); transition: background var(--t-fast), transform var(--t-fast);
 }
 .hamb:hover { background: var(--accent-soft-bg); transform: translateY(-1px); }
-.nav-links { display:flex; align-items:center; gap: 1.1rem; }
+.nav-links { display:flex; align-items:center; gap: clamp(0.85rem, 1.5vw, 1.5rem); }
 .nav-links a, .nav-links button {
   padding: .55rem 1rem; border-radius: var(--radius-2xs); font-weight:700; color: var(--text);
   transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast), border-color var(--t-fast);
@@ -578,7 +579,7 @@ body.dark .table thead th { background: linear-gradient(135deg, rgba(212, 175, 5
 }
 .brand-panel::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--secondary), transparent); }
 .auth-card::before { content: ""; position: absolute; top: 0; right: 0; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, var(--secondary)); }
-.brand-logo { width:48px; height:48px; object-fit:contain; margin-bottom:.45rem; filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.2)); }
+.brand-logo { width:48px; height:48px; object-fit:contain; margin-bottom:.45rem; filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.2)); vertical-align:-6px; }
 .brand-points { margin:.6rem 0 0; padding-left:1.1rem; }
 .brand-points li { margin:.22rem 0; line-height: 1.5; }
 .pw-meter { position:relative; height:8px; background: var(--accent-soft-bg); border-radius:999px; margin-top:.6rem; overflow: hidden; }

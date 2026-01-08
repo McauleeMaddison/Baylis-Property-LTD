@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="description" content="Profile settings and activity for Baylis Property LTD users." />
   <title>Profile • Baylis Property LTD</title>
-  <link rel="icon" href="assets/logo.png" />
+  <link rel="icon" href="assets/logo.svg" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/api-base.js"></script>
   <script defer src="js/script.js"></script>
@@ -25,8 +25,8 @@
   <header class="site-header" id="mainHeader">
     <nav class="nav" aria-label="Main">
       <div class="nav-inner container">
-        <a class="logo" href="login.html" aria-label="Baylis Property LTD Home">
-          <img src="assets/logo.png" alt="" width="26" height="26" />
+        <a class="logo" href="index.html" aria-label="Baylis Property LTD Home">
+          <img src="assets/logo.svg" alt="" width="32" height="32" />
           <span>Baylis Property LTD</span>
         </a>
         <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
@@ -54,7 +54,7 @@
     <section class="dashboard-card profile-card" aria-label="Profile overview">
       <div class="profile-top">
         <div>
-          <img id="profileAvatar" src="assets/logo.png" alt="Profile avatar" class="avatar profile-avatar" width="108" height="108" />
+          <img id="profileAvatar" src="assets/logo.svg" alt="Profile avatar" class="avatar profile-avatar" width="108" height="108" />
           <div>
             <input id="avatarInput" type="file" accept="image/*" class="sr-only" />
             <label class="btn btn-ghost" for="avatarInput">Change avatar</label>
@@ -253,7 +253,7 @@
         $('#statRole').textContent = `Role: ${cap}`;
         document.title = `Profile • ${displayName} | Baylis Property LTD`;
 
-        const avatarUrl = user.profile?.avatarUrl || 'assets/logo.png';
+        const avatarUrl = user.profile?.avatarUrl || 'assets/logo.svg';
         $('#profileAvatar').src = avatarUrl;
       }
 

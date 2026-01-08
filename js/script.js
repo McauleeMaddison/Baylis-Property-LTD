@@ -1,8 +1,3 @@
-/* -------------------------------------------------------
-   Global UI helpers for Baylis Property LTD
-   ----------------------------------------------------- */
-
-/* ==== Lightweight auth gate (runs before DOM ready) ==== */
 (function authGuard() {
   var body = document.body;
   if (!body) return;
@@ -22,7 +17,6 @@
   }
 })();
 
-/* ==== Toast helper (available immediately for other bundles) ==== */
 (function defineToast() {
   if (typeof window.showToast === "function") return;
 
@@ -377,7 +371,7 @@
         var payload = {};
         formData.forEach(function (value, key) { payload[key] = value; });
 
-        csrfFetch(options.endpoint.startsWith("http") ? options.endpoint : (apiBase ? apiBase.replace(/\\/$/, "") + options.endpoint : options.endpoint), {
+        csrfFetch(options.endpoint.startsWith("http") ? options.endpoint : (apiBase ? apiBase.replace(/\\/$/"") + options.endpoint : options.endpoint), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)

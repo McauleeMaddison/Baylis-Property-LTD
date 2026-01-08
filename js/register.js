@@ -18,6 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const btn        = document.getElementById('registerBtn');
 
   const usernameEl = document.getElementById('regUsername');
+  const emailEl    = document.getElementById('regEmail');
   const roleEl     = document.getElementById('regRole');
   const pwEl       = document.getElementById('regPassword');
   const confirmEl  = document.getElementById('regConfirm');
@@ -54,21 +55,31 @@ window.addEventListener('DOMContentLoaded', () => {
     await ensureCsrf();
 
     const username = (usernameEl?.value || '').trim();
+    const email    = (emailEl?.value || '').trim();
     const role     = roleEl?.value || '';
     const password = pwEl?.value || '';
     const confirmed   = confirmEl?.value || '';
     const agreed   = !!acceptTos?.checked;
 
-    if (!username || username.length < 3)  return setMsg('Username must be at least 3 characters.');
-    if (!role)                              return setMsg('Please select a role.');
-    if (!password || password.length < 6)   return setMsg('Password must be at least 6 characters.');
-    if (password !== confirmed)             return setMsg('Passwords do not match.');
-    if (!agreed)                             return setMsg('Please accept the Terms & Privacy.');
+    var bad = false;
+    setInvalid(usernameEl, !username || username.length < 3);
+    setInvalid(emailEl, !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    setInvalid(roleEl, !role);
+    setInvalid(pwEl, !password || password.length < 8);
+    setInvalid(confirmEl, password !== confirmed);
+
+    if (!username || username.length < 3) bad = true;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) bad = true;
+    if (!role) bad = true;
+    if (!password || password.length < 8) bad = true;
+    if (password !== confirmed) bad = true;
+    if (!agreed) return setMsg('Please accept the Terms & Privacy.');
+    if (bad) return setMsg('Please check the highlighted fields and try again.');
 
     lock(true);
     try {
       const headers = { 'Content-Type':'application/json' };
-      const payload = { username, password, role };
+      const payload = { username, email, password, role };
       const fetcher = typeof window.fetchWithCsrf === 'function'
         ? window.fetchWithCsrf
         : (url, opts) => {
@@ -84,8 +95,12 @@ window.addEventListener('DOMContentLoaded', () => {
       });
 
       if (res.status === 201) {
-        setMsg('✅ Account created! Redirecting to login…', true);
-        setTimeout(() => window.location.href = 'login.html', 900);
+        let data = {};
+        try { data = await res.json(); } catch {}
+        const destRole = (data?.user?.role || role).toLowerCase();
+        const dest = destRole === 'landlord' ? 'landlord.html' : 'resident.html';
+        setMsg('✅ Account created! Redirecting…', true);
+        setTimeout(() => window.location.href = dest, 900);
         return;
       }
 
@@ -104,7 +119,7 @@ window.addEventListener('DOMContentLoaded', () => {
   function lock(on) {
     if (!btn) return;
     btn.disabled = on;
-    btn.classList.toggle('is-loading', on);
+    btn.dataset.loading = on ? '1' : '0';
   }
   function setMsg(text, success = false) {
     if (!msg) return;
@@ -116,6 +131,10 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function clearMsg() {
     if (msg) { msg.textContent = ''; msg.style.color = ''; }
+  }
+  function setInvalid(el, on) {
+    if (!el) return;
+    el.classList.toggle('is-invalid', !!on);
   }
 
   function scorePassword(pw) {
