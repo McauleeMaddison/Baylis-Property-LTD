@@ -37,7 +37,6 @@
   };
 })();
 
-/* ==== Main UI wiring ==== */
 (function bootstrap() {
   "use strict";
 
@@ -67,7 +66,6 @@
     var prefersReduced  = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var apiBase         = document.body?.getAttribute("data-api-base") || window.API_BASE || "/api";
 
-    /* ---- Role-aware navigation ---- */
     (function syncRoleNav() {
       var role = (localStorage.getItem("role") || "").toLowerCase();
       if (!role) return;
@@ -83,7 +81,6 @@
       if (welcome) welcome.textContent = localStorage.getItem("username") || "User";
     })();
 
-    /* ---- Navigation toggle ---- */
     var isMobileView = function () {
       return window.matchMedia("(max-width: 768px)").matches;
     };
@@ -155,7 +152,6 @@
       if (!navLinks.contains(event.target) && !hamburgerBtn.contains(event.target)) setNavOpen(false);
     });
 
-    /* ---- Dark mode toggle ---- */
     var updateDarkMode = function (enabled) {
       document.body.classList.toggle("dark", !!enabled);
       if (darkIcon) darkIcon.textContent = enabled ? "🌙" : "🌞";
@@ -168,7 +164,6 @@
       on(darkToggle, "change", function () { updateDarkMode(darkToggle.checked); });
     }
 
-    /* ---- Accent color toggle ---- */
     var applyAccent = function (value) {
       var name = value || "blue";
       root.setAttribute("data-accent", name);
@@ -183,13 +178,11 @@
       });
     });
 
-    /* ---- Sync preferences across tabs ---- */
     on(window, "storage", function (event) {
       if (event.key === "darkMode") updateDarkMode(event.newValue === "true");
       if (event.key === "accent") applyAccent(event.newValue || "blue");
     });
 
-    /* ---- Header auto-hide on scroll ---- */
     if (header) {
       var lastY = window.scrollY;
       var ticking = false;
@@ -207,7 +200,6 @@
       on(window, "scroll", handleScroll, { passive: true });
     }
 
-    /* ---- Avatar dropdown ---- */
     var hideDropdown = function () {
       if (!userDropdown) return;
       userDropdown.classList.add("hidden");
@@ -231,7 +223,6 @@
       if (event.key === "Escape") hideDropdown();
     });
 
-    /* ---- Logout ---- */
     on(logoutBtn, "click", function (event) {
       event.preventDefault();
       window.showToast("👋 Logged out successfully");
@@ -243,7 +234,6 @@
       }, 900);
     });
 
-    /* ---- Sliding panels (used by auth/register views) ---- */
     var panels = $$(".form-wrapper");
     var toggles = $$(".toggle-form-btn");
 
@@ -308,7 +298,6 @@
       }, 320);
     }
 
-    /* ---- Landlord gate (simple local demo) ---- */
     var landlordLoginForm = $("#landlordLoginForm");
     var landlordDashboard = $("#landlordDashboard");
     var landlordGate = $("#landlordLoginGate");
@@ -326,7 +315,6 @@
       }
     });
 
-    /* ---- CSRF helpers ---- */
     var getCsrfToken = function () {
       var match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
       return match ? decodeURIComponent(match[1]) : "";
@@ -348,7 +336,6 @@
       return fetch(path, Object.assign({ credentials: "include" }, options || {}, { headers }));
     };
 
-    /* ---- Generic form handler ---- */
     var handleFormSubmit = function (form, msgEl, options) {
       on(form, "submit", async function (event) {
         event.preventDefault();

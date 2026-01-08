@@ -3,7 +3,7 @@ if (process.env.USE_INMEMORY_DB === 'true') {
   // In-memory mode for fast local/Jest runs.
   db = {
     async query() { return [[], []]; },
-    async end() { /* no-op */ },
+    async end() {},
   };
 } else {
   ({ db } = await import('../mysql.js'));

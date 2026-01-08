@@ -1,4 +1,3 @@
-/** @type {import('jest').Config} */
 const config = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.test.js'],

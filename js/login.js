@@ -403,11 +403,10 @@
     }
   }
 
-  function completeLogin({ token, username, role, isDemo = false }) {
+  function completeLogin({ token, username, role }) {
     localStorage.setItem('token', token || 'session');
     localStorage.setItem('username', username);
     localStorage.setItem('role', role);
-    localStorage.setItem('isDemo', isDemo ? 'true' : 'false');
     localStorage.setItem('lastRole', role);
     localStorage.setItem('lastUser', username);
 

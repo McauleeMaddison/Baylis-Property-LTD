@@ -26,7 +26,6 @@
     try {
       await fetch(`${(base || resolveBase())}/security/csrf`, { credentials: 'include' });
     } catch (_) {
-      /* ignore */
     }
   };
 
