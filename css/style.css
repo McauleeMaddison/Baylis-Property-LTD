@@ -167,11 +167,29 @@ select:focus-visible, textarea:focus-visible {
   .hamb { display:block; }
   .nav-links {
     position:absolute; top:70px; left:0; right:0; flex-direction:column; align-items:stretch;
-    background: var(--bg-light); border-top: 1px solid var(--border); box-shadow: var(--shadow);
-    max-height:0; overflow:hidden; transition:max-height var(--t-smooth); z-index: var(--z-dropdown);
+    background: color-mix(in srgb, var(--bg-light) 88%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border); box-shadow: var(--shadow);
+    max-height:0; opacity:0; transform: translateY(-6px); pointer-events:none;
+    overflow:hidden; transition:max-height var(--t-smooth), opacity var(--t-fast), transform var(--t-fast);
+    z-index: var(--z-dropdown);
   }
-  .nav-links.show { max-height: 520px; }
-  .nav-links a { padding:.9rem 1rem; }
+  .nav-links.show { max-height: 520px; opacity:1; transform: translateY(0); pointer-events:auto; }
+  .nav-links a { padding:.9rem 1rem; opacity:0; transform: translateY(-6px); }
+  .nav-links.show a { animation: navLinkIn 220ms ease both; }
+  .nav-links.show a:nth-child(1) { animation-delay: 40ms; }
+  .nav-links.show a:nth-child(2) { animation-delay: 80ms; }
+  .nav-links.show a:nth-child(3) { animation-delay: 120ms; }
+  .nav-links.show a:nth-child(4) { animation-delay: 160ms; }
+  .nav-links.show a:nth-child(5) { animation-delay: 200ms; }
+  .nav-links.show a:nth-child(6) { animation-delay: 240ms; }
+  .nav-links.show a:nth-child(7) { animation-delay: 280ms; }
+}
+
+@keyframes navLinkIn {
+  from { opacity:0; transform: translateY(-6px); }
+  to { opacity:1; transform: translateY(0); }
 }
 .legal-main { padding: 110px 0 64px; max-width: 960px; }
 .legal-card {
