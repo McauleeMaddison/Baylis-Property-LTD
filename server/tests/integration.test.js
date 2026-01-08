@@ -5,12 +5,14 @@ import { cleanupUser, authedPost, closeDbConnection } from './testUtils.js';
 describe('Integration: profile, community, requests', () => {
   const username = `itest_${Date.now()}`;
   const password = 'testpass123';
+  const email = `itest_${Date.now()}@example.com`;
+  const role = 'resident';
   let agent;
   let userId;
 
   beforeAll(async () => {
     agent = request.agent(app);
-    const res = await agent.post('/api/auth/register').send({ username, password });
+    const res = await agent.post('/api/auth/register').send({ username, password, email, role });
     expect(res.statusCode).toBe(201);
     userId = res.body.user.id;
   }, 20000);

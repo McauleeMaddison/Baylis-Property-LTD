@@ -12,6 +12,8 @@
 
   const $  = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+  const appConfig  = window.BAYLIS_CONFIG || {};
+  const roleRedirects = appConfig.roleRedirects || {};
   const form        = $('#loginForm');
   const usernameEl  = $('#username');
   const passwordEl  = $('#password');
@@ -422,9 +424,14 @@
     toast('✅ Signed in');
 
     const defaultLanding = getDefaultLanding();
-    const fallback = role === 'landlord' ? 'landlord.html' : 'resident.html';
+    const fallback = resolveRoleRedirect(role) || appConfig.defaultLanding || 'resident.html';
     const to = defaultLanding || fallback;
     setTimeout(() => { window.location.href = to; }, 300);
+  }
+
+  function resolveRoleRedirect(role) {
+    const key = (role || '').toLowerCase();
+    return roleRedirects[key] || '';
   }
 
   function getDefaultLanding() {

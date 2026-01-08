@@ -98,7 +98,9 @@ window.addEventListener('DOMContentLoaded', () => {
         let data = {};
         try { data = await res.json(); } catch {}
         const destRole = (data?.user?.role || role).toLowerCase();
-        const dest = destRole === 'landlord' ? 'landlord.html' : 'resident.html';
+        const appConfig = window.BAYLIS_CONFIG || {};
+        const redirects = appConfig.roleRedirects || {};
+        const dest = redirects[destRole] || appConfig.defaultLanding || 'resident.html';
         setMsg('✅ Account created! Redirecting…', true);
         setTimeout(() => window.location.href = dest, 900);
         return;

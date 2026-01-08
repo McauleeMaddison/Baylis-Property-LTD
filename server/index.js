@@ -335,19 +335,34 @@ function requireFields(obj, rules) {
 // Auth
 app.post('/api/auth/register', rateLimit(30, 60_000), asyncHandler(async (req, res) => {
   const { username, email = '', role = 'resident', password = '' } = req.body || {};
-  if (!username || username.length < 3) return res.status(400).json({ error: 'Username too short' });
-  if (!password || password.length < 6) return res.status(400).json({ error: 'Password too short' });
-  const normalizedUsername = username.toLowerCase();
+  const normalizedUsername = (username || '').trim().toLowerCase();
+  const normalizedEmail = (email || '').trim().toLowerCase();
+  const normalizedRole = (role || '').trim().toLowerCase();
+  const allowedRoles = new Set(['resident', 'landlord']);
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+
+  if (!normalizedUsername || normalizedUsername.length < 3) {
+    return res.status(400).json({ error: 'Username too short' });
+  }
+  if (!normalizedEmail || !emailOk) {
+    return res.status(400).json({ error: 'Valid email required' });
+  }
+  if (!allowedRoles.has(normalizedRole)) {
+    return res.status(400).json({ error: 'Invalid role' });
+  }
+  if (!password || password.length < 8) {
+    return res.status(400).json({ error: 'Password too short' });
+  }
   const existing = await User.findOne({ username: normalizedUsername });
   if (existing) return res.status(409).json({ error: 'Username already taken' });
   const hash = await bcrypt.hash(password, 10);
   const user = await User.create({
     username: normalizedUsername,
-    email,
-    role: role.toLowerCase(),
+    email: normalizedEmail,
+    role: normalizedRole,
     passwordHash: hash,
     profile: { displayName: username },
-    contact: { email },
+    contact: { email: normalizedEmail },
   });
   await setSession(req, res, user.id);
   await recordAudit('auth.register', { userId: user.id, metadata: { username: normalizedUsername, role: user.role } }, req);
