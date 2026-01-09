@@ -358,7 +358,7 @@
         var payload = {};
         formData.forEach(function (value, key) { payload[key] = value; });
 
-        csrfFetch(options.endpoint.startsWith("http") ? options.endpoint : (apiBase ? apiBase.replace(/\\/$/"") + options.endpoint : options.endpoint), {
+        csrfFetch(options.endpoint.startsWith("http") ? options.endpoint : (apiBase ? apiBase.replace(/\/$/, "") + options.endpoint : options.endpoint), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
