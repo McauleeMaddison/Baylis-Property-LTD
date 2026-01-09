@@ -5,11 +5,23 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const envPath = process.env.SERVER_ENV_FILE
-  ? path.resolve(process.env.SERVER_ENV_FILE)
-  : path.resolve(__dirname, ".env");
+const envPaths = process.env.SERVER_ENV_FILE
+  ? [path.resolve(process.env.SERVER_ENV_FILE)]
+  : [
+      path.resolve(__dirname, "..", "..", ".env"),
+      path.resolve(__dirname, "..", "..", ".env.production"),
+      path.resolve(__dirname, ".env"),
+      path.resolve(__dirname, ".env.production"),
+    ];
 
-dotenv.config({ path: envPath });
+envPaths.forEach((envPath) => dotenv.config({ path: envPath, override: false }));
+
+const pickEnv = (...keys) => {
+  for (const key of keys) {
+    if (process.env[key] && process.env[key] !== "CHANGE_ME") return process.env[key];
+  }
+  return "";
+};
 
 const parsePort = (value) => {
   const port = Number(value);
@@ -20,7 +32,13 @@ const urlValue = process.env.DATABASE_URL || process.env.MYSQL_URL || process.en
 const hasUrl = Boolean(urlValue);
 
 const requiredKeys = ["MYSQL_HOST", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_DATABASE"];
-const missingKeys = requiredKeys.filter((key) => !process.env[key] || process.env[key] === "CHANGE_ME");
+const missingKeys = requiredKeys.filter((key) => {
+  if (key === "MYSQL_HOST") return !pickEnv("MYSQL_HOST", "MYSQLHOST");
+  if (key === "MYSQL_USER") return !pickEnv("MYSQL_USER", "MYSQLUSER");
+  if (key === "MYSQL_PASSWORD") return !pickEnv("MYSQL_PASSWORD", "MYSQLPASSWORD");
+  if (key === "MYSQL_DATABASE") return !pickEnv("MYSQL_DATABASE", "MYSQLDATABASE");
+  return true;
+});
 if (!hasUrl && missingKeys.length) {
   console.warn(
     `⚠️  Missing MySQL env vars: ${missingKeys.join(
@@ -29,21 +47,21 @@ if (!hasUrl && missingKeys.length) {
   );
 }
 
-const host = process.env.MYSQL_HOST || "127.0.0.1";
+const host = pickEnv("MYSQL_HOST", "MYSQLHOST") || "127.0.0.1";
 
 export const connectionConfig = {
   host,
-  port: parsePort(process.env.MYSQL_PORT),
-  user: process.env.MYSQL_USER || "root",
-  password: process.env.MYSQL_PASSWORD || "",
-  database: process.env.MYSQL_DATABASE || "railway",
+  port: parsePort(pickEnv("MYSQL_PORT", "MYSQLPORT")),
+  user: pickEnv("MYSQL_USER", "MYSQLUSER") || "root",
+  password: pickEnv("MYSQL_PASSWORD", "MYSQLPASSWORD") || "",
+  database: pickEnv("MYSQL_DATABASE", "MYSQLDATABASE") || "railway",
 };
 
 if (hasUrl) {
   try {
     const parsed = new URL(urlValue);
     connectionConfig.host = parsed.hostname;
-    connectionConfig.port = parsePort(parsed.port || process.env.MYSQL_PORT);
+    connectionConfig.port = parsePort(parsed.port || pickEnv("MYSQL_PORT", "MYSQLPORT"));
     connectionConfig.user = decodeURIComponent(parsed.username || "");
     connectionConfig.password = decodeURIComponent(parsed.password || "");
     connectionConfig.database = parsed.pathname.replace(/^\/+/, "");
