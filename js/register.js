@@ -28,17 +28,19 @@ window.addEventListener('DOMContentLoaded', () => {
   const pwBar      = document.getElementById('pwBar');
   const pwLabel    = document.getElementById('pwLabel');
 
-  const bindToggle = (btn, input) => {
-    if (!btn || !input) return;
+  const bindToggle = (btn, inputs) => {
+    if (!btn) return;
+    const list = Array.isArray(inputs) ? inputs.filter(Boolean) : [inputs].filter(Boolean);
+    if (!list.length) return;
     btn.addEventListener('click', () => {
-      const hidden = input.type === 'password';
-      input.type = hidden ? 'text' : 'password';
+      const hidden = list[0].type === 'password';
+      list.forEach((field) => { field.type = hidden ? 'text' : 'password'; });
       btn.setAttribute('aria-pressed', String(hidden));
       btn.textContent = hidden ? 'Hide' : 'Show';
     });
   };
 
-  bindToggle(togglePw, pwEl);
+  bindToggle(togglePw, [pwEl, confirmEl]);
 
   pwEl?.addEventListener('input', () => {
     const score = scorePassword(pwEl.value);

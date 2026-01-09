@@ -176,11 +176,12 @@
       const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
 
       // Show/Hide password
-      const pw = $('#regPassword'), toggle = $('#togglePw');
+      const pw = $('#regPassword'), confirm = $('#regConfirm'), toggle = $('#togglePw');
       if (toggle && pw) {
         toggle.addEventListener('click', () => {
           const show = pw.type === 'password';
           pw.type = show ? 'text' : 'password';
+          if (confirm) confirm.type = show ? 'text' : 'password';
           toggle.setAttribute('aria-pressed', String(show));
           toggle.textContent = show ? 'Hide' : 'Show';
           pw.focus();
