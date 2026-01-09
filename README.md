@@ -29,7 +29,7 @@ Table of Contents
 Features
 --------
 - **Role-based portals** – dedicated dashboards for residents and landlords, including request summaries and contextual navigation.
-- **Secure auth** – password hashing, CSRF protection, session management, rate limiting, and optional 2FA via one-time codes.
+- **Secure auth** – password hashing, CSRF protection, session management, and rate limiting.
 - **Request workflows** – submit and monitor cleaning/repair/community forms with toast notifications and local persistence.
 - **Profile & settings** – update contact details, communication preferences, dark mode/accent themes, and logout-all functionality.
 - **Community hub** – post announcements, comment, like, and filter/paginate threads.
@@ -63,10 +63,10 @@ Set the following keys in `server/.env` (local) and in your hosting environment:
 | `PORT` | HTTP port for Express (default 5000). |
 | `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE` | MySQL connection details. |
 | `USE_INMEMORY_DB` | Set to `true` to run against an in-memory datastore (skips MySQL migrations; data resets on restart). |
-| `SESSION_SECRET` | Long random string for cookies/CSRF/OTP HMAC. |
+| `SESSION_SECRET` | Long random string for cookies/CSRF HMAC. |
 | `SESSION_COOKIE_NAME`, `CSRF_COOKIE_NAME`, `SESSION_TTL_MS` | Session/cookie tuning (defaults provided). |
 | `TRUST_PROXY`, `FORCE_HTTPS` | Reverse proxy settings. |
-| `OTP_WINDOW_MS`, `OTP_MAX_ATTEMPTS`, `RESET_WINDOW_MS`, `REQUIRE_2FA` | Security policies. |
+| `RESET_WINDOW_MS` | Password reset expiry (milliseconds). |
 | `APP_BASE_URL` | Public site URL (used in password reset links). |
 | Optional: `GOOGLE_API_KEY`, `GOOGLE_SHEET_ID` | For sheet integrations if enabled. |
 
@@ -91,7 +91,7 @@ docker compose up -d db
 cd server
 node scripts/mysql-init.js
 ```
-The script creates tables (`users`, `requests`, `community_posts`, `sessions`, `password_resets`, `otp_challenges`) and seeds demo accounts (`resident123` / `resident123`, `landlord123` / `landlord123`).
+The script creates tables (`users`, `requests`, `community_posts`, `sessions`, `password_resets`) and seeds demo accounts (`resident123` / `resident123`, `landlord123` / `landlord123`).
 
 ### Manual migration / quick reset
 If you prefer to run SQL migrations directly, use the ESM-friendly migrator from the repo root:

@@ -199,43 +199,6 @@ export const PasswordResetToken = {
   }
 };
 
-const mapOtpRow = (row) => {
-  if (!row) return null;
-  return {
-    id: row.id,
-    userId: row.user_id,
-    challengeId: row.challenge_id,
-    codeHash: row.code_hash,
-    delivery: row.delivery,
-    context: row.context || 'login',
-    expiresAt: row.expires_at ? new Date(row.expires_at) : null,
-    attempts: row.attempts || 0,
-  };
-};
-
-export const OtpChallenge = {
-  async create({ userId, challengeId, codeHash, delivery = 'sms', context = 'login', expiresAt }) {
-    await db.query(
-      `INSERT INTO otp_challenges (user_id, challenge_id, code_hash, delivery, context, expires_at) VALUES (?, ?, ?, ?, ?, ?)`,
-      [userId, challengeId, codeHash, delivery, context, expiresAt]
-    );
-    return { challengeId };
-  },
-  async findByChallengeId(challengeId) {
-    const [rows] = await db.query('SELECT * FROM otp_challenges WHERE challenge_id = ? LIMIT 1', [challengeId]);
-    return mapOtpRow(rows[0]);
-  },
-  async incrementAttempts(challengeId) {
-    await db.query('UPDATE otp_challenges SET attempts = attempts + 1 WHERE challenge_id = ?', [challengeId]);
-  },
-  async delete(challengeId) {
-    await db.query('DELETE FROM otp_challenges WHERE challenge_id = ?', [challengeId]);
-  },
-  async deleteExpired() {
-    await db.query('DELETE FROM otp_challenges WHERE expires_at < NOW() OR attempts >= 5');
-  }
-};
-
 const mapAuditRow = (row) => ({
   id: row.id,
   userId: row.user_id,
@@ -261,4 +224,4 @@ export const AuditLog = {
   }
 };
 
-export const models = { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge, AuditLog };
+export const models = { User, Request, CommunityPost, Session, PasswordResetToken, AuditLog };

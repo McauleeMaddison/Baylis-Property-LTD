@@ -6,7 +6,6 @@ const state = {
   posts: [],
   sessions: [],
   resetTokens: [],
-  otpChallenges: [],
   auditLogs: [],
 };
 
@@ -138,27 +137,6 @@ export const PasswordResetToken = {
   },
 };
 
-export const OtpChallenge = {
-  async create({ userId, challengeId, codeHash, delivery = "sms", context = "login", expiresAt }) {
-    state.otpChallenges.push({ id: nextId("otpChallenges"), userId, challengeId, codeHash, delivery, context, expiresAt, attempts: 0 });
-    return { challengeId };
-  },
-  async findByChallengeId(challengeId) {
-    return state.otpChallenges.find((c) => c.challengeId === challengeId) || null;
-  },
-  async incrementAttempts(challengeId) {
-    const c = state.otpChallenges.find((ch) => ch.challengeId === challengeId);
-    if (c) c.attempts += 1;
-  },
-  async delete(challengeId) {
-    state.otpChallenges = state.otpChallenges.filter((c) => c.challengeId !== challengeId);
-  },
-  async deleteExpired() {
-    const now = Date.now();
-    state.otpChallenges = state.otpChallenges.filter((c) => (c.expiresAt ? c.expiresAt.getTime() > now : true) && (c.attempts || 0) < 5);
-  },
-};
-
 export const AuditLog = {
   async create({ userId = null, event, severity = "info", ipAddress = null, userAgent = null, metadata = {} }) {
     state.auditLogs.unshift({
@@ -177,4 +155,4 @@ export const AuditLog = {
   },
 };
 
-export const models = { User, Request, CommunityPost, Session, PasswordResetToken, OtpChallenge, AuditLog };
+export const models = { User, Request, CommunityPost, Session, PasswordResetToken, AuditLog };

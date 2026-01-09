@@ -100,7 +100,7 @@ server/
 
 **JavaScript Modules:**
 - `js/script.js` - Global utilities, auth helpers, API client
-- `js/login.js` - Login form handling, 2FA support
+- `js/login.js` - Login form handling
 - `js/register.js` - Registration form
 - `js/resident.js` - Resident dashboard logic
 - `js/landlord.js` - Landlord dashboard logic

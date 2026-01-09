@@ -24,20 +24,9 @@
   const submitBtn   = $('#submitBtn');
   const capsWarn    = $('#capsWarning');
 
-  const otpSection  = $('#otpSection');
-  const otpCodeEl   = $('#otpCode');
-  const otpSubmit   = $('#otpSubmitBtn');
-  const otpBack     = $('#otpBackBtn');
-  const otpStatus   = $('#otpStatus');
-  const otpCountdown= $('#otpCountdown');
-  const otpResend   = $('#otpResendBtn');
   const forgotLink  = $('#forgotPassword');
 
-  let pendingLogin = null;
   let lockTimer = null;
-  let otpTimer = null;
-  const OTP_RESEND_SECONDS = 30;
-  let otpRemaining = OTP_RESEND_SECONDS;
 
   prefill();
   applyLockState();
@@ -54,12 +43,6 @@
 
   forgotLink?.addEventListener('click', handleForgotPassword);
   form?.addEventListener('submit', handleLoginSubmit);
-  otpSubmit?.addEventListener('click', handleOtpSubmit);
-  otpResend?.addEventListener('click', handleOtpResend);
-  otpBack?.addEventListener('click', () => {
-    pendingLogin = null;
-    hideOTP();
-  });
 
   async function handleForgotPassword(e) {
     e.preventDefault();
@@ -114,19 +97,6 @@
       });
       if (res?.ok) {
         const data = await res.json();
-        if (data.require2FA && data.challengeId) {
-          pendingLogin = {
-            username,
-            role,
-            challengeId: data.challengeId,
-            delivery: data.delivery || 'email',
-            context: data.context || 'login'
-          };
-          showOTP();
-          startOtpCountdown();
-          setLoading(false);
-          return;
-        }
         completeLogin({ token: data.token || 'session', username: data.user?.username || username, role: data.user?.role || role });
         return;
       }
@@ -140,63 +110,6 @@
       setMsg('Unable to reach the server. Please check your connection.', false);
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleOtpSubmit() {
-    if (!pendingLogin) return hideOTP();
-    const code = (otpCodeEl?.value || '').trim();
-    if (!code || code.length < 6) return setMsg('Enter the 6-digit verification code.', false);
-    setLoading(true);
-    try {
-      const res = await fetchJSON('/auth/verify-otp', {
-        method: 'POST',
-        body: JSON.stringify({ challengeId: pendingLogin.challengeId, code }),
-        credentials: 'include'
-      });
-      if (res?.ok) {
-        const data = await res.json();
-        const context = { ...pendingLogin };
-        pendingLogin = null;
-        hideOTP();
-        completeLogin({
-          token: data.token || 'session',
-          username: data.user?.username || context.username,
-          role: data.user?.role || context.role
-        });
-        return;
-      }
-      const data = await res?.json().catch(() => ({}));
-      setMsg(data?.error || 'Invalid code. Please try again.', false);
-    } catch {
-      setMsg('Unable to verify the code. Please try again.', false);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleOtpResend() {
-    if (!pendingLogin?.challengeId || otpResend?.disabled) return;
-    otpResend.disabled = true;
-    setMsg('Sending you a new code…', true);
-    try {
-      const res = await fetchJSON('/auth/resend-otp', {
-        method: 'POST',
-        body: JSON.stringify({ challengeId: pendingLogin.challengeId }),
-        credentials: 'include'
-      });
-      const data = await res?.json().catch(() => ({}));
-      if (!res?.ok) throw new Error(data?.error || 'Unable to resend code.');
-      pendingLogin.challengeId = data.challengeId;
-      pendingLogin.delivery = data.delivery || pendingLogin.delivery;
-      pendingLogin.context = data.context || pendingLogin.context;
-      updateOtpStatus();
-      startOtpCountdown();
-      setMsg('New code sent. Check your device.', true);
-    } catch (err) {
-      console.error(err);
-      otpResend.disabled = false;
-      setMsg(err.message || 'Unable to resend the code. Please try again.', false);
     }
   }
 
@@ -348,60 +261,6 @@
       submitBtn.disabled = loading;
       submitBtn.dataset.loading = loading ? '1' : '0';
       submitBtn.textContent = loading ? 'Signing in…' : 'Sign in';
-    }
-  }
-
-  function showOTP() {
-    form?.classList.add('hidden');
-    otpSection?.classList.remove('hidden');
-    otpCodeEl?.focus();
-    updateOtpStatus();
-    setMsg('A verification code was sent to your email/phone.', true);
-  }
-
-  function hideOTP() {
-    otpSection?.classList.add('hidden');
-    form?.classList.remove('hidden');
-    otpCodeEl && (otpCodeEl.value = '');
-    clearInterval(otpTimer);
-    otpTimer = null;
-    if (otpCountdown) otpCountdown.textContent = '';
-    if (otpResend) otpResend.disabled = false;
-    clearMsg();
-  }
-
-  function updateOtpStatus() {
-    if (!otpStatus) return;
-    if (!pendingLogin) {
-      otpStatus.textContent = 'Enter the 6-digit code sent to your email/phone.';
-      return;
-    }
-    const channel = pendingLogin.delivery === 'sms' ? 'text message' : 'email';
-    otpStatus.textContent = `Enter the 6-digit code we sent via ${channel}.`;
-  }
-
-  function startOtpCountdown(seconds = OTP_RESEND_SECONDS) {
-    clearInterval(otpTimer);
-    otpRemaining = seconds;
-    if (otpResend) otpResend.disabled = true;
-    updateOtpCountdown();
-    otpTimer = setInterval(() => {
-      otpRemaining -= 1;
-      updateOtpCountdown();
-      if (otpRemaining <= 0) {
-        clearInterval(otpTimer);
-        otpTimer = null;
-        if (otpResend) otpResend.disabled = false;
-      }
-    }, 1000);
-  }
-
-  function updateOtpCountdown() {
-    if (!otpCountdown) return;
-    if (otpRemaining <= 0) {
-      otpCountdown.textContent = 'You can resend a new code now.';
-    } else {
-      otpCountdown.textContent = `Resend available in ${otpRemaining}s.`;
     }
   }
 

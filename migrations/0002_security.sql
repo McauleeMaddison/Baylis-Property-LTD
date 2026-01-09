@@ -1,6 +1,3 @@
-ALTER TABLE otp_challenges
-  ADD COLUMN context VARCHAR(50) NOT NULL DEFAULT 'login' AFTER delivery;
-
 CREATE TABLE IF NOT EXISTS audit_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NULL,

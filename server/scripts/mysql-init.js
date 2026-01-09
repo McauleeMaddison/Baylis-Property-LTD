@@ -64,17 +64,5 @@ await db.query(`CREATE TABLE IF NOT EXISTS password_resets (
   INDEX idx_password_resets_user (user_id)
 )`);
 
-await db.query(`CREATE TABLE IF NOT EXISTS otp_challenges (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  challenge_id CHAR(64) NOT NULL UNIQUE,
-  code_hash CHAR(64) NOT NULL,
-  delivery VARCHAR(50) DEFAULT 'sms',
-  expires_at TIMESTAMP NOT NULL,
-  attempts INT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_otp_user (user_id)
-)`);
-
 console.log('MySQL tables created/verified.');
 process.exit();

@@ -167,32 +167,6 @@
           <h2 class="h3">Security &amp; Privacy</h2>
           <p class="muted">Passwords, devices, and your data.</p>
 
-          <div class="twofa-panel" aria-live="polite">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:.75rem; flex-wrap:wrap;">
-              <div>
-                <p class="muted">Two-factor authentication</p>
-                <p id="twoFaStatusText" class="h4" style="margin:0;">Checking…</p>
-              </div>
-              <div class="twofa-actions">
-                <button type="button" class="btn" id="twoFaEnableBtn">Enable 2FA</button>
-                <button type="button" class="btn btn-ghost" id="twoFaDisableBtn">Disable 2FA</button>
-              </div>
-            </div>
-            <p class="muted text-small" id="twoFaMeta">Add a verification code after your password to keep intruders out.</p>
-            <div id="twoFaFlow" class="hidden twofa-flow" aria-live="assertive">
-              <label class="field" for="twoFaCode">
-                <span>Verification code</span>
-                <input id="twoFaCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code" />
-              </label>
-              <div class="twofa-flow-actions">
-                <button type="button" class="btn" id="twoFaVerifyBtn">Verify</button>
-                <button type="button" class="btn btn-ghost" id="twoFaResendBtn">Resend code</button>
-                <button type="button" class="btn secondary" id="twoFaCancelBtn">Cancel</button>
-              </div>
-              <p class="muted text-small" id="twoFaCountdown"></p>
-            </div>
-          </div>
-
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.6rem; margin-top:.75rem;">
             <label class="field" for="currentPassword">
               <span>Current password</span>
