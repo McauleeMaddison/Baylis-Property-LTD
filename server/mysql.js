@@ -105,8 +105,23 @@ export const createDbConnection = (overrides = {}) =>
     ...overrides,
   });
 
-export const db = await createDbConnection();
+const poolConfig = {
+  ...connectionConfig,
+  multipleStatements: false,
+  waitForConnections: true,
+  connectionLimit: Number(process.env.MYSQL_POOL_LIMIT || 10),
+  queueLimit: Number(process.env.MYSQL_POOL_QUEUE_LIMIT || 0),
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 10_000,
+};
+
+export const db = mysql.createPool(poolConfig);
+
+export const pingDb = async () => {
+  const [rows] = await db.query("SELECT 1 AS ok");
+  return rows?.[0]?.ok === 1;
+};
 
 console.log(
-  `Connected to MySQL database at ${connectionConfig.host}:${connectionConfig.port}`
+  `MySQL pool configured for ${connectionConfig.host}:${connectionConfig.port} (limit=${poolConfig.connectionLimit})`
 );

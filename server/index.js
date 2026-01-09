@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
+import { pingDb } from './mysql.js';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 
@@ -548,6 +549,16 @@ app.post('/api/notifications/read', authRequired, csrfRequired, asyncHandler(asy
 app.post('/api/notifications/read-all', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   await Notification.markAllRead(req.user.id);
   res.json({ ok: true });
+}));
+
+app.get('/api/health', asyncHandler(async (req, res) => {
+  let dbOk = false;
+  try {
+    dbOk = await pingDb();
+  } catch {
+    dbOk = false;
+  }
+  res.json({ ok: true, db: dbOk, time: new Date().toISOString() });
 }));
 
 // Profile & settings
