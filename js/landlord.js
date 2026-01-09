@@ -22,6 +22,7 @@
     auditBody: document.getElementById("auditTableBody"),
     auditRefresh: document.getElementById("auditRefreshBtn"),
   };
+  const TOUR_KEY = "tour:landlord:v1";
 
   const state = {
     user: null,
@@ -120,13 +121,27 @@
     const filtered = getFilteredRequests();
     const cleaning = filtered.filter((r) => r.type === "cleaning");
     const repairs = filtered.filter((r) => r.type === "repair");
-    hydrateList(els.cleaning, cleaning, renderCleaningItem, "No cleaning requests found.");
-    hydrateList(els.repairs, repairs, renderRepairItem, "No repair requests found.");
+    const emptyConfig = () => emptyStateHtml({
+      title: "No requests match your filters.",
+      body: "Clear filters or refresh the dashboard to fetch the latest requests.",
+      actions: [
+        { label: "Clear filters", action: "clear-filters" },
+        { label: "Refresh", action: "refresh" }
+      ]
+    });
+    hydrateList(els.cleaning, cleaning, renderCleaningItem, emptyConfig);
+    hydrateList(els.repairs, repairs, renderRepairItem, emptyConfig);
   }
 
   function renderCommunity() {
     if (!els.posts) return;
-    hydrateList(els.posts, state.posts, renderCommunityItem, "No community posts yet.");
+    hydrateList(els.posts, state.posts, renderCommunityItem, () => emptyStateHtml({
+      title: "No community posts yet.",
+      body: "When residents post updates or questions, they will appear here.",
+      actions: [
+        { label: "Refresh", action: "refresh" }
+      ]
+    }));
   }
 
   function renderMetrics() {
@@ -150,7 +165,9 @@
   function hydrateList(host, items, renderFn, emptyMsg) {
     host.innerHTML = "";
     if (!items.length) {
-      host.innerHTML = `<li class="muted">${emptyMsg}</li>`;
+      host.innerHTML = typeof emptyMsg === "function"
+        ? emptyMsg()
+        : `<li class="muted">${emptyMsg}</li>`;
       return;
     }
     items.forEach((item) => {
@@ -240,6 +257,19 @@
     return div.innerHTML;
   }
 
+  function emptyStateHtml({ title, body, actions = [] }) {
+    const buttons = actions
+      .map((btn) => `<button type="button" class="btn btn-ghost btn-small" data-action="${btn.action}">${btn.label}</button>`)
+      .join("");
+    return `
+      <li class="empty-state">
+        <div class="empty-title">${escapeHtml(title || "Nothing here yet.")}</div>
+        <p class="muted">${escapeHtml(body || "")}</p>
+        <div class="empty-actions">${buttons}</div>
+      </li>
+    `;
+  }
+
   function exportCsv() {
     const rows = [["Type", "Name", "Details", "Date", "Status"]];
     getFilteredRequests().forEach((req) => {
@@ -279,6 +309,28 @@
     els.refreshBtn?.addEventListener("click", () => loadDashboard());
     els.exportBtn?.addEventListener("click", exportCsv);
     els.auditRefresh?.addEventListener("click", refreshAuditLog);
+    bindEmptyActions();
+  }
+
+  function bindEmptyActions() {
+    const handler = (event) => {
+      const action = event.target?.getAttribute("data-action");
+      if (!action) return;
+      if (action === "clear-filters") {
+        if (els.search) els.search.value = "";
+        if (els.filterType) els.filterType.value = "all";
+        if (els.filterStatus) els.filterStatus.value = "all";
+        render();
+        return;
+      }
+      if (action === "refresh") {
+        loadDashboard();
+      }
+    };
+    [els.cleaning, els.repairs, els.posts].forEach((list) => {
+      if (!list) return;
+      list.addEventListener("click", handler);
+    });
   }
 
   async function refreshAuditLog() {
@@ -302,9 +354,104 @@
       await ensureLandlord();
       bindEvents();
       await loadDashboard();
+      maybeStartTour();
     } catch {
       window.location.replace("/login");
     }
+  }
+
+  function maybeStartTour() {
+    try {
+      if (localStorage.getItem(TOUR_KEY) === "done") return;
+    } catch {
+      return;
+    }
+    const steps = [
+      {
+        title: "Welcome to your landlord dashboard",
+        body: "Review resident requests, track workload, and manage updates from one place.",
+        target: ".header"
+      },
+      {
+        title: "Filter and export",
+        body: "Search and filter requests to stay focused, then export reports as CSV.",
+        target: ".dashboard-card[aria-label=\"Tools\"]"
+      },
+      {
+        title: "Audit trail",
+        body: "Keep an eye on security events and recent activity.",
+        target: "#auditTableBody"
+      }
+    ];
+    startTour(steps, TOUR_KEY);
+  }
+
+  function startTour(steps, storageKey) {
+    if (!steps.length) return;
+    let index = 0;
+    const overlay = document.createElement("div");
+    overlay.className = "tour-overlay";
+    overlay.innerHTML = `
+      <div class="tour-panel" role="dialog" aria-live="polite">
+        <div class="tour-kicker">Quick tour</div>
+        <div class="tour-title"></div>
+        <p class="tour-body muted"></p>
+        <div class="tour-controls">
+          <button type="button" class="btn btn-ghost btn-small" data-action="back">Back</button>
+          <button type="button" class="btn btn-ghost btn-small" data-action="skip">Skip</button>
+          <button type="button" class="btn btn-small" data-action="next">Next</button>
+        </div>
+        <div class="tour-progress"></div>
+      </div>
+    `;
+    const titleEl = overlay.querySelector(".tour-title");
+    const bodyEl = overlay.querySelector(".tour-body");
+    const progressEl = overlay.querySelector(".tour-progress");
+    const backBtn = overlay.querySelector('[data-action="back"]');
+    const nextBtn = overlay.querySelector('[data-action="next"]');
+
+    const clearHighlight = () => {
+      document.querySelectorAll(".tour-highlight").forEach((el) => el.classList.remove("tour-highlight"));
+    };
+    const finish = () => {
+      clearHighlight();
+      overlay.remove();
+      try { localStorage.setItem(storageKey, "done"); } catch {}
+    };
+    const renderStep = () => {
+      const step = steps[index];
+      if (!step) return finish();
+      titleEl.textContent = step.title || "";
+      bodyEl.textContent = step.body || "";
+      progressEl.textContent = `Step ${index + 1} of ${steps.length}`;
+      backBtn.disabled = index === 0;
+      nextBtn.textContent = index === steps.length - 1 ? "Finish" : "Next";
+      clearHighlight();
+      if (step.target) {
+        const target = document.querySelector(step.target);
+        if (target) {
+          target.classList.add("tour-highlight");
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    };
+
+    overlay.addEventListener("click", (event) => {
+      const action = event.target?.getAttribute("data-action");
+      if (!action) return;
+      if (action === "skip") return finish();
+      if (action === "back" && index > 0) {
+        index -= 1;
+        return renderStep();
+      }
+      if (action === "next") {
+        if (index >= steps.length - 1) return finish();
+        index += 1;
+        return renderStep();
+      }
+    });
+    document.body.appendChild(overlay);
+    renderStep();
   }
 
   if (document.readyState === "loading") {
