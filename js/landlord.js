@@ -47,6 +47,23 @@
   }
 
   async function fetchJSON(path, { method = "GET", body = null, headers = {} } = {}) {
+    const getCsrfToken = () => {
+      const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
+      return match ? decodeURIComponent(match[1]) : "";
+    };
+    const ensureCsrf = async () => {
+      if (getCsrfToken()) return;
+      try {
+        await fetch(`${API_BASE}/security/csrf`, { credentials: "include" });
+      } catch (_) {}
+    };
+    if (method !== "GET") {
+      await ensureCsrf();
+      const token = getCsrfToken();
+      if (token && !headers["X-CSRF-Token"] && !headers["x-csrf-token"]) {
+        headers = Object.assign({ "X-CSRF-Token": token }, headers);
+      }
+    }
     const opts = {
       method,
       credentials: "include",
