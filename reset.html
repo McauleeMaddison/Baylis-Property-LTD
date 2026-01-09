@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="description" content="Reset your Baylis Property LTD password." />
+  <meta name="description" content="Reset your Baylis Property LTD password securely." />
   <meta name="author" content="Baylis Property LTD" />
   <meta property="og:title" content="Reset Password • Baylis Property LTD" />
-  <meta property="og:description" content="Reset your Baylis Property LTD password." />
+  <meta property="og:description" content="Securely reset your Baylis Property LTD password." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://baylisproperty.co.uk/assets/logo.svg" />
   <link rel="canonical" href="https://baylisproperty.co.uk/reset.html" />
@@ -28,7 +28,12 @@
       <aside class="brand-panel">
         <img src="assets/logo.svg" alt="" class="brand-logo" />
         <h1 class="h2">Reset your password</h1>
-        <p class="muted">We will email you a one-time reset code if the account exists.</p>
+        <p class="muted">We’ll email you a one-time reset code if the account exists.</p>
+        <ul class="brand-points">
+          <li>Secure, time-limited reset codes</li>
+          <li>Fast access to your dashboard</li>
+          <li>Stay protected with strong passwords</li>
+        </ul>
         <img src="assets/IMG_4432.jpg" alt="Baylis Property's wordmark" class="brand-showcase" loading="lazy" />
       </aside>
 
@@ -43,7 +48,7 @@
         <form id="resetRequestForm" novalidate>
           <label class="field" for="resetIdentity">
             <span>Email or username</span>
-            <input id="resetIdentity" type="text" placeholder="you@example.com or username" required />
+            <input id="resetIdentity" type="text" placeholder="you@example.com or username" autocomplete="username" required />
           </label>
           <button type="submit" class="btn">Send reset code</button>
         </form>
@@ -57,11 +62,11 @@
           </label>
           <label class="field" for="resetPassword">
             <span>New password</span>
-            <input id="resetPassword" type="password" placeholder="New password" required />
+            <input id="resetPassword" type="password" placeholder="New password" autocomplete="new-password" required />
           </label>
           <label class="field" for="resetConfirm">
             <span>Confirm new password</span>
-            <input id="resetConfirm" type="password" placeholder="Repeat new password" required />
+            <input id="resetConfirm" type="password" placeholder="Repeat new password" autocomplete="new-password" required />
           </label>
           <button type="submit" class="btn">Update password</button>
         </form>
