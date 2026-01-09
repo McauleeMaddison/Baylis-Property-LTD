@@ -190,13 +190,13 @@ select:focus-visible, textarea:focus-visible {
   .nav-links.show a:nth-child(6) { animation-delay: 240ms; }
   .nav-links.show a:nth-child(7) { animation-delay: 280ms; }
 }
-@media (max-width: 520px) {
+@media (max-width: 430px) {
   .logo span { display: none; }
   .hamb { padding: .2rem .45rem; font-size: 1.25rem; }
   .nav-links a, .nav-links button { padding: .75rem .9rem; }
   .nav-links { max-height: 0; }
 }
-@media (max-width: 380px) {
+@media (max-width: 375px) {
   .nav { height: 58px; }
   .nav-links { top: 58px; }
   .logo img, .logo svg { width:24px; height:24px; }
@@ -221,7 +221,7 @@ select:focus-visible, textarea:focus-visible {
 .legal-card h1 { margin-bottom: var(--space-2); }
 .legal-card h3 { margin-top: var(--space-3); }
 .hero {
-  background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.15), transparent 55%), var(--bg-light);
+  background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.12), transparent 58%), var(--bg-light);
   padding: var(--space-6) 0 var(--space-6);
 }
 .hero-grid {
@@ -230,7 +230,7 @@ select:focus-visible, textarea:focus-visible {
   gap: var(--space-6);
   align-items: center;
 }
-.hero-content { max-width: 540px; }
+.hero-content { max-width: 560px; }
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -240,8 +240,8 @@ select:focus-visible, textarea:focus-visible {
   margin-bottom: var(--space-2);
 }
 .hero h1 { font-size: clamp(2.2rem, 4vw, 3rem); }
-.hero-subtitle { font-size: 1.125rem; color: var(--text); margin-bottom: var(--space-5); }
-.hero-cta { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); }
+.hero-subtitle { font-size: 1.08rem; color: var(--text); margin-bottom: var(--space-4); }
+.hero-cta { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-3); }
 .hero-cta .btn { min-width: 150px; text-align: center; }
 .hero-points {
   list-style: none;
@@ -249,7 +249,7 @@ select:focus-visible, textarea:focus-visible {
   padding: 0;
   display: grid;
   gap: var(--space-2);
-  font-size: 0.95rem;
+  font-size: 0.96rem;
 }
 .hero-points li { display: flex; gap: 0.4rem; align-items: center; }
 .hero-points li::before {
