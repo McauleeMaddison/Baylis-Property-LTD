@@ -29,6 +29,8 @@
     const confirmNewPw = $("#confirmNewPassword");
     const changePwBtn = $("#changePasswordBtn");
     const signOutAllBtn = $("#signOutAllBtn");
+    const sessionList = $("#sessionList");
+    const sessionRefreshBtn = $("#sessionRefreshBtn");
     const exportDataBtn = $("#exportDataBtn");
     const clearLocalBtn = $("#clearLocalBtn");
     const resetDefaultsBtn = $("#resetDefaults");
@@ -146,6 +148,8 @@
       setTimeout(() => (window.location.href = "login.html"), 900);
     });
 
+    sessionRefreshBtn?.addEventListener("click", loadSessions);
+
     exportDataBtn?.addEventListener("click", async () => {
       const payload = {
         exportedAt: new Date().toISOString(),
@@ -177,6 +181,33 @@
       toast("🧽 Local data cleared.");
       setTimeout(() => (window.location.href = "login.html"), 900);
     });
+
+    if (sessionList) {
+      sessionList.addEventListener("click", async (event) => {
+        const btn = event.target?.closest("button[data-session]");
+        if (!btn) return;
+        const sid = btn.getAttribute("data-session");
+        if (!sid) return;
+        btn.disabled = true;
+        try {
+          const res = await authedFetch("/auth/sessions/revoke", {
+            method: "POST",
+            body: JSON.stringify({ sid })
+          });
+          if (res?.ok) {
+            toast("Session revoked.");
+            loadSessions();
+            return;
+          }
+          const data = await res?.json().catch(() => ({}));
+          toast(data?.error || "Unable to revoke session.");
+        } catch {
+          toast("Network error.");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    }
 
     function loadSettings(defaults) {
       try {
@@ -292,6 +323,41 @@
         return null;
       }
     }
+
+    async function loadSessions() {
+      if (!sessionList) return;
+      sessionList.innerHTML = "<li class=\"muted\">Loading…</li>";
+      try {
+        const res = await authedFetch("/auth/sessions", { method: "GET" });
+        if (!res?.ok) throw new Error("session-fetch");
+        const data = await res.json().catch(() => ({}));
+        const sessions = Array.isArray(data?.sessions) ? data.sessions : [];
+        if (!sessions.length) {
+          sessionList.innerHTML = "<li class=\"muted\">No active sessions.</li>";
+          return;
+        }
+        sessionList.innerHTML = "";
+        sessions.forEach((sess) => {
+          const li = document.createElement("li");
+          const when = sess.lastSeen ? new Date(sess.lastSeen).toLocaleString() : "—";
+          const current = sess.current ? " (current)" : "";
+          li.innerHTML = `
+            <div style="display:flex; justify-content:space-between; gap:.5rem; align-items:center; flex-wrap:wrap;">
+              <div>
+                <strong>${(sess.userAgent || "Unknown device").slice(0, 60)}${current}</strong>
+                <div class="muted">${sess.ipAddress || "Unknown IP"} • Last seen ${when}</div>
+              </div>
+              ${sess.current ? "" : `<button type="button" class="btn btn-ghost btn-small" data-session="${sess.sid}">Revoke</button>`}
+            </div>
+          `;
+          sessionList.appendChild(li);
+        });
+      } catch {
+        sessionList.innerHTML = "<li class=\"muted\">Unable to load sessions.</li>";
+      }
+    }
+
+    loadSessions();
 
     function getCsrfToken() {
       const match = document.cookie.match(/(?:^|;)\\s*csrfToken=([^;]+)/);

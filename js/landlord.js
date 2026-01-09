@@ -10,9 +10,12 @@
     cleaning: document.getElementById("allCleaningRequests"),
     repairs: document.getElementById("allRepairRequests"),
     posts: document.getElementById("allCommunityPosts"),
+    notifications: document.getElementById("landlordNotifications"),
+    notifMarkAll: document.getElementById("landlordNotifMarkAll"),
     metricOpen: document.getElementById("metricOpen"),
     metricProgress: document.getElementById("metricInProgress"),
     metricDone: document.getElementById("metricDone"),
+    metricOverdue: document.getElementById("metricOverdue"),
     metricPosts: document.getElementById("metricPosts"),
     search: document.getElementById("reqSearch"),
     filterType: document.getElementById("filterType"),
@@ -29,6 +32,7 @@
     requests: [],
     posts: [],
     auditLogs: [],
+    notifications: [],
   };
 
   const toast = (text) => {
@@ -74,14 +78,16 @@
 
   async function loadDashboard() {
     try {
-      const [requests, posts, audit] = await Promise.all([
+      const [requests, posts, audit, notifications] = await Promise.all([
         fetchJSON("/requests"),
         fetchJSON("/community"),
-        fetchJSON("/security/audit?limit=50").catch(() => ({ logs: [] }))
+        fetchJSON("/security/audit?limit=50").catch(() => ({ logs: [] })),
+        fetchJSON("/notifications?limit=40").catch(() => ({ notifications: [] })),
       ]);
       state.requests = Array.isArray(requests) ? requests : [];
       state.posts = Array.isArray(posts) ? posts : [];
       state.auditLogs = Array.isArray(audit?.logs) ? audit.logs : [];
+      state.notifications = Array.isArray(notifications?.notifications) ? notifications.notifications : [];
       render();
     } catch (err) {
       showError(err.message || "Unable to load data");
@@ -100,6 +106,7 @@
     renderCommunity();
     renderMetrics();
     renderAudit();
+    renderNotifications();
   }
 
   function getFilteredRequests() {
@@ -149,16 +156,18 @@
     const summary = filtered.reduce(
       (acc, req) => {
         const status = String(req.status || "open").toLowerCase();
+        if (isOverdue(req)) acc.overdue += 1;
         if (status.includes("in")) acc.inProgress += 1;
         else if (status.includes("done") || status.includes("closed")) acc.done += 1;
         else acc.open += 1;
         return acc;
       },
-      { open: 0, inProgress: 0, done: 0 },
+      { open: 0, inProgress: 0, done: 0, overdue: 0 },
     );
     if (els.metricOpen) els.metricOpen.textContent = summary.open;
     if (els.metricProgress) els.metricProgress.textContent = summary.inProgress;
     if (els.metricDone) els.metricDone.textContent = summary.done;
+    if (els.metricOverdue) els.metricOverdue.textContent = summary.overdue;
     if (els.metricPosts) els.metricPosts.textContent = state.posts.length;
   }
 
@@ -178,25 +187,39 @@
   }
 
   function renderCleaningItem(req) {
-    const status = req.status || "open";
+    const status = String(req.status || "open").toLowerCase();
+    const sla = formatSla(req);
+    const badgeClass = isOverdue(req) ? "status-overdue" : `status-${status}`;
     return `
       <div>
         <div><strong data-field="name">${escapeHtml(req.name || "Resident")}</strong></div>
         <div class="muted" data-field="info">${escapeHtml(req.cleaningType || req.type || "Cleaning")}</div>
         <div class="muted" data-field="date">${fmtDate(req.date || req.createdAt)}</div>
-        <span class="badge">Status: ${escapeHtml(status)}</span>
+        <div class="muted">${sla}</div>
+        <div class="request-actions">
+          <span class="badge ${badgeClass}">Status: ${escapeHtml(status.replace("_", " "))}</span>
+          ${renderStatusSelect(req)}
+        </div>
       </div>
     `;
   }
 
   function renderRepairItem(req) {
-    const status = req.status || "open";
+    const status = String(req.status || "open").toLowerCase();
+    const sla = formatSla(req);
+    const photos = renderPhotoStrip(req.photos || []);
+    const badgeClass = isOverdue(req) ? "status-overdue" : `status-${status}`;
     return `
       <div>
         <div><strong data-field="name">${escapeHtml(req.name || "Resident")}</strong></div>
         <div class="muted" data-field="info">${escapeHtml(req.issue || "Repair request")}</div>
         <div class="muted" data-field="date">${fmtDate(req.createdAt)}</div>
-        <span class="badge">Status: ${escapeHtml(status)}</span>
+        <div class="muted">${sla}</div>
+        ${photos}
+        <div class="request-actions">
+          <span class="badge ${badgeClass}">Status: ${escapeHtml(status.replace("_", " "))}</span>
+          ${renderStatusSelect(req)}
+        </div>
       </div>
     `;
   }
@@ -212,6 +235,33 @@
         <span class="badge">${comments} comments</span>
       </div>
     `;
+  }
+
+  function renderNotifications() {
+    if (!els.notifications) return;
+    els.notifications.innerHTML = "";
+    if (!state.notifications.length) {
+      els.notifications.innerHTML = emptyStateHtml({
+        title: "No notifications yet.",
+        body: "Updates about new requests and comments will appear here.",
+        actions: [{ label: "Refresh", action: "refresh" }]
+      });
+      if (els.notifMarkAll) els.notifMarkAll.disabled = true;
+      return;
+    }
+    if (els.notifMarkAll) els.notifMarkAll.disabled = false;
+    state.notifications.forEach((notif) => {
+      const li = document.createElement("li");
+      const isRead = Boolean(notif.readAt);
+      li.className = `notification-item${isRead ? " is-read" : ""}`;
+      li.dataset.id = notif.id;
+      li.innerHTML = `
+        <div class="notification-title">${escapeHtml(notif.title || "Update")}</div>
+        <div class="muted">${escapeHtml(notif.body || "")}</div>
+        <div class="notification-meta">${escapeHtml(fmtDateTime(notif.createdAt))}${isRead ? " • Read" : ""}</div>
+      `;
+      els.notifications.appendChild(li);
+    });
   }
 
   function renderAudit() {
@@ -255,6 +305,51 @@
     const div = document.createElement("div");
     div.textContent = value ?? "";
     return div.innerHTML;
+  }
+
+  function renderStatusSelect(req) {
+    const current = String(req.status || "open").toLowerCase();
+    return `
+      <select class="status-select" data-request-id="${req.id}" aria-label="Update status">
+        <option value="open"${current === "open" ? " selected" : ""}>Open</option>
+        <option value="in_progress"${current === "in_progress" ? " selected" : ""}>In progress</option>
+        <option value="done"${current === "done" ? " selected" : ""}>Done</option>
+      </select>
+    `;
+  }
+
+  function renderPhotoStrip(photos) {
+    if (!Array.isArray(photos) || !photos.length) return "";
+    const thumbs = photos.slice(0, 3).map((src) => {
+      const safe = encodeURI(src);
+      return `<img src="${safe}" alt="Repair photo" loading="lazy" />`;
+    }).join("");
+    return `<div class="photo-strip">${thumbs}</div>`;
+  }
+
+  function formatSla(req) {
+    const type = String(req.type || "").toLowerCase();
+    const hours = type === "repair" ? 72 : 48;
+    const created = new Date(req.createdAt || Date.now());
+    if (Number.isNaN(created.getTime())) return "";
+    const due = new Date(created.getTime() + hours * 60 * 60 * 1000);
+    const diffMs = due.getTime() - Date.now();
+    const abs = Math.abs(diffMs);
+    const days = Math.floor(abs / (24 * 60 * 60 * 1000));
+    const hoursLeft = Math.floor((abs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    const parts = [];
+    if (days) parts.push(`${days}d`);
+    parts.push(`${hoursLeft}h`);
+    const label = parts.join(" ");
+    return diffMs >= 0 ? `SLA: ${label} left` : `SLA: ${label} overdue`;
+  }
+
+  function isOverdue(req) {
+    const type = String(req.type || "").toLowerCase();
+    const hours = type === "repair" ? 72 : 48;
+    const created = new Date(req.createdAt || Date.now());
+    if (Number.isNaN(created.getTime())) return false;
+    return Date.now() > created.getTime() + hours * 60 * 60 * 1000;
   }
 
   function emptyStateHtml({ title, body, actions = [] }) {
@@ -309,7 +404,38 @@
     els.refreshBtn?.addEventListener("click", () => loadDashboard());
     els.exportBtn?.addEventListener("click", exportCsv);
     els.auditRefresh?.addEventListener("click", refreshAuditLog);
+    els.notifMarkAll?.addEventListener("click", markAllNotificationsRead);
+    bindStatusEvents();
     bindEmptyActions();
+  }
+
+  function bindStatusEvents() {
+    const handler = async (event) => {
+      const select = event.target?.closest("select.status-select");
+      if (!select) return;
+      const id = select.getAttribute("data-request-id");
+      const status = select.value;
+      if (!id) return;
+      try {
+        const updated = await fetchJSON(`/requests/${id}/status`, { method: "POST", body: { status } });
+        const idx = state.requests.findIndex((r) => String(r.id) === String(id));
+        if (idx >= 0 && updated) state.requests[idx] = updated;
+        render();
+      } catch (err) {
+        toast(err.message || "Unable to update status.");
+      }
+    };
+    [els.cleaning, els.repairs].forEach((list) => list?.addEventListener("change", handler));
+  }
+
+  async function markAllNotificationsRead() {
+    try {
+      await fetchJSON("/notifications/read-all", { method: "POST" });
+      state.notifications = state.notifications.map((n) => ({ ...n, readAt: new Date().toISOString() }));
+      renderNotifications();
+    } catch (err) {
+      toast(err.message || "Unable to mark notifications.");
+    }
   }
 
   function bindEmptyActions() {

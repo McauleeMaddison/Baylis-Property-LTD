@@ -22,6 +22,7 @@
     user: null,
     requests: [],
     posts: [],
+    notifications: [],
     loading: false,
   };
 
@@ -33,12 +34,15 @@
   };
 
   async function fetchJSON(path, { method = "GET", body = null, headers = {} } = {}) {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const opts = {
       method,
       credentials: "include",
       headers: Object.assign({ "Content-Type": "application/json" }, headers),
       body: body ? JSON.stringify(body) : null,
-    });
+    };
+    const res = typeof window.fetchWithCsrf === "function"
+      ? await window.fetchWithCsrf(`${API_BASE}${path}`, { apiBase: API_BASE, ...opts })
+      : await fetch(`${API_BASE}${path}`, opts);
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new Error(text || `Request failed: ${res.status}`);
@@ -71,6 +75,7 @@
       const data = await fetchJSON("/profile/activity");
       state.requests = Array.isArray(data?.requests) ? data.requests : [];
       state.posts = Array.isArray(data?.posts) ? data.posts : [];
+      state.notifications = Array.isArray(data?.notifications) ? data.notifications : [];
       renderAll();
     } catch (err) {
       showError(err.message || "Unable to load activity");
@@ -90,6 +95,7 @@
     renderRequests();
     renderPosts();
     renderKpis();
+    renderNotifications();
   }
 
   function renderRequests() {
@@ -134,6 +140,34 @@
     if (els.kpiPosts) els.kpiPosts.textContent = state.posts.length;
   }
 
+  function renderNotifications() {
+    const list = document.getElementById("myNotifications");
+    const markAll = document.getElementById("notifMarkAll");
+    if (!list) return;
+    list.innerHTML = "";
+    if (!state.notifications.length) {
+      list.innerHTML = emptyStateHtml({
+        title: "No notifications yet.",
+        body: "We will show updates here when requests or posts change.",
+      });
+      if (markAll) markAll.disabled = true;
+      return;
+    }
+    if (markAll) markAll.disabled = false;
+    state.notifications.forEach((notif) => {
+      const li = document.createElement("li");
+      const isRead = Boolean(notif.readAt);
+      li.className = `notification-item${isRead ? " is-read" : ""}`;
+      li.innerHTML = `
+        <div class="notification-title">${escapeHtml(notif.title || "Update")}</div>
+        <div class="muted">${escapeHtml(notif.body || "")}</div>
+        <div class="notification-meta">${formatWhen(notif.createdAt)}${isRead ? " • Read" : ""}</div>
+      `;
+      li.dataset.id = notif.id;
+      list.appendChild(li);
+    });
+  }
+
   function hydrateList(host, items, renderFn, emptyText) {
     host.innerHTML = "";
     if (!items.length) {
@@ -152,16 +186,19 @@
   function renderCleaningItem(req) {
     const date = req.date || req.createdAt;
     const type = req.cleaningType || req.type || "Cleaning";
-    const status = req.status || "open";
+    const status = String(req.status || "open").toLowerCase();
+    const sla = formatSla(req);
+    const badgeClass = isOverdue(req) ? "status-overdue" : `status-${status}`;
     return `
       <div style="display:flex;justify-content:space-between;gap:.75rem;">
         <div>
           <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong><br/>
           <span class="muted">${type}</span>
+          <div class="muted">${sla}</div>
         </div>
         <div style="text-align:right;">
           <span class="muted">${fmtDate(date)}</span><br/>
-          <span class="badge">[${status}]</span>
+          <span class="badge ${badgeClass}">[${status.replace("_", " ")}]</span>
         </div>
       </div>
     `;
@@ -169,17 +206,22 @@
 
   function renderRepairItem(req) {
     const when = req.createdAt || Date.now();
-    const status = req.status || "open";
+    const status = String(req.status || "open").toLowerCase();
     const issue = req.issue || "Repair request";
+    const sla = formatSla(req);
+    const photos = renderPhotoStrip(req.photos || []);
+    const badgeClass = isOverdue(req) ? "status-overdue" : `status-${status}`;
     return `
       <div style="display:flex;justify-content:space-between;gap:.75rem;">
         <div>
           <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong><br/>
           <span class="muted">${escapeHtml(issue)}</span>
+          <div class="muted">${sla}</div>
+          ${photos}
         </div>
         <div style="text-align:right;">
           <span class="muted">${fmtDate(when)}</span><br/>
-          <span class="badge">[${status}]</span>
+          <span class="badge ${badgeClass}">[${status.replace("_", " ")}]</span>
         </div>
       </div>
     `;
@@ -202,6 +244,46 @@
     return div.innerHTML;
   }
 
+  function formatWhen(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "" : date.toLocaleString();
+  }
+
+  function renderPhotoStrip(photos) {
+    if (!Array.isArray(photos) || !photos.length) return "";
+    const thumbs = photos.slice(0, 3).map((src) => {
+      const safe = encodeURI(src);
+      return `<img src="${safe}" alt="Repair photo" loading="lazy" />`;
+    }).join("");
+    return `<div class="photo-strip">${thumbs}</div>`;
+  }
+
+  function formatSla(req) {
+    const type = String(req.type || "").toLowerCase();
+    const hours = type === "repair" ? 72 : 48;
+    const created = new Date(req.createdAt || Date.now());
+    if (Number.isNaN(created.getTime())) return "";
+    const due = new Date(created.getTime() + hours * 60 * 60 * 1000);
+    const diffMs = due.getTime() - Date.now();
+    const abs = Math.abs(diffMs);
+    const days = Math.floor(abs / (24 * 60 * 60 * 1000));
+    const hoursLeft = Math.floor((abs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    const parts = [];
+    if (days) parts.push(`${days}d`);
+    parts.push(`${hoursLeft}h`);
+    const label = parts.join(" ");
+    return diffMs >= 0 ? `SLA: ${label} left` : `SLA: ${label} overdue`;
+  }
+
+  function isOverdue(req) {
+    const type = String(req.type || "").toLowerCase();
+    const hours = type === "repair" ? 72 : 48;
+    const created = new Date(req.createdAt || Date.now());
+    if (Number.isNaN(created.getTime())) return false;
+    return Date.now() > created.getTime() + hours * 60 * 60 * 1000;
+  }
+
   function emptyStateHtml({ title, body, action }) {
     const actionHtml = action?.href
       ? `<a class="btn btn-ghost btn-small" href="${action.href}">${action.label}</a>`
@@ -221,6 +303,32 @@
       if (!endpoint || !formEndpoints.has(endpoint)) return;
       loadActivity();
     });
+  }
+
+  function bindNotificationActions() {
+    const list = document.getElementById("myNotifications");
+    const markAll = document.getElementById("notifMarkAll");
+    if (list) {
+      list.addEventListener("click", async (event) => {
+        const li = event.target?.closest("li.notification-item");
+        if (!li || li.classList.contains("is-read")) return;
+        const id = Number(li.dataset.id);
+        if (!Number.isFinite(id)) return;
+        try {
+          await fetchJSON("/notifications/read", { method: "POST", body: { ids: [id] } });
+          li.classList.add("is-read");
+        } catch (_) {}
+      });
+    }
+    if (markAll) {
+      markAll.addEventListener("click", async () => {
+        try {
+          await fetchJSON("/notifications/read-all", { method: "POST" });
+          state.notifications = state.notifications.map((n) => ({ ...n, readAt: new Date().toISOString() }));
+          renderNotifications();
+        } catch (_) {}
+      });
+    }
   }
 
   function maybeStartTour() {
@@ -324,6 +432,7 @@
       await loadActivity();
       listenForFormSuccess();
       maybeStartTour();
+      bindNotificationActions();
     } catch {
       window.location.replace("/login");
     }

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Reset your Baylis Property LTD password." />
+  <meta name="author" content="Baylis Property LTD" />
+  <meta property="og:title" content="Reset Password • Baylis Property LTD" />
+  <meta property="og:description" content="Reset your Baylis Property LTD password." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://baylisproperty.co.uk/assets/logo.svg" />
+  <link rel="canonical" href="https://baylisproperty.co.uk/reset.html" />
+
+  <title>Reset Password • Baylis Property LTD</title>
+
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/api-base.js"></script>
+  <script defer src="js/script.js"></script>
+  <script defer src="js/reset.js"></script>
+</head>
+<body class="page auth-body" data-api-base="/api">
+  <a class="skip-link" href="#content">Skip to main content</a>
+
+  <main role="main" class="auth-shell container" id="content" tabindex="-1">
+    <section class="auth-grid" aria-label="Reset password">
+      <aside class="brand-panel">
+        <img src="assets/logo.svg" alt="" class="brand-logo" />
+        <h1 class="h2">Reset your password</h1>
+        <p class="muted">We will email you a one-time reset code if the account exists.</p>
+        <img src="assets/IMG_4432.jpg" alt="Baylis Property's wordmark" class="brand-showcase" loading="lazy" />
+      </aside>
+
+      <section class="auth-card">
+        <header>
+          <p class="muted">Baylis Property LTD</p>
+          <h2>Password reset</h2>
+        </header>
+
+        <div id="resetMsg" class="form-msg" role="status" aria-live="polite"></div>
+
+        <form id="resetRequestForm" novalidate>
+          <label class="field" for="resetIdentity">
+            <span>Email or username</span>
+            <input id="resetIdentity" type="text" placeholder="you@example.com or username" required />
+          </label>
+          <button type="submit" class="btn">Send reset code</button>
+        </form>
+
+        <hr class="divider" />
+
+        <form id="resetForm" novalidate>
+          <label class="field" for="resetToken">
+            <span>Reset code</span>
+            <input id="resetToken" type="text" placeholder="Enter the code" required />
+          </label>
+          <label class="field" for="resetPassword">
+            <span>New password</span>
+            <input id="resetPassword" type="password" placeholder="New password" required />
+          </label>
+          <label class="field" for="resetConfirm">
+            <span>Confirm new password</span>
+            <input id="resetConfirm" type="password" placeholder="Repeat new password" required />
+          </label>
+          <button type="submit" class="btn">Update password</button>
+        </form>
+
+        <div style="margin-top:1rem;">
+          <a href="login.html" class="btn btn-ghost">Back to sign in</a>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

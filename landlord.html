@@ -75,6 +75,12 @@
         <p class="muted">Resolved and closed</p>
       </article>
 
+      <article class="dashboard-card" aria-labelledby="mOverdue">
+        <h3 id="mOverdue">Overdue</h3>
+        <div class="metric" id="metricOverdue">—</div>
+        <p class="muted">Past SLA window</p>
+      </article>
+
       <article class="dashboard-card" aria-labelledby="mPosts">
         <h3 id="mPosts">Community Posts (7d)</h3>
         <div class="metric" id="metricPosts">—</div>
@@ -131,6 +137,16 @@
     <section class="dashboard-card" aria-label="Community posts">
       <h3>Community Posts</h3>
       <ul id="allCommunityPosts" class="post-feed" aria-live="polite">
+        <li class="muted">Loading…</li>
+      </ul>
+    </section>
+
+    <section class="dashboard-card" aria-label="Notifications">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem;">
+        <h3>Notifications</h3>
+        <button type="button" class="btn btn-ghost btn-small" id="landlordNotifMarkAll">Mark all read</button>
+      </div>
+      <ul id="landlordNotifications" class="submission-log" aria-live="polite">
         <li class="muted">Loading…</li>
       </ul>
     </section>

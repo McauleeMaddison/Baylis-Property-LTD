@@ -6,6 +6,7 @@ const state = {
   posts: [],
   sessions: [],
   resetTokens: [],
+  notifications: [],
   auditLogs: [],
 };
 
@@ -43,6 +44,10 @@ export const User = {
     state.users.push(user);
     return user;
   },
+  async findAll(filter = {}) {
+    if (filter.role) return state.users.filter((u) => u.role === filter.role);
+    return [...state.users];
+  },
 };
 
 export const Request = {
@@ -57,9 +62,19 @@ export const Request = {
       cleaningType: data.cleaningType || "",
       date: data.date || "",
       message: data.message || "",
+      status: data.status || "open",
+      statusUpdatedAt: data.statusUpdatedAt || new Date(),
+      photos: Array.isArray(data.photos) ? data.photos : [],
       createdAt: new Date(),
     };
     state.requests.unshift(rec);
+    return rec;
+  },
+  async updateStatus(id, status) {
+    const rec = state.requests.find((r) => r.id === Number(id));
+    if (!rec) return null;
+    rec.status = status;
+    rec.statusUpdatedAt = new Date();
     return rec;
   },
   async find(filter = {}) {
@@ -116,6 +131,9 @@ export const Session = {
     const s = state.sessions.find((sess) => sess.sid === sid);
     if (s) s.csrfDigest = csrfDigest;
   },
+  async findByUserId(userId) {
+    return state.sessions.filter((sess) => sess.userId === userId);
+  },
 };
 
 export const PasswordResetToken = {
@@ -137,6 +155,40 @@ export const PasswordResetToken = {
   },
 };
 
+export const Notification = {
+  async create({ userId, type, title, body = "", metadata = {} }) {
+    const rec = {
+      id: nextId("notifications"),
+      userId,
+      type,
+      title,
+      body,
+      metadata: clone(metadata),
+      readAt: null,
+      createdAt: new Date(),
+    };
+    state.notifications.unshift(rec);
+    return rec;
+  },
+  async findByUserId(userId, { limit = 50, unreadOnly = false } = {}) {
+    const list = state.notifications.filter((n) => n.userId === userId);
+    const filtered = unreadOnly ? list.filter((n) => !n.readAt) : list;
+    return filtered.slice(0, Math.min(Math.max(Number(limit) || 50, 1), 200)).map(clone);
+  },
+  async markRead(userId, ids = []) {
+    if (!ids.length) return;
+    const set = new Set(ids.map((id) => Number(id)));
+    state.notifications.forEach((n) => {
+      if (n.userId === userId && set.has(n.id)) n.readAt = new Date();
+    });
+  },
+  async markAllRead(userId) {
+    state.notifications.forEach((n) => {
+      if (n.userId === userId && !n.readAt) n.readAt = new Date();
+    });
+  },
+};
+
 export const AuditLog = {
   async create({ userId = null, event, severity = "info", ipAddress = null, userAgent = null, metadata = {} }) {
     state.auditLogs.unshift({
@@ -155,4 +207,4 @@ export const AuditLog = {
   },
 };
 
-export const models = { User, Request, CommunityPost, Session, PasswordResetToken, AuditLog };
+export const models = { User, Request, CommunityPost, Session, PasswordResetToken, Notification, AuditLog };

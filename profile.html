@@ -188,6 +188,13 @@
         </div>
 
         <div>
+          <h3 class="list-title">Notifications</h3>
+          <ul id="activityNotifications" class="submission-log" aria-live="polite">
+            <li class="muted">Loading…</li>
+          </ul>
+        </div>
+
+        <div>
           <a href="index.html#cleaningForm" class="btn btn-ghost">New Cleaning</a>
           <a href="index.html#repairForm" class="btn btn-ghost">New Repair</a>
           <a href="index.html#communityPostForm" class="btn">New Post</a>
@@ -347,10 +354,11 @@
         try {
           const r = await fetch(`${apiBase}/profile/activity`, { credentials: 'include' });
           if (!r.ok) throw 0;
-          const { requests = [], posts = [] } = await r.json();
+          const { requests = [], posts = [], notifications = [] } = await r.json();
 
           const ulReq = $('#activityRequests');
           const ulPost = $('#activityPosts');
+          const ulNotif = $('#activityNotifications');
 
           const li = (html) => {
             const el = document.createElement('li'); el.innerHTML = html; return el;
@@ -375,6 +383,18 @@
               `<strong>${p.title || 'Post'}</strong><br><span class="muted">${when}</span><p>${(p.message||'').slice(0,220)}</p>`
             ));
           });
+
+          if (ulNotif) {
+            ulNotif.innerHTML = '';
+            if (!notifications.length) ulNotif.innerHTML = '<li class="muted">No notifications yet.</li>';
+            notifications.forEach(n => {
+              const when = new Date(n.createdAt || Date.now()).toLocaleString();
+              const read = n.readAt ? ' • Read' : '';
+              ulNotif.appendChild(li(
+                `<strong>${n.title || 'Update'}</strong><br><span class="muted">${when}${read}</span><p>${(n.body||'').slice(0,220)}</p>`
+              ));
+            });
+          }
         } catch {
         }
       }

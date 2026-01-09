@@ -57,27 +57,46 @@ export const User = {
     const id = result.insertId;
     const [rows] = await db.query('SELECT * FROM users WHERE id = ? LIMIT 1', [id]);
     return rowToUser(rows[0]);
+  },
+  async findAll(filter = {}) {
+    if (filter.role) {
+      const [rows] = await db.query('SELECT * FROM users WHERE role = ?', [filter.role]);
+      return Promise.all(rows.map(rowToUser));
+    }
+    const [rows] = await db.query('SELECT * FROM users');
+    return Promise.all(rows.map(rowToUser));
   }
 };
 
-const mapRequestRow = (r) => ({
-  id: r.id,
-  userId: r.user_id,
-  type: r.type,
-  name: r.name,
-  address: r.address,
-  issue: r.issue,
-  cleaningType: r.cleaning_type,
-  date: r.date,
-  message: r.message,
-  createdAt: r.created_at
-});
+const mapRequestRow = (r) => {
+  const photos = parseJSONField(r.photos);
+  return {
+    id: r.id,
+    userId: r.user_id,
+    type: r.type,
+    name: r.name,
+    address: r.address,
+    issue: r.issue,
+    cleaningType: r.cleaning_type,
+    date: r.date,
+    message: r.message,
+    status: r.status || 'open',
+    statusUpdatedAt: r.status_updated_at ? new Date(r.status_updated_at) : null,
+    photos: Array.isArray(photos) ? photos : [],
+    createdAt: r.created_at
+  };
+};
 
 export const Request = {
   async create(data) {
-    const [result] = await db.query(`INSERT INTO requests (user_id, type, name, address, issue, cleaning_type, date, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [data.userId, data.type, data.name || '', data.address || '', data.issue || '', data.cleaningType || '', data.date || '', data.message || '']);
+    const [result] = await db.query(`INSERT INTO requests (user_id, type, name, address, issue, cleaning_type, date, message, status, status_updated_at, photos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [data.userId, data.type, data.name || '', data.address || '', data.issue || '', data.cleaningType || '', data.date || '', data.message || '', data.status || 'open', data.statusUpdatedAt || new Date(), JSON.stringify(data.photos || [])]);
     const [rows] = await db.query('SELECT * FROM requests WHERE id = ? LIMIT 1', [result.insertId]);
+    return mapRequestRow(rows[0]);
+  },
+  async updateStatus(id, status) {
+    await db.query('UPDATE requests SET status = ?, status_updated_at = NOW() WHERE id = ?', [status, id]);
+    const [rows] = await db.query('SELECT * FROM requests WHERE id = ? LIMIT 1', [id]);
     return mapRequestRow(rows[0]);
   },
   async find(filter = {}) {
@@ -164,6 +183,10 @@ export const Session = {
   },
   async updateCsrf(sid, csrfDigest) {
     await db.query('UPDATE sessions SET csrf_digest = ? WHERE sid = ?', [csrfDigest, sid]);
+  },
+  async findByUserId(userId) {
+    const [rows] = await db.query('SELECT * FROM sessions WHERE user_id = ? ORDER BY last_seen DESC', [userId]);
+    return rows.map(mapSessionRow);
   }
 };
 
@@ -224,4 +247,42 @@ export const AuditLog = {
   }
 };
 
-export const models = { User, Request, CommunityPost, Session, PasswordResetToken, AuditLog };
+export const Notification = {
+  async create({ userId, type, title, body = '', metadata = {} }) {
+    const [result] = await db.query(
+      `INSERT INTO notifications (user_id, type, title, body, metadata) VALUES (?, ?, ?, ?, ?)`,
+      [userId, type, title, body, JSON.stringify(metadata || {})]
+    );
+    const [rows] = await db.query('SELECT * FROM notifications WHERE id = ? LIMIT 1', [result.insertId]);
+    return rows[0] || null;
+  },
+  async findByUserId(userId, { limit = 50, unreadOnly = false } = {}) {
+    const safeLimit = Math.min(Math.max(Number(limit) || 50, 1), 200);
+    if (unreadOnly) {
+      const [rows] = await db.query(
+        'SELECT * FROM notifications WHERE user_id = ? AND read_at IS NULL ORDER BY created_at DESC LIMIT ?',
+        [userId, safeLimit]
+      );
+      return rows;
+    }
+    const [rows] = await db.query(
+      'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?',
+      [userId, safeLimit]
+    );
+    return rows;
+  },
+  async markRead(userId, ids = []) {
+    if (!ids.length) return;
+    const safeIds = ids.slice(0, 100);
+    const placeholders = safeIds.map(() => '?').join(',');
+    await db.query(
+      `UPDATE notifications SET read_at = NOW() WHERE user_id = ? AND id IN (${placeholders})`,
+      [userId, ...safeIds]
+    );
+  },
+  async markAllRead(userId) {
+    await db.query('UPDATE notifications SET read_at = NOW() WHERE user_id = ? AND read_at IS NULL', [userId]);
+  }
+};
+
+export const models = { User, Request, CommunityPost, Session, PasswordResetToken, Notification, AuditLog };

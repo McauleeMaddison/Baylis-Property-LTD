@@ -336,6 +336,38 @@
       return fetch(path, Object.assign({ credentials: "include" }, options || {}, { headers }));
     };
 
+    var readFileAsDataUrl = function (file) {
+      return new Promise(function (resolve) {
+        if (!file) return resolve(null);
+        var allowed = ["image/jpeg", "image/png", "image/webp"];
+        if (allowed.indexOf(file.type) === -1) return resolve(null);
+        if (file.size > 2 * 1024 * 1024) return resolve(null);
+        var reader = new FileReader();
+        reader.onload = function () {
+          resolve({ name: file.name || "upload", type: file.type, data: reader.result });
+        };
+        reader.onerror = function () { resolve(null); };
+        reader.readAsDataURL(file);
+      });
+    };
+
+    var collectFilePayloads = async function (form) {
+      var inputs = Array.prototype.slice.call(form.querySelectorAll('input[type="file"]'));
+      var out = {};
+      var tasks = inputs.map(function (input) {
+        if (!input.files || !input.files.length) return Promise.resolve();
+        var files = Array.prototype.slice.call(input.files).slice(0, 4);
+        return Promise.all(files.map(readFileAsDataUrl)).then(function (list) {
+          var clean = list.filter(Boolean);
+          if (!clean.length) return;
+          var key = input.name || "files";
+          out[key] = clean;
+        });
+      });
+      await Promise.all(tasks);
+      return out;
+    };
+
     var handleFormSubmit = function (form, msgEl, options) {
       on(form, "submit", async function (event) {
         event.preventDefault();
@@ -356,7 +388,12 @@
 
         var formData = new FormData(form);
         var payload = {};
-        formData.forEach(function (value, key) { payload[key] = value; });
+        formData.forEach(function (value, key) {
+          if (value instanceof File) return;
+          payload[key] = value;
+        });
+        var filePayloads = await collectFilePayloads(form);
+        Object.keys(filePayloads).forEach(function (key) { payload[key] = filePayloads[key]; });
 
         csrfFetch(options.endpoint.startsWith("http") ? options.endpoint : (apiBase ? apiBase.replace(/\/$/, "") + options.endpoint : options.endpoint), {
           method: "POST",

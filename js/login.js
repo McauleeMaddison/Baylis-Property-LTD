@@ -46,38 +46,7 @@
 
   async function handleForgotPassword(e) {
     e.preventDefault();
-    if (isLocked()) return;
-    const emailOrUser = window.prompt('Enter the email or username for your account:');
-    if (!emailOrUser) return;
-    setMsg('Sending reset instructions…', true);
-    try {
-      const payload = /\S+@\S+\.\S+/.test(emailOrUser)
-        ? { email: emailOrUser.trim() }
-        : { username: emailOrUser.trim() };
-      const res = await fetchJSON('/auth/request-reset', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        credentials: 'include'
-      });
-      if (!res?.ok) throw new Error('Reset request failed');
-      toast('If the account exists, a reset code was sent via email/SMS.');
-      const token = window.prompt('Enter the reset code you received (or leave blank to skip):');
-      if (!token) return;
-      const newPassword = window.prompt('Enter a new password (min 6 characters):');
-      if (!newPassword || newPassword.length < 6) {
-        toast('Password must be at least 6 characters.');
-        return;
-      }
-      const confirmPw = window.prompt('Confirm the new password:');
-      if (newPassword !== confirmPw) {
-        toast('Passwords did not match.');
-        return;
-      }
-      await submitPasswordReset(token.trim(), newPassword.trim());
-    } catch (err) {
-      console.error(err);
-      setMsg('Unable to request a reset right now. Please try again later.', false);
-    }
+    window.location.href = 'reset.html';
   }
 
   async function handleLoginSubmit(e) {
@@ -319,25 +288,6 @@
     msgDiv.className = '';
     msgDiv.removeAttribute('role');
     msgDiv.removeAttribute('aria-live');
-  }
-
-  async function submitPasswordReset(token, password) {
-    try {
-      const res = await fetchJSON('/auth/reset', {
-        method: 'POST',
-        body: JSON.stringify({ token, password }),
-        credentials: 'include'
-      });
-      if (res?.ok) {
-        toast('✅ Password reset! Please sign in with your new password.');
-        return true;
-      }
-      const data = await res?.json().catch(() => ({}));
-      setMsg(data?.error || 'Could not reset password. Please check the code and try again.', false);
-    } catch {
-      setMsg('Unable to reset the password right now. Please try again.', false);
-    }
-    return false;
   }
 
   async function fetchJSON(path, options = {}) {

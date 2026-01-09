@@ -122,6 +122,11 @@
             <span>Issue</span>
             <textarea id="repairIssue" name="issue" rows="3" placeholder="Describe the problem…" required aria-describedby="repairMsg"></textarea>
           </label>
+          <label class="field grid-span-3">
+            <span>Photos (optional)</span>
+            <input id="repairPhotos" name="photos" type="file" accept="image/*" multiple />
+            <small class="muted">Up to 4 images (max 2MB each).</small>
+          </label>
           <label class="field">
             <span>Address</span>
             <input id="repairAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required aria-describedby="repairMsg" />
@@ -151,6 +156,13 @@
     </section>
 
     <section class="dashboard-cards" aria-label="My activity">
+      <article class="dashboard-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem;">
+          <h3>Notifications</h3>
+          <button type="button" class="btn btn-ghost btn-small" id="notifMarkAll">Mark all read</button>
+        </div>
+        <ul id="myNotifications" class="submission-log" aria-live="polite"><li class="muted">Loading…</li></ul>
+      </article>
       <article class="dashboard-card">
         <h3>My Cleaning Requests</h3>
         <ul id="myCleaning" class="submission-log" aria-live="polite"><li class="muted">Loading…</li></ul>

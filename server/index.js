@@ -2,12 +2,15 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
+import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
+const uploadsRoot = path.join(root, 'uploads');
+const repairUploadDir = path.join(uploadsRoot, 'repairs');
 [
   path.join(root, '.env'),
   path.join(root, '.env.production'),
@@ -46,7 +49,7 @@ try {
   };
 }
 
-const { User, Request, CommunityPost, Session, PasswordResetToken, AuditLog } = models;
+const { User, Request, CommunityPost, Session, PasswordResetToken, Notification, AuditLog } = models;
 const app = express();
 const PORT = process.env.PORT || 5000;
 const isProd = process.env.NODE_ENV === 'production';
@@ -98,6 +101,7 @@ const cspDirectives = {
 const randomToken = (size = 32) => crypto.randomBytes(size).toString('hex');
 const hashToken = (token) => crypto.createHmac('sha256', SESSION_SECRET).update(token).digest('hex');
 const minutes = (ms) => Math.round(ms / 60000);
+const REQUEST_STATUSES = new Set(['open', 'in_progress', 'done']);
 
 const sendEmail = async (to, subject, body) => {
   if (!to) {
@@ -114,6 +118,33 @@ const sendSms = async (to, message) => {
   console.log(`\n📱 SMS to ${to}\n${message}\n`);
 };
 
+const ensureRepairUploadDir = async () => {
+  await fs.mkdir(repairUploadDir, { recursive: true });
+};
+
+const saveRepairPhotos = async (photos = []) => {
+  if (!Array.isArray(photos) || !photos.length) return [];
+  await ensureRepairUploadDir();
+  const allowed = new Set(['image/jpeg', 'image/png', 'image/webp']);
+  const saved = [];
+  for (const item of photos.slice(0, 4)) {
+    const dataUrl = item?.data || item?.dataUrl || '';
+    if (typeof dataUrl !== 'string') continue;
+    const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+    if (!match) continue;
+    const [, mime, b64] = match;
+    if (!allowed.has(mime)) continue;
+    const buffer = Buffer.from(b64, 'base64');
+    if (buffer.length > 2 * 1024 * 1024) continue;
+    const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
+    const name = `${Date.now()}-${randomToken(6)}.${ext}`;
+    const target = path.join(repairUploadDir, name);
+    await fs.writeFile(target, buffer);
+    saved.push(`/uploads/repairs/${name}`);
+  }
+  return saved;
+};
+
 const recordAudit = async (event, { userId = null, severity = 'info', metadata = {} } = {}, req = null) => {
   try {
     const ipAddress = req?.ip || null;
@@ -122,6 +153,32 @@ const recordAudit = async (event, { userId = null, severity = 'info', metadata =
   } catch (err) {
     console.error('Failed to write audit log', err);
   }
+};
+
+const createNotification = async (userId, { type, title, body = '', metadata = {} } = {}) => {
+  try {
+    if (!userId || !type || !title) return;
+    await Notification.create({ userId, type, title, body, metadata });
+  } catch (err) {
+    console.error('Failed to create notification', err);
+  }
+};
+
+const mapNotification = (n) => {
+  let metadata = n.metadata || {};
+  if (typeof metadata === 'string') {
+    try { metadata = JSON.parse(metadata); } catch { metadata = {}; }
+  }
+  return {
+    id: n.id,
+    userId: n.user_id || n.userId,
+    type: n.type,
+    title: n.title,
+    body: n.body,
+    metadata,
+    readAt: n.read_at || n.readAt || null,
+    createdAt: n.created_at || n.createdAt || null,
+  };
 };
 
 async function issuePasswordReset(user) {
@@ -160,20 +217,22 @@ if (isProd && FORCE_HTTPS) {
   });
 }
 app.use(morgan('dev'));
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: false, limit: '5mb' }));
 app.use(express.static(root, { index: false }));
+app.use('/uploads', express.static(path.join(root, 'uploads')));
 
 const rateBuckets = new Map();
-const rateLimit = (max = 100, windowMs = 60_000) => (req, res, next) => {
+const rateLimit = (max = 100, windowMs = 60_000, keyFn = (req) => req.ip) => (req, res, next) => {
   const now = Date.now();
-  const bucket = rateBuckets.get(req.ip) || { count: 0, reset: now + windowMs };
+  const key = keyFn(req) || req.ip;
+  const bucket = rateBuckets.get(key) || { count: 0, reset: now + windowMs };
   if (now > bucket.reset) {
     bucket.count = 0;
     bucket.reset = now + windowMs;
   }
   bucket.count += 1;
-  rateBuckets.set(req.ip, bucket);
+  rateBuckets.set(key, bucket);
   if (bucket.count > max) return res.status(429).json({ error: 'Too many requests, slow down.' });
   next();
 };
@@ -339,7 +398,12 @@ app.post('/api/auth/register', rateLimit(30, 60_000), asyncHandler(async (req, r
   res.status(201).json({ user: publicUser(user) });
 }));
 
-app.post('/api/auth/login', rateLimit(60, 60_000), asyncHandler(async (req, res) => {
+const loginRateKey = (req) => {
+  const user = (req.body?.username || '').toLowerCase().trim();
+  return `${req.ip}:${user || 'unknown'}`;
+};
+
+app.post('/api/auth/login', rateLimit(60, 60_000, loginRateKey), asyncHandler(async (req, res) => {
   const { username = '', password = '' } = req.body || {};
   const normalizedUsername = username.toLowerCase();
   const user = await User.findOne({ username: normalizedUsername });
@@ -373,6 +437,35 @@ app.post('/api/auth/logout-all', authRequired, csrfRequired, asyncHandler(async 
   res.json({ ok: true });
 }));
 
+app.get('/api/auth/sessions', authRequired, asyncHandler(async (req, res) => {
+  const sessions = await Session.findByUserId(req.user.id);
+  const currentSid = req.sessionRecord?.sid;
+  res.json({
+    sessions: sessions.map((s) => ({
+      sid: s.sid,
+      ipAddress: s.ipAddress,
+      userAgent: s.userAgent,
+      createdAt: s.createdAt,
+      lastSeen: s.lastSeen,
+      expiresAt: s.expiresAt,
+      current: s.sid === currentSid
+    }))
+  });
+}));
+
+app.post('/api/auth/sessions/revoke', authRequired, csrfRequired, asyncHandler(async (req, res) => {
+  const { sid = '' } = req.body || {};
+  if (!sid) return res.status(400).json({ error: 'Session id required' });
+  if (sid === req.sessionRecord?.sid) {
+    await clearSession(req, res);
+    await recordAudit('auth.session.revoked', { userId: req.user.id, metadata: { sid, current: true } }, req);
+    return res.json({ ok: true, current: true });
+  }
+  await Session.deleteOne({ sid });
+  await recordAudit('auth.session.revoked', { userId: req.user.id, metadata: { sid } }, req);
+  res.json({ ok: true });
+}));
+
 app.post('/api/auth/change-password', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { currentPassword = '', newPassword = '' } = req.body || {};
   if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Missing fields' });
@@ -385,7 +478,13 @@ app.post('/api/auth/change-password', authRequired, csrfRequired, asyncHandler(a
   res.json({ ok: true });
 }));
 
-app.post('/api/auth/request-reset', rateLimit(20, 60_000), asyncHandler(async (req, res) => {
+const resetRateKey = (req) => {
+  const email = (req.body?.email || '').toLowerCase().trim();
+  const user = (req.body?.username || '').toLowerCase().trim();
+  return `${req.ip}:${email || user || 'unknown'}`;
+};
+
+app.post('/api/auth/request-reset', rateLimit(20, 60_000, resetRateKey), asyncHandler(async (req, res) => {
   const { email = '', username = '' } = req.body || {};
   const emailTrim = email.trim();
   const usernameTrim = username.trim().toLowerCase();
@@ -433,6 +532,24 @@ app.get('/api/security/audit', authRequired, requireRole('landlord'), asyncHandl
   res.json({ logs });
 }));
 
+app.get('/api/notifications', authRequired, asyncHandler(async (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 40, 5), 200);
+  const unreadOnly = String(req.query.unread || '').toLowerCase() === 'true';
+  const list = await Notification.findByUserId(req.user.id, { limit, unreadOnly });
+  res.json({ notifications: list.map(mapNotification) });
+}));
+
+app.post('/api/notifications/read', authRequired, csrfRequired, asyncHandler(async (req, res) => {
+  const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+  await Notification.markRead(req.user.id, ids.map((id) => Number(id)).filter((id) => Number.isFinite(id)));
+  res.json({ ok: true });
+}));
+
+app.post('/api/notifications/read-all', authRequired, csrfRequired, asyncHandler(async (req, res) => {
+  await Notification.markAllRead(req.user.id);
+  res.json({ ok: true });
+}));
+
 // Profile & settings
 app.post('/api/profile/about', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { displayName = '', unit = '', bio = '' } = req.body || {};
@@ -466,30 +583,65 @@ app.get('/api/profile/activity', authRequired, asyncHandler(async (req, res) => 
   const userId = req.user.id;
   const userReqs = await Request.find({ userId });
   const userPosts = await CommunityPost.find({ userId });
-  res.json({ requests: userReqs, posts: userPosts });
+  const notifications = await Notification.findByUserId(userId, { limit: 20 });
+  res.json({ requests: userReqs, posts: userPosts, notifications: notifications.map(mapNotification) });
 }));
 
 app.post('/api/forms/cleaning', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { name = req.user.username, address = '', date = '', type = '' } = req.body || {};
   const err = requireFields({ address, date, type }, { address: { min: 3 }, date: { min: 2 }, type: { min: 2 } });
   if (err) return res.status(400).json({ error: err });
-  const rec = await Request.create({ userId: req.user.id, type: 'cleaning', name, address, date, cleaningType: type });
+  const rec = await Request.create({ userId: req.user.id, type: 'cleaning', name, address, date, cleaningType: type, status: 'open', statusUpdatedAt: new Date() });
   req.user.stats.requests = (req.user.stats.requests || 0) + 1;
   await req.user.save();
+  await createNotification(req.user.id, {
+    type: 'request_created',
+    title: 'Cleaning request submitted',
+    body: `${type} • ${address}`,
+    metadata: { requestId: rec.id, requestType: 'cleaning' }
+  });
+  const landlords = await User.findAll({ role: 'landlord' });
+  await Promise.all(landlords.map((l) => createNotification(l.id, {
+    type: 'request_created',
+    title: 'New cleaning request',
+    body: `${name} • ${address}`,
+    metadata: { requestId: rec.id, requestType: 'cleaning' }
+  })));
   res.status(201).json(rec);
 }));
 app.post('/api/forms/repairs', authRequired, csrfRequired, asyncHandler(async (req, res) => {
-  const { name = req.user.username, address = '', issue = '' } = req.body || {};
+  const { name = req.user.username, address = '', issue = '', photos = [] } = req.body || {};
   const err = requireFields({ address, issue }, { address: { min: 3 }, issue: { min: 3 } });
   if (err) return res.status(400).json({ error: err });
-  const rec = await Request.create({ userId: req.user.id, type: 'repair', name, address, issue });
+  const savedPhotos = await saveRepairPhotos(Array.isArray(photos) ? photos : []);
+  const rec = await Request.create({ userId: req.user.id, type: 'repair', name, address, issue, status: 'open', statusUpdatedAt: new Date(), photos: savedPhotos });
   req.user.stats.requests = (req.user.stats.requests || 0) + 1;
   await req.user.save();
+  await createNotification(req.user.id, {
+    type: 'request_created',
+    title: 'Repair request submitted',
+    body: issue.slice(0, 140),
+    metadata: { requestId: rec.id, requestType: 'repair' }
+  });
+  const landlords = await User.findAll({ role: 'landlord' });
+  await Promise.all(landlords.map((l) => createNotification(l.id, {
+    type: 'request_created',
+    title: 'New repair request',
+    body: `${name} • ${address}`,
+    metadata: { requestId: rec.id, requestType: 'repair' }
+  })));
   res.status(201).json(rec);
 }));
 app.post('/api/forms/message', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { message = '' } = req.body || {};
   const rec = await Request.create({ userId: req.user.id, type: 'message', name: req.user.username, message });
+  const landlords = await User.findAll({ role: 'landlord' });
+  await Promise.all(landlords.map((l) => createNotification(l.id, {
+    type: 'community_post',
+    title: 'New community message',
+    body: message.slice(0, 140),
+    metadata: { requestId: rec.id, requestType: 'message' }
+  })));
   res.status(201).json(rec);
 }));
 app.get('/api/requests', authRequired, asyncHandler(async (req, res) => {
@@ -500,6 +652,24 @@ app.get('/api/requests', authRequired, asyncHandler(async (req, res) => {
     await recordAudit('requests.view.self', { userId: req.user.id }, req);
   }
   res.json(list);
+}));
+
+app.post('/api/requests/:id/status', authRequired, requireRole('landlord'), csrfRequired, asyncHandler(async (req, res) => {
+  const { status = '' } = req.body || {};
+  const normalized = String(status || '').toLowerCase().trim();
+  if (!REQUEST_STATUSES.has(normalized)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  const updated = await Request.updateStatus(req.params.id, normalized);
+  if (!updated) return res.status(404).json({ error: 'Request not found' });
+  await createNotification(updated.userId, {
+    type: 'request_status',
+    title: 'Request status updated',
+    body: `Your ${updated.type} request is now ${normalized.replace('_', ' ')}.`,
+    metadata: { requestId: updated.id, status: normalized }
+  });
+  await recordAudit('requests.status.updated', { userId: req.user.id, metadata: { requestId: updated.id, status: normalized } }, req);
+  res.json(updated);
 }));
 
 app.get('/api/community', authRequired, asyncHandler(async (req, res) => {
@@ -517,6 +687,13 @@ app.post('/api/community', authRequired, csrfRequired, asyncHandler(async (req, 
   });
   req.user.stats.posts = (req.user.stats.posts || 0) + 1;
   await req.user.save();
+  const landlords = await User.findAll({ role: 'landlord' });
+  await Promise.all(landlords.map((l) => createNotification(l.id, {
+    type: 'community_post',
+    title: 'New community post',
+    body: message.slice(0, 140),
+    metadata: { postId: post.id }
+  })));
   res.status(201).json(post);
 }));
 app.post('/api/community/:id/comments', authRequired, csrfRequired, asyncHandler(async (req, res) => {
@@ -526,6 +703,14 @@ app.post('/api/community/:id/comments', authRequired, csrfRequired, asyncHandler
   if (!message.trim()) return res.status(400).json({ error: 'Message required' });
   post.comments.unshift({ author: req.user.profile?.displayName || req.user.username, message });
   await post.save();
+  if (post.userId && post.userId !== req.user.id) {
+    await createNotification(post.userId, {
+      type: 'community_comment',
+      title: 'New comment on your post',
+      body: message.slice(0, 140),
+      metadata: { postId: post.id }
+    });
+  }
   res.status(201).json(post.comments[0]);
 }));
 
@@ -539,6 +724,7 @@ app.get('/', asyncHandler(async (req, res) => {
 }));
 app.get('/login', (req, res) => send(res, 'login.html'));
 app.get('/register', (req, res) => send(res, 'register.html'));
+app.get('/reset', (req, res) => send(res, 'reset.html'));
 
 app.get('/resident', async (req, res) => {
   const user = await getUserFromReq(req);

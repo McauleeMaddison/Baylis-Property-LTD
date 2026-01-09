@@ -187,6 +187,16 @@
             <button type="button" class="btn btn-ghost" id="signOutAllBtn">Sign out of all devices</button>
           </div>
 
+          <div style="margin-top:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem; flex-wrap:wrap;">
+              <p class="muted" style="margin:0;">Active sessions</p>
+              <button type="button" class="btn btn-ghost btn-small" id="sessionRefreshBtn">Refresh</button>
+            </div>
+            <ul id="sessionList" class="submission-log" aria-live="polite">
+              <li class="muted">Loading…</li>
+            </ul>
+          </div>
+
           <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem;">
             <button type="button" class="btn secondary" id="exportDataBtn">Export my data</button>
             <button type="button" class="btn secondary" id="clearLocalBtn">Clear local data</button>

@@ -24,6 +24,9 @@ await db.query(`CREATE TABLE IF NOT EXISTS requests (
   cleaning_type VARCHAR(255),
   date VARCHAR(255),
   message TEXT,
+  status VARCHAR(50) NOT NULL DEFAULT 'open',
+  status_updated_at TIMESTAMP NULL DEFAULT NULL,
+  photos JSON DEFAULT (JSON_ARRAY()),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )`);
 
@@ -62,6 +65,19 @@ await db.query(`CREATE TABLE IF NOT EXISTS password_resets (
   used TINYINT(1) DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_password_resets_user (user_id)
+)`);
+
+await db.query(`CREATE TABLE IF NOT EXISTS notifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  body TEXT,
+  metadata JSON DEFAULT (JSON_OBJECT()),
+  read_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_notifications_user (user_id),
+  INDEX idx_notifications_read (read_at)
 )`);
 
 console.log('MySQL tables created/verified.');

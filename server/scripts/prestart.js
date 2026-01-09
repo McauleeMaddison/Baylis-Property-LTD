@@ -27,23 +27,37 @@ if (missing.length) {
 }
 
 const migratePath = path.join(serverRoot, 'migrate.js');
-const sqlPath = path.join(serverRoot, '..', 'migrations', '0001_init.sql');
+const migrations = [
+  '0001_init.sql',
+  '0002_security.sql',
+  '0003_drop_otp_challenges.sql',
+  '0004_request_status.sql',
+  '0005_notifications.sql',
+];
 
-const child = spawn(process.execPath, [migratePath, sqlPath], {
-  stdio: 'inherit',
-  cwd: serverRoot,
+const runMigration = (file) => new Promise((resolve) => {
+  const sqlPath = path.join(serverRoot, '..', 'migrations', file);
+  const child = spawn(process.execPath, [migratePath, sqlPath], {
+    stdio: 'inherit',
+    cwd: serverRoot,
+  });
+  child.on('error', (err) => {
+    console.warn(`[prestart] Migration spawn error: ${err.message || err}`);
+    resolve(false);
+  });
+  child.on('exit', (code) => {
+    if (code && code !== 0) {
+      console.warn(`[prestart] Migration failed (${file}) with code ${code}. Continuing startup (using existing schema). Verify DB credentials/SSL and rerun migrations when ready.`);
+      resolve(false);
+    } else {
+      resolve(true);
+    }
+  });
 });
 
-child.on('error', (err) => {
-  console.warn(`[prestart] Migration spawn error: ${err.message || err}`);
-  process.exit(0);
-});
-
-child.on('exit', (code) => {
-  if (code && code !== 0) {
-    console.warn(`[prestart] Migration failed with code ${code}. Continuing startup (using existing schema). Verify DB credentials/SSL and rerun migrations when ready.`);
-    process.exit(0);
-  } else {
-    process.exit(0);
-  }
-});
+let ok = true;
+for (const file of migrations) {
+  const result = await runMigration(file);
+  if (!result) ok = false;
+}
+process.exit(ok ? 0 : 0);
