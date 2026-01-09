@@ -13,3 +13,4 @@ build/
 coverage/
 server/.env
 server/.env.production
+uploads/
