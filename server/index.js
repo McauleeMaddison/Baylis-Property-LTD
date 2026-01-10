@@ -263,15 +263,25 @@ async function getActiveSession(req) {
   if (req.sessionRecord) return req.sessionRecord;
   const sid = parseCookies(req)[SESSION_COOKIE];
   if (!sid) return null;
-  const session = await Session.findBySid(sid);
+  let session;
+  try {
+    session = await Session.findBySid(sid);
+  } catch (err) {
+    console.warn('⚠️  Session lookup failed (DB unavailable):', err.code || err.message || err);
+    return null;
+  }
   if (!session) return null;
   const now = Date.now();
   if (session.expiresAt && session.expiresAt.getTime() <= now) {
-    await Session.deleteOne({ sid });
+    try { await Session.deleteOne({ sid }); } catch (err) {
+      console.warn('⚠️  Session cleanup failed (DB unavailable):', err.code || err.message || err);
+    }
     return null;
   }
   const nextExpiry = new Date(now + SESSION_TTL_MS);
-  await Session.touch(sid, nextExpiry);
+  try { await Session.touch(sid, nextExpiry); } catch (err) {
+    console.warn('⚠️  Session touch failed (DB unavailable):', err.code || err.message || err);
+  }
   const hydrated = { ...session, sid };
   req.sessionRecord = hydrated;
   return hydrated;
@@ -313,9 +323,17 @@ async function clearSession(req, res) {
 async function getUserFromReq(req) {
   const session = await getActiveSession(req);
   if (!session) return null;
-  const user = await User.findById(session.userId);
+  let user;
+  try {
+    user = await User.findById(session.userId);
+  } catch (err) {
+    console.warn('⚠️  User lookup failed (DB unavailable):', err.code || err.message || err);
+    return null;
+  }
   if (!user) {
-    await Session.deleteOne({ sid: session.sid });
+    try { await Session.deleteOne({ sid: session.sid }); } catch (err) {
+      console.warn('⚠️  Session delete failed (DB unavailable):', err.code || err.message || err);
+    }
     return null;
   }
   return user;
@@ -777,6 +795,11 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  const code = err?.code;
+  if (code === 'PROTOCOL_CONNECTION_LOST' || code === 'ECONNRESET' || code === 'ETIMEDOUT' || code === 'EPIPE') {
+    console.error('DB connection error:', err);
+    return res.status(503).json({ error: 'Database unavailable' });
+  }
   console.error(err);
   res.status(500).json({ error: 'Server error' });
 });

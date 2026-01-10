@@ -117,6 +117,26 @@ const poolConfig = {
 
 export const db = mysql.createPool(poolConfig);
 
+const transientErrors = new Set([
+  "PROTOCOL_CONNECTION_LOST",
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "EPIPE",
+]);
+
+const originalQuery = db.query.bind(db);
+db.query = async (...args) => {
+  try {
+    return await originalQuery(...args);
+  } catch (err) {
+    if (err && transientErrors.has(err.code)) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      return originalQuery(...args);
+    }
+    throw err;
+  }
+};
+
 export const pingDb = async () => {
   const [rows] = await db.query("SELECT 1 AS ok");
   return rows?.[0]?.ok === 1;
