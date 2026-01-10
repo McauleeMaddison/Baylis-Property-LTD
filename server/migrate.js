@@ -22,15 +22,39 @@ const parsePort = (value) => {
   return Number.isFinite(port) && port > 0 ? port : 3306;
 };
 
-const host = process.env.MYSQL_HOST || "127.0.0.1";
-const sslMode = (process.env.MYSQL_SSL || (host.includes("proxy.rlwy.net") ? "skip-verify" : "")).toLowerCase();
-const connConfig = {
-  host,
-  port: parsePort(process.env.MYSQL_PORT),
-  user: process.env.MYSQL_USER || "root",
-  password: process.env.MYSQL_PASSWORD || "",
-  database: process.env.MYSQL_DATABASE || "railway",
+const pickEnv = (...keys) => {
+  for (const key of keys) {
+    if (process.env[key] && process.env[key] !== "CHANGE_ME") return process.env[key];
+  }
+  return "";
 };
+
+const urlValue = process.env.DATABASE_URL || process.env.MYSQL_URL || process.env.MYSQL_CONNECTION_URL || "";
+const hasUrl = Boolean(urlValue);
+
+const connConfig = {
+  host: pickEnv("MYSQL_HOST", "MYSQLHOST") || "127.0.0.1",
+  port: parsePort(pickEnv("MYSQL_PORT", "MYSQLPORT")),
+  user: pickEnv("MYSQL_USER", "MYSQLUSER") || "root",
+  password: pickEnv("MYSQL_PASSWORD", "MYSQLPASSWORD") || "",
+  database: pickEnv("MYSQL_DATABASE", "MYSQLDATABASE") || "railway",
+};
+
+if (hasUrl) {
+  try {
+    const parsed = new URL(urlValue);
+    connConfig.host = parsed.hostname;
+    connConfig.port = parsePort(parsed.port || pickEnv("MYSQL_PORT", "MYSQLPORT"));
+    connConfig.user = decodeURIComponent(parsed.username || "");
+    connConfig.password = decodeURIComponent(parsed.password || "");
+    connConfig.database = parsed.pathname.replace(/^\/+/, "");
+  } catch (err) {
+    console.warn(`⚠️  Invalid DATABASE_URL/MYSQL_URL: ${err.message}`);
+  }
+}
+
+const sslRaw = (process.env.MYSQL_SSL || "").toLowerCase();
+const sslMode = sslRaw || (connConfig.host.includes("proxy.rlwy.net") ? "skip-verify" : "");
 if (sslMode === "skip-verify") {
   connConfig.ssl = { rejectUnauthorized: false };
 } else if (sslMode === "true" || sslMode === "required" || sslMode === "enable") {

@@ -70,7 +70,15 @@ if (!process.env.SESSION_SECRET) {
   console.warn('⚠️  SESSION_SECRET not set. Using fallback "change-me" secret. Configure a strong SESSION_SECRET in production.');
 }
 
-await seedDemoUsers();
+const seedEnabled = process.env.SEED_DEMO_USERS === 'true'
+  || (!isProd && process.env.SEED_DEMO_USERS !== 'false');
+if (seedEnabled) {
+  try {
+    await seedDemoUsers();
+  } catch (err) {
+    console.warn('⚠️  seedDemoUsers skipped due to DB error:', err.message || err);
+  }
+}
 
 const sessionCookieOptions = {
   httpOnly: true,
