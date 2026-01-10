@@ -76,16 +76,24 @@ const sqlPath = path.isAbsolute(argv[0])
 
 async function runMigration(file) {
   const sql = fs.readFileSync(file, "utf8");
+  let conn;
   try {
-    const conn = await mysql.createConnection({ ...connConfig, multipleStatements: true });
+    conn = await mysql.createConnection({ ...connConfig, multipleStatements: true });
     console.log(
       `Running migration ${path.basename(file)} against ${connConfig.host}:${connConfig.port}`
     );
     await conn.query(sql);
-    await conn.end();
     console.log("Migration complete");
   } catch (err) {
     console.warn(`[migrate] Failed to run migration (${err.code || err.message}). Skipping so deploy can proceed; verify DB creds/SSL and rerun when ready.`);
+  } finally {
+    if (conn) {
+      try {
+        await conn.end();
+      } catch (closeErr) {
+        console.warn(`[migrate] Failed to close DB connection: ${closeErr.message || closeErr}`);
+      }
+    }
   }
 }
 
