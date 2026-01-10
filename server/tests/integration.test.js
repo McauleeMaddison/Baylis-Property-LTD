@@ -1,6 +1,5 @@
-import request from 'supertest';
 import app from '../index.js';
-import { cleanupUser, authedPost, closeDbConnection } from './testUtils.js';
+import { cleanupUser, authedPost, closeDbConnection, createTestAgent } from './testUtils.js';
 
 describe('Integration: profile, community, requests', () => {
   const username = `itest_${Date.now()}`;
@@ -9,9 +8,12 @@ describe('Integration: profile, community, requests', () => {
   const role = 'resident';
   let agent;
   let userId;
+  let closeServer;
 
   beforeAll(async () => {
-    agent = request.agent(app);
+    const setup = await createTestAgent(app);
+    agent = setup.agent;
+    closeServer = setup.close;
     const res = await agent.post('/api/auth/register').send({ username, password, email, role });
     expect(res.statusCode).toBe(201);
     userId = res.body.user.id;
@@ -53,6 +55,9 @@ describe('Integration: profile, community, requests', () => {
 
   afterAll(async () => {
     await cleanupUser(userId);
+    if (closeServer) {
+      await closeServer();
+    }
     await closeDbConnection();
   });
 });

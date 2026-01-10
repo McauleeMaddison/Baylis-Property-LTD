@@ -1,16 +1,21 @@
-import request from 'supertest';
 import app from '../index.js';
-import { cleanupUser, closeDbConnection } from './testUtils.js';
+import { cleanupUser, closeDbConnection, createTestAgent } from './testUtils.js';
 
 describe('Smoke: registration and login', () => {
   const password = 'smokepass123';
   let agent;
   let userIds = [];
+  let closeServer;
+
+  beforeAll(async () => {
+    const setup = await createTestAgent(app);
+    agent = setup.agent;
+    closeServer = setup.close;
+  });
 
   test(
     'registers and logs in for resident and landlord',
     async () => {
-      agent = request.agent(app);
       const roles = ['resident', 'landlord'];
       for (const role of roles) {
         const stamp = Date.now();
@@ -32,6 +37,9 @@ describe('Smoke: registration and login', () => {
   afterAll(async () => {
     for (const id of userIds) {
       await cleanupUser(id);
+    }
+    if (closeServer) {
+      await closeServer();
     }
     await closeDbConnection();
   });

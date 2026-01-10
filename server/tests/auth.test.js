@@ -1,6 +1,5 @@
-import request from 'supertest';
 import app from '../index.js';
-import { closeDbConnection } from './testUtils.js';
+import { closeDbConnection, createTestAgent } from './testUtils.js';
 
 describe('Auth endpoints', () => {
   const username = `testuser_${Date.now()}`;
@@ -8,11 +7,17 @@ describe('Auth endpoints', () => {
   const email = `testuser_${Date.now()}@example.com`;
   const role = 'resident';
   let agent;
+  let closeServer;
+
+  beforeAll(async () => {
+    const setup = await createTestAgent(app);
+    agent = setup.agent;
+    closeServer = setup.close;
+  });
 
   test(
     'registers a new user',
     async () => {
-      agent = request.agent(app);
       const res = await agent.post('/api/auth/register').send({ username, password, email, role });
       expect(res.statusCode).toBe(201);
       expect(res.body).toHaveProperty('user');
@@ -33,6 +38,9 @@ describe('Auth endpoints', () => {
   );
 
   afterAll(async () => {
+    if (closeServer) {
+      await closeServer();
+    }
     await closeDbConnection();
   });
 });

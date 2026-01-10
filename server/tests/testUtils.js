@@ -1,3 +1,5 @@
+import request from 'supertest';
+
 let db = null;
 if (process.env.USE_INMEMORY_DB === 'true') {
   // In-memory mode for fast local/Jest runs.
@@ -44,4 +46,11 @@ export async function closeDbConnection() {
   } catch (err) {
     console.error('closeDbConnection error', err.message || err);
   }
+}
+
+export async function createTestAgent(app) {
+  const server = app.listen(0, '127.0.0.1');
+  const agent = request.agent(server);
+  const close = () => new Promise((resolve) => server.close(resolve));
+  return { agent, close };
 }
