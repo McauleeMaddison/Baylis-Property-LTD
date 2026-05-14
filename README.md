@@ -31,9 +31,9 @@ Features
 - **Role-based portals** – dedicated dashboards for residents and landlords, including request summaries and contextual navigation.
 - **Secure auth** – password hashing, CSRF protection, session management, and rate limiting.
 - **Request workflows** – submit and monitor cleaning/repair/community forms with toast notifications and local persistence.
-- **Profile & settings** – update contact details, communication preferences, dark mode/accent themes, and logout-all functionality.
+- **Profile & settings** – update contact details, communication preferences, dark mode preferences, and logout-all functionality.
 - **Community hub** – post announcements, comment, like, and filter/paginate threads.
-- **Responsive UI** – mobile-friendly layout with dark/light modes, accessible focus states, and accent theming.
+- **Responsive UI** – mobile-friendly layout with dark/light modes and accessible focus states.
 
 Technology Stack
 ----------------

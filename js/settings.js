@@ -14,7 +14,6 @@
     const timeFormat = $("#timeFormat");
 
     const darkModeSetting = $("#darkModeSetting");
-    const accentColor = $("#accentColor");
     const uiDensity = $("#uiDensity");
     const baseFontSize = $("#baseFontSize");
     const cornerRadius = $("#cornerRadius");
@@ -49,7 +48,6 @@
       },
       appearance: {
         darkMode: localStorage.getItem("darkMode") === "true",
-        accentColor: "#d4af37",
         uiDensity: "comfortable",
         baseFontSize: 16,
         cornerRadius: 12
@@ -69,10 +67,6 @@
     hydrateForm(settings);
     applySettings(settings, { persist: false, preview: true });
 
-    accentColor?.addEventListener("input", () => {
-      settings.appearance.accentColor = accentColor.value || DEFAULTS.appearance.accentColor;
-      applySettings(settings, { persist: false, preview: true });
-    });
     baseFontSize?.addEventListener("change", () => {
       settings.appearance.baseFontSize = clamp(parseInt(baseFontSize.value, 10) || DEFAULTS.appearance.baseFontSize, 12, 22);
       applySettings(settings, { persist: false, preview: true });
@@ -214,14 +208,22 @@
         const raw = localStorage.getItem("appSettings");
         if (!raw) return structuredClone(defaults);
         const parsed = JSON.parse(raw);
-        return deepMerge(structuredClone(defaults), parsed);
+        const merged = deepMerge(structuredClone(defaults), parsed);
+        if (merged?.appearance && Object.prototype.hasOwnProperty.call(merged.appearance, "accentColor")) {
+          delete merged.appearance.accentColor;
+        }
+        return merged;
       } catch {
         return structuredClone(defaults);
       }
     }
 
     function saveSettings(data) {
-      try { localStorage.setItem("appSettings", JSON.stringify(data)); } catch {}
+      const clean = structuredClone(data);
+      if (clean?.appearance && Object.prototype.hasOwnProperty.call(clean.appearance, "accentColor")) {
+        delete clean.appearance.accentColor;
+      }
+      try { localStorage.setItem("appSettings", JSON.stringify(clean)); } catch {}
       try { localStorage.setItem("darkMode", data.appearance.darkMode ? "true" : "false"); } catch {}
     }
 
@@ -231,7 +233,6 @@
       if (timeFormat) timeFormat.value = data.general.timeFormat;
 
       if (darkModeSetting) darkModeSetting.checked = !!data.appearance.darkMode;
-      if (accentColor) accentColor.value = data.appearance.accentColor;
       if (uiDensity) uiDensity.value = data.appearance.uiDensity;
       if (baseFontSize) baseFontSize.value = String(data.appearance.baseFontSize);
       if (cornerRadius) cornerRadius.value = String(data.appearance.cornerRadius);
@@ -252,7 +253,6 @@
       if (timeFormat) out.general.timeFormat = timeFormat.value || DEFAULTS.general.timeFormat;
 
       if (darkModeSetting) out.appearance.darkMode = !!darkModeSetting.checked;
-      if (accentColor) out.appearance.accentColor = accentColor.value || DEFAULTS.appearance.accentColor;
       if (uiDensity) out.appearance.uiDensity = uiDensity.value || DEFAULTS.appearance.uiDensity;
       if (baseFontSize) out.appearance.baseFontSize = clamp(parseInt(baseFontSize.value, 10) || DEFAULTS.appearance.baseFontSize, 12, 22);
       if (cornerRadius) out.appearance.cornerRadius = clamp(parseInt(cornerRadius.value, 10) || DEFAULTS.appearance.cornerRadius, 6, 24);
@@ -271,21 +271,11 @@
       headerDarkIcon && (headerDarkIcon.textContent = data.appearance.darkMode ? "🌙" : "🌞");
       if (persist) localStorage.setItem("darkMode", data.appearance.darkMode ? "true" : "false");
 
-      setAccentColor(data.appearance.accentColor);
       document.documentElement.setAttribute("data-density", data.appearance.uiDensity || "comfortable");
       document.documentElement.style.fontSize = `${data.appearance.baseFontSize}px`;
       document.documentElement.style.setProperty("--radius", `${data.appearance.cornerRadius}px`);
 
       if (preview) pulsePreviewButtons();
-    }
-
-    function setAccentColor(color) {
-      const hex = normalizeHex(color || DEFAULTS.appearance.accentColor);
-      const darker = shadeHex(hex, -15);
-      document.documentElement.style.setProperty("--secondary", hex);
-      document.documentElement.style.setProperty("--secondary-600", darker);
-      document.documentElement.style.setProperty("--accent-soft-bg", hex + "22");
-      document.documentElement.style.setProperty("--accent-soft-bd", hex + "44");
     }
 
     function pulsePreviewButtons() {
@@ -400,27 +390,6 @@
 
   function clamp(val, min, max) {
     return Math.min(Math.max(val, min), max);
-  }
-
-  function normalizeHex(hex) {
-    const value = String(hex || "").trim();
-    if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) return value;
-    return "#d4af37";
-  }
-
-  function shadeHex(hex, percent) {
-    const value = hex.replace("#", "");
-    const num = parseInt(value.length === 3 ? value.split("").map(ch => ch + ch).join("") : value, 16);
-    const amt = Math.round(2.55 * percent);
-    const r = (num >> 16) + amt;
-    const g = ((num >> 8) & 0x00ff) + amt;
-    const b = (num & 0x0000ff) + amt;
-    return "#" + (
-      0x1000000 +
-      (r < 255 ? (r < 0 ? 0 : r) : 255) * 0x10000 +
-      (g < 255 ? (g < 0 ? 0 : g) : 255) * 0x100 +
-      (b < 255 ? (b < 0 ? 0 : b) : 255)
-    ).toString(16).slice(1);
   }
 
   function downloadJSON(obj, filename) {

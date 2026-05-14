@@ -45,7 +45,6 @@
     var $$ = function (sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); };
     var on = function (el, ev, fn, opts) { el && el.addEventListener(ev, fn, opts); };
 
-    var root            = document.documentElement;
     var header          = $("#mainHeader");
     var navWrapper      = $(".nav-inner");
     var hamburgerBtn    = document.querySelector("[data-hamb]");
@@ -163,24 +162,10 @@
       darkToggle.checked = darkEnabled;
       on(darkToggle, "change", function () { updateDarkMode(darkToggle.checked); });
     }
-
-    var applyAccent = function (value) {
-      var name = value || "blue";
-      root.setAttribute("data-accent", name);
-      try { localStorage.setItem("accent", name); } catch (_) {}
-    };
-    applyAccent(localStorage.getItem("accent") || "blue");
-    $$("[data-accent-option]").forEach(function (btn) {
-      on(btn, "click", function () {
-        var choice = btn.getAttribute("data-accent-option");
-        applyAccent(choice);
-        window.showToast && window.showToast("🎨 Accent set to " + choice);
-      });
-    });
+    try { localStorage.removeItem("accent"); } catch (_) {}
 
     on(window, "storage", function (event) {
       if (event.key === "darkMode") updateDarkMode(event.newValue === "true");
-      if (event.key === "accent") applyAccent(event.newValue || "blue");
     });
 
     if (header) {

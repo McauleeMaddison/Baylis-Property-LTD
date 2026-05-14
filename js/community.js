@@ -26,21 +26,7 @@
     posts: [],
     filtered: [],
     page: 1,
-    accent: localStorage.getItem("accent") || "blue",
   };
-
-  const accentMap = {
-    blue: "#72a4ff",
-    teal: "#2dd4bf",
-    violet: "#a78bfa",
-  };
-
-  function applyAccent(name) {
-    const color = accentMap[name] || accentMap.blue;
-    document.documentElement.style.setProperty("--brand", color);
-    state.accent = name;
-    localStorage.setItem("accent", name);
-  }
 
   function getCsrfToken() {
     const match = document.cookie.match(/(?:^|;)\s*csrfToken=([^;]+)/);
@@ -274,14 +260,10 @@
       event.target.value = "";
       warnImportDisabled();
     });
-    document.querySelectorAll("[data-accent-option]")?.forEach((btn) => {
-      btn.addEventListener("click", () => applyAccent(btn.dataset.accentOption || "blue"));
-    });
   }
 
   async function boot() {
     try {
-      applyAccent(state.accent);
       await ensureUser();
       await ensureCsrfToken();
       bindEvents();

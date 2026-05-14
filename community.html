@@ -63,20 +63,20 @@
     <section class="dashboard-card">
       <div class="community-hero">
         <div>
-          <h1 class="h1">Community</h1>
-          <p class="muted">Share updates, ask questions, and connect with your neighbours.</p>
+          <p class="eyebrow">Resident and Landlord Workspace</p>
+          <h1 class="h1">Community Notices</h1>
+          <p class="muted">Centralise day-to-day updates, service notices, and resident questions in one professional channel.</p>
         </div>
-        <div class="hero-actions">
-          <button class="btn-chip" type="button" data-accent-option="blue" title="Accent: Blue">Blue</button>
-          <button class="btn-chip" type="button" data-accent-option="teal" title="Accent: Teal">Teal</button>
-          <button class="btn-chip" type="button" data-accent-option="violet" title="Accent: Violet">Violet</button>
+        <div class="hero-actions hero-actions--meta">
+          <p class="hero-meta"><span>Audience</span><strong>Residents + Landlords</strong></p>
+          <p class="hero-meta"><span>Purpose</span><strong>Operational communication</strong></p>
         </div>
       </div>
     </section>
 
     <section class="dashboard-card" aria-label="Filters">
       <div class="filters-row">
-        <input id="postSearch" type="search" placeholder="Search posts by title, message, or author…" aria-label="Search posts" />
+        <input id="postSearch" type="search" placeholder="Search by title, message, or author" aria-label="Search posts" />
         <select id="postSort" title="Sort posts">
           <option value="newest">Newest</option>
           <option value="oldest">Oldest</option>
@@ -85,8 +85,8 @@
         </select>
         <label class="checkbox"><input id="filterMine" type="checkbox" /> <span>Mine only</span></label>
         <label class="checkbox"><input id="filterPinnedOnly" type="checkbox" /> <span>Pinned only</span></label>
-        <button id="exportCommunityBtn" class="btn secondary" type="button">Export</button>
-        <button class="btn secondary" type="button" onclick="document.getElementById('importCommunityInput').click()">Import</button>
+        <button id="exportCommunityBtn" class="btn secondary" type="button">Export JSON</button>
+        <button class="btn secondary" type="button" onclick="document.getElementById('importCommunityInput').click()">Import JSON</button>
         <input id="importCommunityInput" type="file" accept="application/json" class="sr-only" title="Import community data" />
       </div>
     </section>
@@ -96,11 +96,11 @@
         <div class="grid-2">
           <label class="field">
             <span>Title <small class="muted">(optional)</small></span>
-            <input id="postTitle" type="text" placeholder="e.g. Lost parcel? Cleaner recommendation?" maxlength="120" />
+            <input id="postTitle" type="text" placeholder="e.g. Lift maintenance on Friday" maxlength="120" />
           </label>
           <label class="field">
             <span>Message</span>
-            <textarea id="postMessage" placeholder="Write your message for the community…" required rows="4"></textarea>
+            <textarea id="postMessage" placeholder="Write a clear operational update for residents and landlords." required rows="4"></textarea>
           </label>
         </div>
         <div>
