@@ -14,17 +14,6 @@
   <script defer src="js/settings.js"></script>
   <link rel="prefetch" href="index.html" />
   <link rel="prefetch" href="profile.html" />
-
-  <style>
-    .settings-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
-    .chip-row { display:flex; gap:.5rem; flex-wrap:wrap; margin: .75rem 0 1rem; }
-    .chip-row .btn-chip { border:1px solid var(--border); border-radius: var(--radius-full); padding:.4rem .75rem; background:transparent; }
-    .twofa-panel { margin-top:1rem; border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-4); background: var(--bg-light); box-shadow: var(--shadow); }
-    .twofa-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
-    .twofa-flow { margin-top:1rem; border:1px dashed var(--accent-soft-bd); border-radius: var(--radius-2xs); padding: var(--space-3); background: var(--bg); }
-    .twofa-flow-actions { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem; }
-    .text-small { font-size: var(--fs-14); }
-  </style>
 </head>
 <body class="page page--settings" data-required-role="resident,landlord" data-api-base="/api">
   <a class="skip-link" href="#content">Skip to main content</a>
@@ -66,7 +55,7 @@
     </nav>
   </header>
 
-  <main role="main" id="content" class="container" tabindex="-1" style="margin-top:1rem;">
+  <main role="main" id="content" class="container page-main" tabindex="-1">
     <header class="header">
       <h1 class="h1">Settings</h1>
       <p class="muted">Tune your experience. Changes to appearance are previewed live.</p>
@@ -81,7 +70,7 @@
 
     <section class="dashboard-card" id="previewCard">
       <p class="muted">Buttons and surfaces reflect your appearance choices below.</p>
-      <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.4rem;">
+      <div class="form-actions">
         <button class="btn" id="previewBtnPrimary">Primary</button>
         <button class="btn btn-ghost" id="previewBtnGhost">Ghost</button>
       </div>
@@ -93,12 +82,12 @@
           <h2 class="h3">General</h2>
           <p class="muted">Basic preferences for your account on this device.</p>
 
-          <label class="checkbox" style="margin-top:.75rem;">
+          <label class="checkbox label-spaced">
             <input type="checkbox" id="showTips" />
             <span>Show onboarding tips</span>
           </label>
 
-          <label class="field" for="defaultLanding" style="margin-top:.6rem;">
+          <label class="field label-spaced" for="defaultLanding">
             <span>Default landing page</span>
             <select id="defaultLanding" aria-describedby="settingsMsg">
               <option value="resident.html">Resident Dashboard</option>
@@ -109,7 +98,7 @@
             <small class="muted">Used after you sign in.</small>
           </label>
 
-          <label class="field" for="timeFormat" style="margin-top:.6rem;">
+          <label class="field label-spaced" for="timeFormat">
             <span>Time format</span>
             <select id="timeFormat" aria-describedby="settingsMsg">
               <option value="24h" selected>24-hour</option>
@@ -122,18 +111,18 @@
           <h2 class="h3">Appearance</h2>
           <p class="muted">Color, density, and theme preferences.</p>
 
-          <label class="checkbox" style="margin-top:.75rem;">
+          <label class="checkbox label-spaced">
             <input type="checkbox" id="darkModeSetting" aria-describedby="settingsMsg" />
             <span>Enable dark mode by default</span>
           </label>
 
-          <label class="field" for="accentColor" style="margin-top:.6rem;">
+          <label class="field label-spaced" for="accentColor">
             <span>Accent color</span>
             <input type="color" id="accentColor" value="#4a90e2" aria-describedby="settingsMsg" />
             <small class="muted">Affects highlights and focus states.</small>
           </label>
 
-          <label class="field" for="uiDensity" style="margin-top:.6rem;">
+          <label class="field label-spaced" for="uiDensity">
             <span>UI density</span>
             <select id="uiDensity" aria-describedby="settingsMsg">
               <option value="comfortable" selected>Comfortable</option>
@@ -142,12 +131,12 @@
             </select>
           </label>
 
-          <label class="field" for="baseFontSize" style="margin-top:.6rem;">
+          <label class="field label-spaced" for="baseFontSize">
             <span>Base font size (px)</span>
             <input type="number" id="baseFontSize" value="16" min="12" max="22" aria-describedby="settingsMsg" />
           </label>
 
-          <label class="field" for="cornerRadius" style="margin-top:.6rem;">
+          <label class="field label-spaced" for="cornerRadius">
             <span>Corner radius (px)</span>
             <input type="number" id="cornerRadius" value="12" min="6" max="24" aria-describedby="settingsMsg" />
           </label>
@@ -157,13 +146,13 @@
           <h2 class="h3">Notifications</h2>
           <p class="muted">Choose what we should ping you about.</p>
 
-          <div style="display:grid; gap:.55rem; margin-top:.75rem;">
+          <div class="stack">
             <label class="checkbox"><input type="checkbox" id="notifRequests" aria-describedby="settingsMsg" /> <span>Requests</span></label>
             <label class="checkbox"><input type="checkbox" id="notifCommunity" aria-describedby="settingsMsg" /> <span>Community posts</span></label>
             <label class="checkbox"><input type="checkbox" id="notifDigest" aria-describedby="settingsMsg" /> <span>Weekly digest</span></label>
           </div>
 
-          <label class="field" for="digestDay" style="margin-top:.6rem;">
+          <label class="field label-spaced" for="digestDay">
             <span>Digest day</span>
             <select id="digestDay" aria-describedby="settingsMsg">
               <option>Monday</option>
@@ -181,7 +170,7 @@
           <h2 class="h3">Security &amp; Privacy</h2>
           <p class="muted">Passwords, devices, and your data.</p>
 
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.6rem; margin-top:.75rem;">
+          <div class="form-grid grid-3 label-spaced">
             <label class="field" for="currentPassword">
               <span>Current password</span>
               <input id="currentPassword" type="password" autocomplete="current-password" aria-describedby="settingsMsg" />
@@ -196,14 +185,14 @@
             </label>
           </div>
 
-          <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem;">
+          <div class="form-actions label-spaced">
             <button type="button" class="btn" id="changePasswordBtn">Change password</button>
             <button type="button" class="btn btn-ghost" id="signOutAllBtn">Sign out of all devices</button>
           </div>
 
-          <div style="margin-top:1rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem; flex-wrap:wrap;">
-              <p class="muted" style="margin:0;">Active sessions</p>
+          <div class="label-spaced">
+            <div class="section-row">
+              <p class="muted">Active sessions</p>
               <button type="button" class="btn btn-ghost btn-small" id="sessionRefreshBtn">Refresh</button>
             </div>
             <ul id="sessionList" class="submission-log" aria-live="polite">
@@ -211,7 +200,7 @@
             </ul>
           </div>
 
-          <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem;">
+          <div class="form-actions label-spaced">
             <button type="button" class="btn secondary" id="exportDataBtn">Export my data</button>
             <button type="button" class="btn secondary" id="clearLocalBtn">Clear local data</button>
             <button type="button" class="btn btn-ghost" id="resetDefaults">Reset defaults</button>
@@ -219,7 +208,7 @@
         </section>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
+      <div class="form-actions">
         <button type="submit" class="btn">Save settings</button>
       </div>
       <div id="settingsMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
@@ -254,11 +243,5 @@
       }
     })();
   </script>
-  <style>
-    .btn { --_accent: var(--accent, #4a90e2); }
-    .density-compact .dashboard-card { padding: .6rem; }
-    .density-comfortable .dashboard-card { padding: 1rem; }
-    .density-spacious .dashboard-card { padding: 1.4rem; }
-  </style>
 </body>
 </html>

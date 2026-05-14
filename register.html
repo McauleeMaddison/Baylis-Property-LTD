@@ -31,25 +31,6 @@
   <link rel="prefetch" href="login.html" />
   <link rel="prefetch" href="index.html" />
 
-  <style>
-    .auth-shell { min-height: calc(100dvh - 70px); display:grid; place-items:center; padding:1rem; }
-    .auth-grid { display:grid; grid-template-columns: 1.1fr 1fr; gap:1rem; width:100%; max-width: 1000px; }
-    .brand-panel { padding:1.2rem; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); }
-    .brand-points { margin:.6rem 0 0; padding-left:1.1rem; }
-    .auth-card { padding:1.2rem; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); }
-    .field { display:flex; flex-direction:column; gap:.35rem; }
-    .input-group { display:flex; gap:.4rem; align-items:center; }
-    .icon-btn { border:1px solid rgba(255,255,255,.15); background:#1f2937; padding:.45rem .65rem; border-radius:10px; cursor:pointer; }
-    .pw-meter { position:relative; height:8px; background:rgba(255,255,255,.08); border-radius:999px; margin-top:.45rem; }
-    .pw-bar { position:absolute; left:0; top:0; bottom:0; width:0%; border-radius:999px; background:linear-gradient(90deg, #ef4444, #22c55e); transition:width .25s ease; }
-    .pw-label { display:block; margin-top:.25rem; color:#94a3b8; }
-    .btn-spinner { display:inline-block; width:0; height:0; margin-left:.5rem; border:2px solid transparent; border-top-color:currentColor; border-right-color:currentColor; border-radius:50%; animation:spin .65s linear infinite; opacity:0; }
-    #registerBtn[data-loading="1"] .btn-spinner { width:14px; height:14px; opacity:1; }
-    .form-msg { min-height:1.2rem; margin-top:.4rem; }
-    .is-invalid { border-color:#ef4444 !important; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    @media (max-width: 900px){ .auth-grid{ grid-template-columns: 1fr; } }
-  </style>
 </head>
 
 <body class="page page--register" data-api-base="/api">
@@ -101,7 +82,7 @@
       <!-- Brand side -->
       <aside class="brand-panel">
         <p><img src="assets/logo.svg" alt="Baylis Property LTD" class="brand-logo" /> <strong>Baylis Property LTD</strong></p>
-        <h1 class="h2" style="margin:.4rem 0;">Create your account</h1>
+        <h1 class="h2">Create your account</h1>
         <p class="muted brand-tagline">Join Baylis Properties and start managing your home life.</p>
         <ul class="brand-points">
           <li>Resident or Landlord roles</li>
@@ -122,12 +103,12 @@
             <input id="regUsername" name="username" type="text" placeholder="e.g. username" minlength="3" required autocomplete="username" aria-describedby="registerMsg" />
           </div>
 
-          <div class="field" style="margin-top:.6rem;">
+          <div class="field">
             <label for="regEmail">Email</label>
             <input id="regEmail" name="email" type="email" placeholder="you@example.com" required autocomplete="email" aria-describedby="registerMsg" />
           </div>
 
-          <div class="field" style="margin-top:.6rem;">
+          <div class="field">
             <label for="regRole">Role</label>
             <select id="regRole" name="role" required aria-describedby="registerMsg">
               <option value="">Select role…</option>
@@ -136,7 +117,7 @@
             </select>
           </div>
 
-          <div class="field" style="margin-top:.6rem;">
+          <div class="field">
             <label for="regPassword">Password</label>
             <div class="input-group">
               <input id="regPassword" name="password" type="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password" aria-describedby="registerMsg" />
@@ -148,12 +129,12 @@
             </div>
           </div>
 
-          <div class="field" style="margin-top:.6rem;">
+          <div class="field">
             <label for="regConfirm">Confirm Password</label>
             <input id="regConfirm" type="password" placeholder="Repeat your password" required autocomplete="new-password" aria-describedby="registerMsg" />
           </div>
 
-          <label class="checkbox" style="margin:.8rem 0 1rem;">
+          <label class="checkbox">
             <input type="checkbox" id="acceptTos" required aria-describedby="registerMsg" />
             <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> &amp; <a href="/privacy" target="_blank" rel="noopener">Privacy</a></span>
           </label>
@@ -165,7 +146,7 @@
 
           <div id="registerMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
 
-          <p class="muted" style="margin-top:1rem;">
+          <p class="muted">
             Already have an account? <a href="/login">Sign in</a>
           </p>
         </form>

@@ -64,7 +64,7 @@
     </nav>
   </header>
 
-  <main role="main" id="content" class="container" tabindex="-1" style="margin-top:1rem;">
+  <main role="main" id="content" class="container page-main" tabindex="-1">
     <header class="header">
       <h1 class="h1">Landlord</h1>
       <p class="muted">Welcome, <strong id="userWelcome">Landlord</strong>. Review requests, update statuses, and monitor community activity.</p>
@@ -102,8 +102,8 @@
       </article>
     </section>
 
-    <section class="dashboard-card" aria-label="Tools" style="display:grid; gap:.75rem;">
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:.6rem; align-items:end;">
+    <section class="dashboard-card panel-grid" aria-label="Tools">
+      <div class="form-grid form-grid--align-end grid-3">
         <label for="reqSearch" class="field">
           <span>Search requests</span>
           <input id="reqSearch" type="search" placeholder="Search by name, issue or type…" inputmode="search" />
@@ -126,7 +126,7 @@
           </select>
         </label>
       </div>
-      <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+      <div class="form-actions">
         <button type="button" id="btnRefresh" class="btn btn-ghost">Refresh</button>
         <button type="button" id="btnExport" class="btn btn-ghost">Export CSV</button>
       </div>
@@ -156,7 +156,7 @@
     </section>
 
     <section class="dashboard-card" aria-label="Notifications">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem;">
+      <div class="section-row">
         <h3>Notifications</h3>
         <button type="button" class="btn btn-ghost btn-small" id="landlordNotifMarkAll">Mark all read</button>
       </div>
@@ -166,10 +166,10 @@
     </section>
 
     <section class="dashboard-card" aria-label="Security audit log">
-      <div class="section-header" style="margin-bottom:var(--space-3);">
+      <div class="section-header">
         <p class="eyebrow">Security events</p>
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem; flex-wrap:wrap;">
-          <h3 style="margin:0;">Audit log</h3>
+        <div class="section-row">
+          <h3>Audit log</h3>
           <button type="button" id="auditRefreshBtn" class="btn btn-ghost btn-small">Refresh</button>
         </div>
         <p class="muted">Latest authentication and security events across the workspace.</p>
@@ -202,11 +202,5 @@
     </div>
   </footer>
 
-  <style>
-    .metric { font-size: 1.8rem; font-weight: 700; }
-    .table-wrapper { overflow-x:auto; }
-    #auditTableBody td { font-size: var(--fs-14); }
-    .eyebrow { text-transform: uppercase; letter-spacing: .2em; font-size: .75rem; color: var(--secondary); }
-  </style>
 </body>
 </html>

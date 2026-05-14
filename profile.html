@@ -12,13 +12,6 @@
   <script defer src="js/script.js"></script>
   <link rel="prefetch" href="settings.html" />
   <link rel="prefetch" href="index.html" />
-  <style>
-    .profile-grid { display:grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-4); margin-top: var(--space-4); }
-    .profile-top { display:flex; gap: var(--space-4); align-items:flex-start; flex-wrap:wrap; }
-    .profile-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
-    .profile-stats { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
-    @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } }
-  </style>
 </head>
 <body class="page page--profile" data-required-role="resident,landlord" data-api-base="/api">
   <a class="skip-link" href="#content">Skip to main content</a>
@@ -58,7 +51,7 @@
     </nav>
   </header>
 
-  <main role="main" id="content" class="container" tabindex="-1">
+  <main role="main" id="content" class="container page-main" tabindex="-1">
     <header class="header">
       <p class="muted">Account</p>
       <h1 class="h1">Profile</h1>
@@ -424,9 +417,5 @@
       })();
     })();
   </script>
-  <style>
-    .profile-avatar { border-radius: 999px; border: 2px solid rgba(255,255,255,.08); box-shadow: 0 6px 24px rgba(0,0,0,.25); }
-    .list-title { font-weight: 600; margin: 0; }
-  </style>
 </body>
 </html>

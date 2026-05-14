@@ -72,7 +72,7 @@
     </nav>
   </header>
 
-  <main role="main" id="content" class="container" tabindex="-1" style="margin-top:1rem;">
+  <main role="main" id="content" class="container page-main" tabindex="-1">
     <header class="header">
       <h1 class="h1">Resident</h1>
       <p class="muted">Welcome, <strong id="userWelcome">Resident</strong> — create requests, track progress, and post to your community.</p>
@@ -122,7 +122,7 @@
             <span>Address</span>
             <input id="cleaningAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required aria-describedby="cleaningMsg" />
           </label>
-          <div class="grid-span-3" style="display:flex; gap:.5rem; justify-content:flex-end;">
+          <div class="grid-span-3 form-actions">
             <button class="btn btn-ghost" type="reset">Reset</button>
             <button class="btn" type="submit" id="cleaningSubmit">Schedule</button>
           </div>
@@ -146,7 +146,7 @@
             <span>Address</span>
             <input id="repairAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required aria-describedby="repairMsg" />
           </label>
-          <div class="grid-span-3" style="display:flex; gap:.5rem; justify-content:flex-end;">
+          <div class="grid-span-3 form-actions">
             <button class="btn btn-ghost" type="reset">Reset</button>
             <button class="btn" type="submit" id="repairSubmit">Submit</button>
           </div>
@@ -161,7 +161,7 @@
             <span>Message</span>
             <textarea id="communityMessage" name="message" rows="3" placeholder="Share an update or ask a question…" required aria-describedby="communityMsg"></textarea>
           </label>
-          <div class="grid-span-3" style="display:flex; gap:.5rem; justify-content:flex-end;">
+          <div class="grid-span-3 form-actions">
             <button class="btn btn-ghost" type="reset">Reset</button>
             <button class="btn" type="submit" id="communitySubmit">Post</button>
           </div>
@@ -172,7 +172,7 @@
 
     <section class="dashboard-cards" aria-label="My activity">
       <article class="dashboard-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem;">
+        <div class="section-row">
           <h3>Notifications</h3>
           <button type="button" class="btn btn-ghost btn-small" id="notifMarkAll">Mark all read</button>
         </div>
