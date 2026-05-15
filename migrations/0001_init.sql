@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS requests (
   type ENUM('cleaning','repair','message') NOT NULL,
   name VARCHAR(255),
   address VARCHAR(255),
+  property_id VARCHAR(64) DEFAULT NULL,
   issue TEXT,
   cleaning_type VARCHAR(255),
   date VARCHAR(255),
@@ -77,3 +78,33 @@ CREATE TABLE IF NOT EXISTS notifications (
   INDEX idx_notifications_user (user_id),
   INDEX idx_notifications_read (read_at)
 );
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NULL,
+  event VARCHAR(100) NOT NULL,
+  severity ENUM('info','warn','error') DEFAULT 'info',
+  ip_address VARCHAR(255) DEFAULT NULL,
+  user_agent VARCHAR(500) DEFAULT NULL,
+  metadata JSON DEFAULT (JSON_OBJECT()),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_audit_user (user_id),
+  INDEX idx_audit_event (event)
+);
+
+CREATE TABLE IF NOT EXISTS properties (
+  id VARCHAR(64) PRIMARY KEY,
+  label VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO properties (id, label) VALUES
+  ('crownfield-1-3', '1 & 3 Crownfield Road, Ashford, Kent'),
+  ('christchurch-4-74', '4 & 74 Christchurch Road, Ashford, Kent'),
+  ('christchurch-9', '9 Christchurch Road, Ashford, Kent'),
+  ('cross-stile-21', '21 Cross Stile, Ashford, Kent'),
+  ('beaver-32', '32 Beaver Road (including adjoining land), Ashford, Kent'),
+  ('bond-40', '40 Bond Road, Ashford, Kent'),
+  ('francis-59', '59 Francis Road, Ashford, Kent'),
+  ('cottage-28-the-street', 'The Cottage, 28 The Street, Kennington, Ashford, Kent')
+ON DUPLICATE KEY UPDATE label = VALUES(label);

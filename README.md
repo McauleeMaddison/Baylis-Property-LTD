@@ -91,7 +91,7 @@ docker compose up -d db
 cd server
 node scripts/mysql-init.js
 ```
-The script creates tables (`users`, `requests`, `community_posts`, `sessions`, `password_resets`) and seeds demo accounts (`resident123` / `resident123`, `landlord123` / `landlord123`).
+The script creates/verifies tables (`users`, `requests`, `properties`, `community_posts`, `sessions`, `password_resets`, `notifications`, `audit_logs`) and seeds demo accounts (`resident123` / `resident123`, `landlord123` / `landlord123`).
 
 ### Manual migration / quick reset
 If you prefer to run all SQL migrations directly, run:

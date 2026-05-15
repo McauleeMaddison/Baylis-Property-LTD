@@ -37,6 +37,17 @@ await db.query(`CREATE TABLE IF NOT EXISTS properties (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )`);
 
+await db.query(`INSERT INTO properties (id, label) VALUES
+  ('crownfield-1-3', '1 & 3 Crownfield Road, Ashford, Kent'),
+  ('christchurch-4-74', '4 & 74 Christchurch Road, Ashford, Kent'),
+  ('christchurch-9', '9 Christchurch Road, Ashford, Kent'),
+  ('cross-stile-21', '21 Cross Stile, Ashford, Kent'),
+  ('beaver-32', '32 Beaver Road (including adjoining land), Ashford, Kent'),
+  ('bond-40', '40 Bond Road, Ashford, Kent'),
+  ('francis-59', '59 Francis Road, Ashford, Kent'),
+  ('cottage-28-the-street', 'The Cottage, 28 The Street, Kennington, Ashford, Kent')
+ON DUPLICATE KEY UPDATE label = VALUES(label)`);
+
 await db.query(`CREATE TABLE IF NOT EXISTS community_posts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
@@ -85,6 +96,19 @@ await db.query(`CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_notifications_user (user_id),
   INDEX idx_notifications_read (read_at)
+)`);
+
+await db.query(`CREATE TABLE IF NOT EXISTS audit_logs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NULL,
+  event VARCHAR(100) NOT NULL,
+  severity ENUM('info','warn','error') DEFAULT 'info',
+  ip_address VARCHAR(255) DEFAULT NULL,
+  user_agent VARCHAR(500) DEFAULT NULL,
+  metadata JSON DEFAULT (JSON_OBJECT()),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_audit_user (user_id),
+  INDEX idx_audit_event (event)
 )`);
 
 console.log('MySQL tables created/verified.');
