@@ -11,6 +11,7 @@
     year: document.getElementById("year"),
     requests: document.getElementById("allRequests"),
     propertySummary: document.getElementById("propertySummary"),
+    propertyAdd: document.getElementById("propertyAddBtn"),
     posts: document.getElementById("allCommunityPosts"),
     notifications: document.getElementById("landlordNotifications"),
     notifMarkAll: document.getElementById("landlordNotifMarkAll"),
@@ -281,6 +282,7 @@
     cards.forEach((card) => {
       const li = document.createElement("li");
       const selected = (els.filterProperty?.value || "all") === card.id;
+      const isMappedProperty = card.id !== "__unmapped";
       li.innerHTML = `
         <div>
           <div class="section-row">
@@ -290,6 +292,8 @@
           <div class="muted">Open ${card.stats.open} • In progress ${card.stats.inProgress} • Done ${card.stats.done}</div>
           <div class="property-summary-actions">
             <button type="button" class="btn btn-ghost btn-small" data-action="filter-property" data-property-id="${card.id}">${selected ? "Clear filter" : "View requests"}</button>
+            ${isMappedProperty ? `<button type="button" class="btn btn-ghost btn-small" data-action="edit-property" data-property-id="${card.id}">Edit</button>` : ""}
+            ${isMappedProperty ? `<button type="button" class="btn btn-ghost btn-small" data-action="delete-property" data-property-id="${card.id}">Delete</button>` : ""}
           </div>
         </div>
       `;
@@ -522,6 +526,7 @@
     bindStatusEvents();
     bindEmptyActions();
     bindPropertySummaryActions();
+    bindPropertyAdminActions();
   }
 
   function bindStatusEvents() {
@@ -563,13 +568,95 @@
   }
 
   function bindPropertySummaryActions() {
-    els.propertySummary?.addEventListener("click", (event) => {
-      const button = event.target?.closest('button[data-action="filter-property"]');
-      if (!button || !els.filterProperty) return;
-      const propertyId = button.getAttribute("data-property-id") || "all";
-      els.filterProperty.value = els.filterProperty.value === propertyId ? "all" : propertyId;
-      render();
+    els.propertySummary?.addEventListener("click", async (event) => {
+      const button = event.target?.closest("button[data-action]");
+      if (!button) return;
+      const action = button.getAttribute("data-action");
+      const propertyId = button.getAttribute("data-property-id") || "";
+      if (!action || !propertyId) return;
+
+      if (action === "filter-property") {
+        if (!els.filterProperty) return;
+        els.filterProperty.value = els.filterProperty.value === propertyId ? "all" : propertyId;
+        render();
+        return;
+      }
+
+      if (action === "edit-property") {
+        await editProperty(propertyId);
+        return;
+      }
+
+      if (action === "delete-property") {
+        await deleteProperty(propertyId);
+      }
     });
+  }
+
+  function bindPropertyAdminActions() {
+    els.propertyAdd?.addEventListener("click", async () => {
+      await createProperty();
+    });
+  }
+
+  async function createProperty() {
+    const label = window.prompt("Enter the full property address");
+    if (label === null) return;
+    const normalized = String(label || "").replace(/\s+/g, " ").trim();
+    if (!normalized) {
+      toast("Property label is required.");
+      return;
+    }
+    try {
+      await fetchJSON("/properties", { method: "POST", body: { label: normalized } });
+      await loadDashboard();
+      toast("Property added.");
+    } catch (err) {
+      toast(err.message || "Unable to add property.");
+    }
+  }
+
+  async function editProperty(propertyId) {
+    const property = state.properties.find((p) => String(p.id) === String(propertyId));
+    if (!property) {
+      toast("Property not found.");
+      return;
+    }
+    const nextLabel = window.prompt("Update property address", property.label || "");
+    if (nextLabel === null) return;
+    const normalized = String(nextLabel || "").replace(/\s+/g, " ").trim();
+    if (!normalized) {
+      toast("Property label is required.");
+      return;
+    }
+    if (normalized === String(property.label || "").trim()) return;
+    try {
+      await fetchJSON(`/properties/${encodeURIComponent(propertyId)}`, { method: "PATCH", body: { label: normalized } });
+      await loadDashboard();
+      toast("Property updated.");
+    } catch (err) {
+      toast(err.message || "Unable to update property.");
+    }
+  }
+
+  async function deleteProperty(propertyId) {
+    const property = state.properties.find((p) => String(p.id) === String(propertyId));
+    if (!property) {
+      toast("Property not found.");
+      return;
+    }
+    const confirmed = window.confirm(`Delete property?\n\n${property.label}\n\nThis cannot be undone.`);
+    if (!confirmed) return;
+    try {
+      await fetchJSON(`/properties/${encodeURIComponent(propertyId)}`, { method: "DELETE" });
+      if (els.filterProperty?.value === propertyId) {
+        els.filterProperty.value = "all";
+      }
+      await loadDashboard();
+      toast("Property deleted.");
+    } catch (err) {
+      toast(err.message || "Unable to delete property.");
+    }
   }
 
   async function markAllNotificationsRead() {

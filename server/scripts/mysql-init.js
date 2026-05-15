@@ -20,6 +20,7 @@ await db.query(`CREATE TABLE IF NOT EXISTS requests (
   type ENUM('cleaning','repair','message') NOT NULL,
   name VARCHAR(255),
   address VARCHAR(255),
+  property_id VARCHAR(64) DEFAULT NULL,
   issue TEXT,
   cleaning_type VARCHAR(255),
   date VARCHAR(255),
@@ -27,6 +28,12 @@ await db.query(`CREATE TABLE IF NOT EXISTS requests (
   status VARCHAR(50) NOT NULL DEFAULT 'open',
   status_updated_at TIMESTAMP NULL DEFAULT NULL,
   photos JSON DEFAULT (JSON_ARRAY()),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`);
+
+await db.query(`CREATE TABLE IF NOT EXISTS properties (
+  id VARCHAR(64) PRIMARY KEY,
+  label VARCHAR(255) NOT NULL UNIQUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )`);
 

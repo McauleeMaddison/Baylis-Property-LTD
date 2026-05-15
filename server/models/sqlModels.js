@@ -68,6 +68,42 @@ export const User = {
   }
 };
 
+const mapPropertyRow = (row) => {
+  if (!row) return null;
+  return {
+    id: row.id,
+    label: row.label,
+    createdAt: row.created_at ? new Date(row.created_at) : null,
+  };
+};
+
+export const Property = {
+  async findAll() {
+    const [rows] = await db.query('SELECT * FROM properties ORDER BY label ASC');
+    return rows.map(mapPropertyRow);
+  },
+  async findById(id) {
+    const [rows] = await db.query('SELECT * FROM properties WHERE id = ? LIMIT 1', [id]);
+    return mapPropertyRow(rows[0]);
+  },
+  async findByLabel(label) {
+    const [rows] = await db.query('SELECT * FROM properties WHERE LOWER(TRIM(label)) = LOWER(TRIM(?)) LIMIT 1', [label]);
+    return mapPropertyRow(rows[0]);
+  },
+  async create(data) {
+    await db.query('INSERT INTO properties (id, label) VALUES (?, ?)', [data.id, data.label]);
+    return this.findById(data.id);
+  },
+  async update(id, data) {
+    await db.query('UPDATE properties SET label = ? WHERE id = ?', [data.label, id]);
+    return this.findById(id);
+  },
+  async delete(id) {
+    const [result] = await db.query('DELETE FROM properties WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+  }
+};
+
 const mapRequestRow = (r) => {
   const photos = parseJSONField(r.photos);
   return {
@@ -76,6 +112,8 @@ const mapRequestRow = (r) => {
     type: r.type,
     name: r.name,
     address: r.address,
+    propertyId: r.property_id || null,
+    propertyLabel: r.property_label || '',
     issue: r.issue,
     cleaningType: r.cleaning_type,
     date: r.date,
@@ -89,23 +127,56 @@ const mapRequestRow = (r) => {
 
 export const Request = {
   async create(data) {
-    const [result] = await db.query(`INSERT INTO requests (user_id, type, name, address, issue, cleaning_type, date, message, status, status_updated_at, photos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [data.userId, data.type, data.name || '', data.address || '', data.issue || '', data.cleaningType || '', data.date || '', data.message || '', data.status || 'open', data.statusUpdatedAt || new Date(), JSON.stringify(data.photos || [])]);
-    const [rows] = await db.query('SELECT * FROM requests WHERE id = ? LIMIT 1', [result.insertId]);
+    const [result] = await db.query(`INSERT INTO requests (user_id, type, name, address, property_id, issue, cleaning_type, date, message, status, status_updated_at, photos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [data.userId, data.type, data.name || '', data.address || '', data.propertyId || null, data.issue || '', data.cleaningType || '', data.date || '', data.message || '', data.status || 'open', data.statusUpdatedAt || new Date(), JSON.stringify(data.photos || [])]);
+    const [rows] = await db.query(
+      `SELECT r.*, p.label AS property_label
+       FROM requests r
+       LEFT JOIN properties p ON p.id = r.property_id
+       WHERE r.id = ? LIMIT 1`,
+      [result.insertId]
+    );
     return mapRequestRow(rows[0]);
   },
   async updateStatus(id, status) {
     await db.query('UPDATE requests SET status = ?, status_updated_at = NOW() WHERE id = ?', [status, id]);
-    const [rows] = await db.query('SELECT * FROM requests WHERE id = ? LIMIT 1', [id]);
+    const [rows] = await db.query(
+      `SELECT r.*, p.label AS property_label
+       FROM requests r
+       LEFT JOIN properties p ON p.id = r.property_id
+       WHERE r.id = ? LIMIT 1`,
+      [id]
+    );
     return mapRequestRow(rows[0]);
   },
   async find(filter = {}) {
     if (filter.userId) {
-      const [rows] = await db.query('SELECT * FROM requests WHERE user_id = ? ORDER BY created_at DESC', [filter.userId]);
+      const [rows] = await db.query(
+        `SELECT r.*, p.label AS property_label
+         FROM requests r
+         LEFT JOIN properties p ON p.id = r.property_id
+         WHERE r.user_id = ?
+         ORDER BY r.created_at DESC`,
+        [filter.userId]
+      );
       return rows.map(mapRequestRow);
     }
-    const [rows] = await db.query('SELECT * FROM requests ORDER BY created_at DESC');
+    const [rows] = await db.query(
+      `SELECT r.*, p.label AS property_label
+       FROM requests r
+       LEFT JOIN properties p ON p.id = r.property_id
+       ORDER BY r.created_at DESC`
+    );
     return rows.map(mapRequestRow);
+  },
+  async relabelProperty(propertyId, label, previousLabel = '') {
+    await db.query(
+      `UPDATE requests
+       SET address = ?
+       WHERE property_id = ?
+          OR (property_id IS NULL AND LOWER(TRIM(address)) = LOWER(TRIM(?)))`,
+      [label, propertyId, previousLabel || '']
+    );
   }
 };
 
@@ -285,4 +356,4 @@ export const Notification = {
   }
 };
 
-export const models = { User, Request, CommunityPost, Session, PasswordResetToken, Notification, AuditLog };
+export const models = { User, Request, Property, CommunityPost, Session, PasswordResetToken, Notification, AuditLog };

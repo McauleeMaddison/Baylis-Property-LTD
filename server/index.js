@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { pingDb } from './mysql.js';
-import { listProperties, findPropertyById, findPropertyByAddress } from './propertyCatalog.js';
+import { DEFAULT_PROPERTIES } from './propertyCatalog.js';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 
@@ -51,7 +51,7 @@ try {
   };
 }
 
-const { User, Request, CommunityPost, Session, PasswordResetToken, Notification, AuditLog } = models;
+const { User, Request, Property, CommunityPost, Session, PasswordResetToken, Notification, AuditLog } = models;
 const app = express();
 const PORT = process.env.PORT || 5000;
 const isProd = process.env.NODE_ENV === 'production';
@@ -73,6 +73,11 @@ if (!process.env.SESSION_SECRET) {
 
 const seedEnabled = process.env.SEED_DEMO_USERS === 'true'
   || (!isProd && process.env.SEED_DEMO_USERS !== 'false');
+try {
+  await ensureDefaultProperties();
+} catch (err) {
+  console.warn('⚠️  ensureDefaultProperties skipped due to DB error:', err.message || err);
+}
 if (seedEnabled) {
   try {
     await seedDemoUsers();
@@ -112,6 +117,50 @@ const randomToken = (size = 32) => crypto.randomBytes(size).toString('hex');
 const hashToken = (token) => crypto.createHmac('sha256', SESSION_SECRET).update(token).digest('hex');
 const minutes = (ms) => Math.round(ms / 60000);
 const REQUEST_STATUSES = new Set(['open', 'in_progress', 'done']);
+const normalizePropertyLabel = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+const slugifyPropertyId = (label) => {
+  const slug = normalizePropertyLabel(label)
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return (slug || 'property').slice(0, 56);
+};
+
+async function buildUniquePropertyId(label) {
+  const base = slugifyPropertyId(label);
+  for (let i = 0; i < 500; i += 1) {
+    const candidate = i === 0 ? base : `${base}-${i + 1}`;
+    const existing = await Property.findById(candidate);
+    if (!existing) return candidate;
+  }
+  return `${base}-${Date.now()}`;
+}
+
+async function ensureDefaultProperties() {
+  if (!Property || typeof Property.findById !== 'function') return;
+  for (const property of DEFAULT_PROPERTIES) {
+    const byId = await Property.findById(property.id);
+    if (byId) continue;
+    const byLabel = await Property.findByLabel(property.label);
+    if (byLabel) continue;
+    await Property.create({ id: property.id, label: property.label });
+  }
+}
+
+async function getPropertyMaps() {
+  const properties = await Property.findAll();
+  const byId = new Map();
+  const byLabel = new Map();
+  properties.forEach((property) => {
+    const id = String(property.id || '').trim();
+    const label = normalizePropertyLabel(property.label);
+    const normalized = { ...property, id, label };
+    if (id) byId.set(id, normalized);
+    if (label) byLabel.set(label.toLowerCase(), normalized);
+  });
+  return { properties, byId, byLabel };
+}
 
 const sendEmail = async (to, subject, body) => {
   if (!to) {
@@ -191,29 +240,34 @@ const mapNotification = (n) => {
   };
 };
 
-const mapRequestWithProperty = (request) => {
-  const property = findPropertyByAddress(request?.address || '');
+const mapRequestWithProperty = (request, maps = null) => {
+  const requestedId = request?.propertyId ? String(request.propertyId).trim() : '';
+  const requestLabel = normalizePropertyLabel(request?.propertyLabel || request?.address || '');
+  const byId = maps?.byId && requestedId ? maps.byId.get(requestedId) : null;
+  const byLabel = !byId && maps?.byLabel && requestLabel ? maps.byLabel.get(requestLabel.toLowerCase()) : null;
+  const property = byId || byLabel || null;
   return {
     ...request,
-    propertyId: property?.id || null,
-    propertyLabel: property?.label || '',
+    propertyId: property?.id || requestedId || null,
+    propertyLabel: property?.label || requestLabel || '',
   };
 };
 
-const getResidentProperty = (user) => {
+async function getResidentProperty(user, maps = null) {
   const propertyId = user?.profile?.propertyId ? String(user.profile.propertyId).trim() : '';
   if (!propertyId) return null;
-  return findPropertyById(propertyId);
-};
+  if (maps?.byId?.has(propertyId)) return maps.byId.get(propertyId);
+  return Property.findById(propertyId);
+}
 
-async function resolveResidentPropertyForSubmission(user, body = {}, req = null) {
+async function resolveResidentPropertyForSubmission(user, body = {}, req = null, maps = null) {
   const profilePropertyId = user?.profile?.propertyId ? String(user.profile.propertyId).trim() : '';
   const requestedPropertyId = body?.propertyId ? String(body.propertyId).trim() : '';
   const selectedPropertyId = requestedPropertyId || profilePropertyId;
   if (!selectedPropertyId) {
     return { ok: false, status: 400, error: 'Select your assigned property before submitting requests.' };
   }
-  const property = findPropertyById(selectedPropertyId);
+  const property = maps?.byId?.get(selectedPropertyId) || await Property.findById(selectedPropertyId);
   if (!property) {
     return { ok: false, status: 400, error: 'Selected property is invalid.' };
   }
@@ -226,7 +280,7 @@ async function resolveResidentPropertyForSubmission(user, body = {}, req = null)
     await user.save();
     await recordAudit('profile.property.selected', { userId: user.id, metadata: { propertyId: property.id, source: 'form_submission' } }, req);
   }
-  return { ok: true, property };
+  return { ok: true, property: { ...property, label: normalizePropertyLabel(property.label) } };
 }
 
 async function issuePasswordReset(user) {
@@ -636,17 +690,71 @@ app.post('/api/profile/about', authRequired, csrfRequired, asyncHandler(async (r
   res.json({ user: publicUser(req.user) });
 }));
 app.get('/api/properties', authRequired, asyncHandler(async (req, res) => {
-  const properties = listProperties();
-  const selected = getResidentProperty(req.user);
+  const maps = await getPropertyMaps();
+  const selected = await getResidentProperty(req.user, maps);
   res.json({
-    properties,
+    properties: maps.properties,
     selectedPropertyId: selected?.id || null,
     selectedPropertyLabel: selected?.label || '',
   });
 }));
+app.post('/api/properties', authRequired, requireRole('landlord'), csrfRequired, asyncHandler(async (req, res) => {
+  const label = normalizePropertyLabel(req.body?.label || '');
+  if (!label || label.length < 6) return res.status(400).json({ error: 'Property label is required.' });
+  const byLabel = await Property.findByLabel(label);
+  if (byLabel) return res.status(409).json({ error: 'A property with this label already exists.' });
+  const id = await buildUniquePropertyId(label);
+  const property = await Property.create({ id, label });
+  await recordAudit('properties.created', { userId: req.user.id, metadata: { propertyId: id, label } }, req);
+  res.status(201).json({ ok: true, property });
+}));
+app.patch('/api/properties/:id', authRequired, requireRole('landlord'), csrfRequired, asyncHandler(async (req, res) => {
+  const id = String(req.params.id || '').trim();
+  const label = normalizePropertyLabel(req.body?.label || '');
+  if (!id) return res.status(400).json({ error: 'Property id is required.' });
+  if (!label || label.length < 6) return res.status(400).json({ error: 'Property label is required.' });
+  const existing = await Property.findById(id);
+  if (!existing) return res.status(404).json({ error: 'Property not found.' });
+  const byLabel = await Property.findByLabel(label);
+  if (byLabel && String(byLabel.id) !== id) {
+    return res.status(409).json({ error: 'A property with this label already exists.' });
+  }
+  const previousLabel = normalizePropertyLabel(existing.label);
+  const updated = await Property.update(id, { label });
+  if (typeof Request.relabelProperty === 'function') {
+    await Request.relabelProperty(id, label, previousLabel);
+  }
+  await recordAudit('properties.updated', { userId: req.user.id, metadata: { propertyId: id, label } }, req);
+  res.json({ ok: true, property: updated });
+}));
+app.delete('/api/properties/:id', authRequired, requireRole('landlord'), csrfRequired, asyncHandler(async (req, res) => {
+  const id = String(req.params.id || '').trim();
+  if (!id) return res.status(400).json({ error: 'Property id is required.' });
+  const existing = await Property.findById(id);
+  if (!existing) return res.status(404).json({ error: 'Property not found.' });
+  const allRequests = await Request.find();
+  const existingLabel = normalizePropertyLabel(existing.label).toLowerCase();
+  const requestsUsing = allRequests.filter((r) => {
+    const byId = String(r.propertyId || '') === id;
+    const byAddress = normalizePropertyLabel(r.address).toLowerCase() === existingLabel;
+    return byId || byAddress;
+  }).length;
+  const users = await User.findAll();
+  const usersAssigned = users.filter((u) => u.role === 'resident' && String(u?.profile?.propertyId || '') === id).length;
+  if (requestsUsing || usersAssigned) {
+    return res.status(409).json({
+      error: `Cannot delete property in use (${usersAssigned} resident assignments, ${requestsUsing} requests).`,
+      usersAssigned,
+      requestsUsing
+    });
+  }
+  await Property.delete(id);
+  await recordAudit('properties.deleted', { userId: req.user.id, metadata: { propertyId: id } }, req);
+  res.json({ ok: true });
+}));
 app.post('/api/profile/property', authRequired, requireRole('resident'), csrfRequired, asyncHandler(async (req, res) => {
   const propertyId = String(req.body?.propertyId || '').trim();
-  const property = findPropertyById(propertyId);
+  const property = await Property.findById(propertyId);
   if (!property) return res.status(400).json({ error: 'Invalid property selection.' });
   req.user.profile = req.user.profile || {};
   req.user.profile.propertyId = property.id;
@@ -676,7 +784,8 @@ app.post('/api/settings', authRequired, csrfRequired, asyncHandler(async (req, r
 }));
 app.get('/api/profile/activity', authRequired, asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const userReqs = (await Request.find({ userId })).map(mapRequestWithProperty);
+  const maps = await getPropertyMaps();
+  const userReqs = (await Request.find({ userId })).map((request) => mapRequestWithProperty(request, maps));
   const userPosts = await CommunityPost.find({ userId });
   const notifications = await Notification.findByUserId(userId, { limit: 20 });
   res.json({ requests: userReqs, posts: userPosts, notifications: notifications.map(mapNotification) });
@@ -686,7 +795,8 @@ app.post('/api/forms/cleaning', authRequired, requireRole('resident'), csrfRequi
   const { name = req.user.username, date = '', type = '', propertyId = '' } = req.body || {};
   const err = requireFields({ date, type }, { date: { min: 2 }, type: { min: 2 } });
   if (err) return res.status(400).json({ error: err });
-  const resolvedProperty = await resolveResidentPropertyForSubmission(req.user, { propertyId }, req);
+  const maps = await getPropertyMaps();
+  const resolvedProperty = await resolveResidentPropertyForSubmission(req.user, { propertyId }, req, maps);
   if (!resolvedProperty.ok) return res.status(resolvedProperty.status).json({ error: resolvedProperty.error });
   const property = resolvedProperty.property;
   const rec = await Request.create({
@@ -694,6 +804,7 @@ app.post('/api/forms/cleaning', authRequired, requireRole('resident'), csrfRequi
     type: 'cleaning',
     name,
     address: property.label,
+    propertyId: property.id,
     date,
     cleaningType: type,
     status: 'open',
@@ -714,13 +825,14 @@ app.post('/api/forms/cleaning', authRequired, requireRole('resident'), csrfRequi
     body: `${name} • ${property.label}`,
     metadata: { requestId: rec.id, requestType: 'cleaning', propertyId: property.id }
   })));
-  res.status(201).json(mapRequestWithProperty(rec));
+  res.status(201).json(mapRequestWithProperty(rec, maps));
 }));
 app.post('/api/forms/repairs', authRequired, requireRole('resident'), csrfRequired, asyncHandler(async (req, res) => {
   const { name = req.user.username, issue = '', photos = [], propertyId = '' } = req.body || {};
   const err = requireFields({ issue }, { issue: { min: 3 } });
   if (err) return res.status(400).json({ error: err });
-  const resolvedProperty = await resolveResidentPropertyForSubmission(req.user, { propertyId }, req);
+  const maps = await getPropertyMaps();
+  const resolvedProperty = await resolveResidentPropertyForSubmission(req.user, { propertyId }, req, maps);
   if (!resolvedProperty.ok) return res.status(resolvedProperty.status).json({ error: resolvedProperty.error });
   const property = resolvedProperty.property;
   const savedPhotos = await saveRepairPhotos(Array.isArray(photos) ? photos : []);
@@ -729,6 +841,7 @@ app.post('/api/forms/repairs', authRequired, requireRole('resident'), csrfRequir
     type: 'repair',
     name,
     address: property.label,
+    propertyId: property.id,
     issue,
     status: 'open',
     statusUpdatedAt: new Date(),
@@ -749,7 +862,7 @@ app.post('/api/forms/repairs', authRequired, requireRole('resident'), csrfRequir
     body: `${name} • ${property.label}`,
     metadata: { requestId: rec.id, requestType: 'repair', propertyId: property.id }
   })));
-  res.status(201).json(mapRequestWithProperty(rec));
+  res.status(201).json(mapRequestWithProperty(rec, maps));
 }));
 app.post('/api/forms/message', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { message = '' } = req.body || {};
@@ -764,13 +877,14 @@ app.post('/api/forms/message', authRequired, csrfRequired, asyncHandler(async (r
   res.status(201).json(rec);
 }));
 app.get('/api/requests', authRequired, asyncHandler(async (req, res) => {
+  const maps = await getPropertyMaps();
   const list = req.user.role === 'landlord'
     ? await Request.find()
     : await Request.find({ userId: req.user.id });
   if (req.user.role !== 'landlord') {
     await recordAudit('requests.view.self', { userId: req.user.id }, req);
   }
-  res.json(list.map(mapRequestWithProperty));
+  res.json(list.map((request) => mapRequestWithProperty(request, maps)));
 }));
 
 app.post('/api/requests/:id/status', authRequired, requireRole('landlord'), csrfRequired, asyncHandler(async (req, res) => {
@@ -788,7 +902,8 @@ app.post('/api/requests/:id/status', authRequired, requireRole('landlord'), csrf
     metadata: { requestId: updated.id, status: normalized }
   });
   await recordAudit('requests.status.updated', { userId: req.user.id, metadata: { requestId: updated.id, status: normalized } }, req);
-  res.json(mapRequestWithProperty(updated));
+  const maps = await getPropertyMaps();
+  res.json(mapRequestWithProperty(updated, maps));
 }));
 
 app.get('/api/community', authRequired, asyncHandler(async (req, res) => {

@@ -67,6 +67,15 @@ describe('Integration: profile, community, requests', () => {
     15000,
   );
 
+  test(
+    'resident cannot manage property catalog',
+    async () => {
+      const res = await authedPost(agent, '/api/properties', { label: 'Example Property, Ashford, Kent' });
+      expect(res.statusCode).toBe(403);
+    },
+    10000,
+  );
+
   afterAll(async () => {
     await cleanupUser(userId);
     if (closeServer) {

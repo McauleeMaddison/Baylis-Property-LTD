@@ -33,6 +33,7 @@ const migrations = [
   '0003_drop_otp_challenges.sql',
   '0004_request_status.sql',
   '0005_notifications.sql',
+  '0006_properties.sql',
 ];
 
 const runMigration = (file) => new Promise((resolve) => {

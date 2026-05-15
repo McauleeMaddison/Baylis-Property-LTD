@@ -1,5 +1,9 @@
 // Lightweight in-memory models for local/demo use when MySQL isn't available.
 // Data persists only for the life of the Node process.
+import { DEFAULT_PROPERTIES } from '../propertyCatalog.js';
+
+const clone = (obj) => JSON.parse(JSON.stringify(obj));
+
 const state = {
   users: [],
   requests: [],
@@ -8,14 +12,13 @@ const state = {
   resetTokens: [],
   notifications: [],
   auditLogs: [],
+  properties: DEFAULT_PROPERTIES.map((property) => clone(property)),
 };
 
 const nextId = (col) => {
   const arr = state[col];
   return arr.length ? Math.max(...arr.map((r) => r.id || 0)) + 1 : 1;
 };
-
-const clone = (obj) => JSON.parse(JSON.stringify(obj));
 
 export const User = {
   async findOne(filter = {}) {
@@ -58,6 +61,7 @@ export const Request = {
       type: data.type,
       name: data.name || "",
       address: data.address || "",
+      propertyId: data.propertyId || null,
       issue: data.issue || "",
       cleaningType: data.cleaningType || "",
       date: data.date || "",
@@ -80,6 +84,52 @@ export const Request = {
   async find(filter = {}) {
     if (filter.userId) return state.requests.filter((r) => r.userId === filter.userId);
     return [...state.requests];
+  },
+  async relabelProperty(propertyId, label, previousLabel = "") {
+    const oldLabel = String(previousLabel || "").trim().toLowerCase();
+    if (!propertyId) return;
+    state.requests.forEach((r) => {
+      const byId = String(r.propertyId || "") === String(propertyId);
+      const byAddress = !r.propertyId && oldLabel && String(r.address || "").trim().toLowerCase() === oldLabel;
+      if (byId || byAddress) {
+        r.address = label;
+      }
+    });
+  },
+};
+
+export const Property = {
+  async findAll() {
+    return state.properties.slice().sort((a, b) => String(a.label || "").localeCompare(String(b.label || ""))).map(clone);
+  },
+  async findById(id) {
+    if (!id) return null;
+    return state.properties.find((p) => String(p.id) === String(id)) || null;
+  },
+  async findByLabel(label) {
+    const normalized = String(label || "").trim().toLowerCase();
+    if (!normalized) return null;
+    return state.properties.find((p) => String(p.label || "").trim().toLowerCase() === normalized) || null;
+  },
+  async create({ id, label }) {
+    const property = {
+      id: String(id || "").trim(),
+      label: String(label || "").trim(),
+      createdAt: new Date(),
+    };
+    state.properties.push(property);
+    return clone(property);
+  },
+  async update(id, { label }) {
+    const property = state.properties.find((p) => String(p.id) === String(id));
+    if (!property) return null;
+    property.label = String(label || property.label || "").trim();
+    return clone(property);
+  },
+  async delete(id) {
+    const before = state.properties.length;
+    state.properties = state.properties.filter((p) => String(p.id) !== String(id));
+    return before !== state.properties.length;
   },
 };
 
@@ -207,4 +257,4 @@ export const AuditLog = {
   },
 };
 
-export const models = { User, Request, CommunityPost, Session, PasswordResetToken, Notification, AuditLog };
+export const models = { User, Request, Property, CommunityPost, Session, PasswordResetToken, Notification, AuditLog };
