@@ -385,10 +385,10 @@
     state.auditLogs.forEach((log) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${escapeHtml(fmtDateTime(log.createdAt))}</td>
-        <td><strong>${escapeHtml(log.event || "event")}</strong></td>
-        <td><span class="badge">${escapeHtml((log.severity || "info").toUpperCase())}</span></td>
-        <td>${escapeHtml(formatAuditDetails(log))}</td>
+        <td data-label="When">${escapeHtml(fmtDateTime(log.createdAt))}</td>
+        <td data-label="Event"><strong>${escapeHtml(log.event || "event")}</strong></td>
+        <td data-label="Severity"><span class="badge">${escapeHtml((log.severity || "info").toUpperCase())}</span></td>
+        <td data-label="Details">${escapeHtml(formatAuditDetails(log))}</td>
       `;
       els.auditBody.appendChild(tr);
     });
