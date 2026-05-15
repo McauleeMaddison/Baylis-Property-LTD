@@ -7,8 +7,8 @@ import { fileURLToPath } from "url";
 const app = express();
 const PORT = process.env.PORT || 5000;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.join(__dirname, "..");
-const pub  = path.join(root, "");
+const projectRoot = path.join(__dirname, "..");
+const pub  = path.join(projectRoot, "public");
 const assetsStatic = express.static(pub, { index: false });
 
 app.disable("x-powered-by");
@@ -17,7 +17,7 @@ app.use(morgan("dev"));
 
 app.use(assetsStatic);
 
-const send = (res, file) => res.sendFile(path.join(root, file));
+const send = (res, file) => res.sendFile(path.join(pub, file));
 
 app.get("/",        (req, res) => send(res, "index.html"));
 app.get("/resident",(req, res) => send(res, "resident.html"));

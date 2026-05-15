@@ -24,7 +24,7 @@ Top-level layout (recommended)
 Goals of this framework
 -----------------------
 
-- Make development reproducible via `docker-compose`.
+- Make development reproducible via `docker compose`.
 - Provide a minimal container setup for production builds.
 - Keep secrets out of source control (use `.env` locally and env management for CI/prod).
 - Track schema changes via migrations in `migrations/`.
@@ -46,13 +46,13 @@ How to use
 3. To run migrations manually:
 
    ```bash
-   node server/migrate.js migrations/0001_init.sql
+   npm --prefix server run migrate
    ```
 
 Notes for maintainers
 ---------------------
 
 - Add each schema change as a new migration file (`migrations/0002_*.sql`) and update CI to run migrations before tests/deploys.
-- For production deployment: build the `server` image using the `server/Dockerfile`, run behind a reverse proxy (NGINX) and use a managed MySQL service for reliability.
+- For production deployment: build the root `Dockerfile` image, run behind a reverse proxy (NGINX) and use a managed MySQL service for reliability.
 
 This scaffold is intentionally minimal — it provides the foundation for CI/CD, migration management, and containerized development. Extend it with tests, linter configs, and monitoring as needed for your Level 5 diploma submission.

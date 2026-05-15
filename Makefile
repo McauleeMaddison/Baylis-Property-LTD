@@ -3,14 +3,14 @@ SHELL := /bin/bash
 .PHONY: up down migrate start stop logs
 
 up:
-	docker-compose up -d --build
+	docker compose up -d --build
 
 down:
-	docker-compose down
+	docker compose down
 
 migrate:
-	@echo "Running migrations"
-	node server/migrate.js migrations/0001_init.sql
+	@echo "Running all migrations"
+	npm --prefix server run migrate
 
 start:
 	@echo "Start server locally (no docker)"
@@ -21,4 +21,4 @@ stop:
 	-kill $(shell lsof -t -i :5000)
 
 logs:
-	docker-compose logs -f
+	docker compose logs -f

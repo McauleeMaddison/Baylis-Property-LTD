@@ -10,12 +10,13 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.join(__dirname, '..');
-const uploadsRoot = path.join(root, 'uploads');
+const projectRoot = path.join(__dirname, '..');
+const publicRoot = path.join(projectRoot, 'public');
+const uploadsRoot = path.join(projectRoot, 'uploads');
 const repairUploadDir = path.join(uploadsRoot, 'repairs');
 [
-  path.join(root, '.env'),
-  path.join(root, '.env.production'),
+  path.join(projectRoot, '.env'),
+  path.join(projectRoot, '.env.production'),
   path.join(__dirname, '.env'),
   path.join(__dirname, '.env.production'),
 ].forEach((envPath) => dotenv.config({ path: envPath, override: false }));
@@ -321,8 +322,8 @@ if (isProd && FORCE_HTTPS) {
 app.use(morgan('dev'));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: false, limit: '5mb' }));
-app.use(express.static(root, { index: false }));
-app.use('/uploads', express.static(path.join(root, 'uploads')));
+app.use(express.static(publicRoot, { index: false }));
+app.use('/uploads', express.static(uploadsRoot));
 
 const rateBuckets = new Map();
 const rateLimit = (max = 100, windowMs = 60_000, keyFn = (req) => req.ip) => (req, res, next) => {
@@ -948,7 +949,7 @@ app.post('/api/community/:id/comments', authRequired, csrfRequired, asyncHandler
   res.status(201).json(post.comments[0]);
 }));
 
-const send = (res, file) => res.sendFile(path.join(root, file));
+const send = (res, file) => res.sendFile(path.join(publicRoot, file));
 
 app.get('/', asyncHandler(async (req, res) => {
   const user = await getUserFromReq(req);

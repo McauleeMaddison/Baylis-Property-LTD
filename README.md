@@ -37,9 +37,9 @@ Features
 
 Technology Stack
 ----------------
-- **Frontend**: Vanilla HTML/CSS/JS, modular scripts per page, global helpers in `js/script.js`.
+- **Frontend**: Vanilla HTML/CSS/JS, modular scripts per page, global helpers in `public/js/script.js`.
 - **Backend**: Node.js (ES modules), Express, Helmet, Morgan, `mysql2` for persistence, bcrypt for hashing.
-- **Database**: MySQL 8 (tables in `migrations/0001_init.sql`).
+- **Database**: MySQL 8 (schema managed in `migrations/*.sql`).
 - **Tooling**: Nodemon for dev, Jest/Supertest scaffolding for API tests, Cypress placeholder for e2e, Docker Compose for local MySQL.
 
 Getting Started
@@ -94,25 +94,25 @@ node scripts/mysql-init.js
 The script creates tables (`users`, `requests`, `community_posts`, `sessions`, `password_resets`) and seeds demo accounts (`resident123` / `resident123`, `landlord123` / `landlord123`).
 
 ### Manual migration / quick reset
-If you prefer to run SQL migrations directly, use the ESM-friendly migrator from the repo root:
+If you prefer to run all SQL migrations directly, run:
 ```bash
 # assumes docker compose db service is already healthy
 MYSQL_HOST=127.0.0.1 \
 MYSQL_USER=baylis_user \
 MYSQL_PASSWORD=baylis_pass \
 MYSQL_DATABASE=baylis_db \
-node server/migrate.js migrations/0001_init.sql
+npm --prefix server run migrate
 ```
 
 ### Local test workflow (repeatable)
 1. `docker compose up -d db` – start MySQL 8 with credentials from `docker-compose.yml`.
-2. Run `node server/migrate.js migrations/0001_init.sql` (or `server/scripts/mysql-init.js`) after exporting the same credentials:
+2. Run `npm --prefix server run migrate` (or `server/scripts/mysql-init.js`) after exporting the same credentials:
    ```bash
    MYSQL_HOST=127.0.0.1 \
    MYSQL_USER=baylis_user \
    MYSQL_PASSWORD=baylis_pass \
    MYSQL_DATABASE=baylis_db \
-   node server/migrate.js migrations/0001_init.sql
+   npm --prefix server run migrate
    ```
 3. Run API tests or start the server with those variables available.
 4. Stop MySQL with `docker compose down` when you’re done.
@@ -162,15 +162,17 @@ Google Sheets Integration
 Project Structure
 -----------------
 ```
-├── index.html / *.html         # Landing + dashboards
-├── css/, js/                   # Frontend assets
+├── public/
+│   ├── *.html                  # Landing + dashboards
+│   ├── css/, js/               # Frontend assets
+│   └── assets/                 # Images, logos, favicon
 ├── server/
 │   ├── index.js                # Express entry point
 │   ├── mysql.js                # DB connection
 │   ├── models/, middleware/, scripts/, tests/
 │   ├── package.json
 │   └── .env.example / .env
-├── migrations/0001_init.sql    # Schema definition
+├── migrations/*.sql            # Schema migrations
 ├── docker-compose.yml          # Local MySQL helper
 └── README.md                   # You are here
 ```
