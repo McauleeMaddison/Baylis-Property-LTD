@@ -111,6 +111,26 @@
 
     <section class="portal-grid portal-grid--resident" aria-label="Resident workspace">
       <div class="portal-column portal-column--primary">
+        <article class="dashboard-card portal-card" aria-label="Property selection">
+          <div class="section-row">
+            <h2 class="h3">My Property</h2>
+            <span class="badge" id="residentPropertyTag">Not selected</span>
+          </div>
+          <p class="muted">Select the property you live in. Cleaning and repair requests are restricted to this property.</p>
+          <div class="form-grid form-grid--align-end grid-3">
+            <label class="field grid-span-3">
+              <span>Property</span>
+              <select id="residentPropertySelect" name="propertyId" aria-describedby="residentPropertyMsg">
+                <option value="">Select property…</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-ghost btn-small" type="button" id="residentPropertySave">Save property</button>
+          </div>
+          <p id="residentPropertyMsg" class="muted" aria-live="polite"></p>
+        </article>
+
         <article class="dashboard-card portal-card">
           <h2 class="h3">Service Requests</h2>
           <p class="muted">Create cleaning and repair requests with clear details so your building team can act quickly.</p>
@@ -122,6 +142,7 @@
                 <small class="muted">Routine and move-out services</small>
               </summary>
               <form id="cleaningForm" action="/api/forms/cleaning" method="POST" class="grid-3" novalidate>
+                <input id="cleaningPropertyId" name="propertyId" type="hidden" value="" />
                 <label class="field">
                   <span>Date</span>
                   <input id="cleaningDate" name="date" type="date" required aria-describedby="cleaningMsg" />
@@ -134,10 +155,6 @@
                     <option>Deep Clean</option>
                     <option>Light Clean</option>
                   </select>
-                </label>
-                <label class="field">
-                  <span>Address</span>
-                  <input id="cleaningAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required aria-describedby="cleaningMsg" />
                 </label>
                 <div class="grid-span-3 form-actions">
                   <button class="btn btn-ghost" type="reset">Reset</button>
@@ -152,7 +169,8 @@
                 <span>New Repair Request</span>
                 <small class="muted">Maintenance and urgent issues</small>
               </summary>
-              <form id="repairForm" action="/api/forms/repair" method="POST" class="grid-3" novalidate>
+              <form id="repairForm" action="/api/forms/repairs" method="POST" class="grid-3" novalidate>
+                <input id="repairPropertyId" name="propertyId" type="hidden" value="" />
                 <label class="field grid-span-3">
                   <span>Issue</span>
                   <textarea id="repairIssue" name="issue" rows="3" placeholder="Describe the problem…" required aria-describedby="repairMsg"></textarea>
@@ -161,10 +179,6 @@
                   <span>Photos (optional)</span>
                   <input id="repairPhotos" name="photos" type="file" accept="image/*" multiple />
                   <small class="muted">Up to 4 images (max 2MB each).</small>
-                </label>
-                <label class="field">
-                  <span>Address</span>
-                  <input id="repairAddress" name="address" type="text" placeholder="e.g. Flat 3B, 10 Baylis St" required aria-describedby="repairMsg" />
                 </label>
                 <div class="grid-span-3 form-actions">
                   <button class="btn btn-ghost" type="reset">Reset</button>
@@ -208,7 +222,7 @@
           <ul id="myNotifications" class="submission-log portal-scroll" aria-live="polite"><li class="muted">Loading…</li></ul>
         </article>
 
-        <article class="dashboard-card portal-card">
+        <article class="dashboard-card portal-card" id="requests">
           <h2 class="h3">Request History</h2>
           <div class="portal-list-grid">
             <section>

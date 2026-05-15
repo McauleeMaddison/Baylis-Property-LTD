@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { pingDb } from './mysql.js';
+import { listProperties, findPropertyById, findPropertyByAddress } from './propertyCatalog.js';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 
@@ -189,6 +190,44 @@ const mapNotification = (n) => {
     createdAt: n.created_at || n.createdAt || null,
   };
 };
+
+const mapRequestWithProperty = (request) => {
+  const property = findPropertyByAddress(request?.address || '');
+  return {
+    ...request,
+    propertyId: property?.id || null,
+    propertyLabel: property?.label || '',
+  };
+};
+
+const getResidentProperty = (user) => {
+  const propertyId = user?.profile?.propertyId ? String(user.profile.propertyId).trim() : '';
+  if (!propertyId) return null;
+  return findPropertyById(propertyId);
+};
+
+async function resolveResidentPropertyForSubmission(user, body = {}, req = null) {
+  const profilePropertyId = user?.profile?.propertyId ? String(user.profile.propertyId).trim() : '';
+  const requestedPropertyId = body?.propertyId ? String(body.propertyId).trim() : '';
+  const selectedPropertyId = requestedPropertyId || profilePropertyId;
+  if (!selectedPropertyId) {
+    return { ok: false, status: 400, error: 'Select your assigned property before submitting requests.' };
+  }
+  const property = findPropertyById(selectedPropertyId);
+  if (!property) {
+    return { ok: false, status: 400, error: 'Selected property is invalid.' };
+  }
+  if (profilePropertyId && profilePropertyId !== property.id) {
+    return { ok: false, status: 403, error: 'You can only submit requests for your selected property.' };
+  }
+  if (!profilePropertyId) {
+    user.profile = user.profile || {};
+    user.profile.propertyId = property.id;
+    await user.save();
+    await recordAudit('profile.property.selected', { userId: user.id, metadata: { propertyId: property.id, source: 'form_submission' } }, req);
+  }
+  return { ok: true, property };
+}
 
 async function issuePasswordReset(user) {
   await PasswordResetToken.deleteExpired();
@@ -596,6 +635,25 @@ app.post('/api/profile/about', authRequired, csrfRequired, asyncHandler(async (r
   await req.user.save();
   res.json({ user: publicUser(req.user) });
 }));
+app.get('/api/properties', authRequired, asyncHandler(async (req, res) => {
+  const properties = listProperties();
+  const selected = getResidentProperty(req.user);
+  res.json({
+    properties,
+    selectedPropertyId: selected?.id || null,
+    selectedPropertyLabel: selected?.label || '',
+  });
+}));
+app.post('/api/profile/property', authRequired, requireRole('resident'), csrfRequired, asyncHandler(async (req, res) => {
+  const propertyId = String(req.body?.propertyId || '').trim();
+  const property = findPropertyById(propertyId);
+  if (!property) return res.status(400).json({ error: 'Invalid property selection.' });
+  req.user.profile = req.user.profile || {};
+  req.user.profile.propertyId = property.id;
+  await req.user.save();
+  await recordAudit('profile.property.selected', { userId: req.user.id, metadata: { propertyId: property.id } }, req);
+  res.json({ ok: true, property, user: publicUser(req.user) });
+}));
 app.post('/api/profile/contact', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { email = '', phone = '', preferred = 'email' } = req.body || {};
   req.user.contact.email = email;
@@ -618,56 +676,80 @@ app.post('/api/settings', authRequired, csrfRequired, asyncHandler(async (req, r
 }));
 app.get('/api/profile/activity', authRequired, asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const userReqs = await Request.find({ userId });
+  const userReqs = (await Request.find({ userId })).map(mapRequestWithProperty);
   const userPosts = await CommunityPost.find({ userId });
   const notifications = await Notification.findByUserId(userId, { limit: 20 });
   res.json({ requests: userReqs, posts: userPosts, notifications: notifications.map(mapNotification) });
 }));
 
-app.post('/api/forms/cleaning', authRequired, csrfRequired, asyncHandler(async (req, res) => {
-  const { name = req.user.username, address = '', date = '', type = '' } = req.body || {};
-  const err = requireFields({ address, date, type }, { address: { min: 3 }, date: { min: 2 }, type: { min: 2 } });
+app.post('/api/forms/cleaning', authRequired, requireRole('resident'), csrfRequired, asyncHandler(async (req, res) => {
+  const { name = req.user.username, date = '', type = '', propertyId = '' } = req.body || {};
+  const err = requireFields({ date, type }, { date: { min: 2 }, type: { min: 2 } });
   if (err) return res.status(400).json({ error: err });
-  const rec = await Request.create({ userId: req.user.id, type: 'cleaning', name, address, date, cleaningType: type, status: 'open', statusUpdatedAt: new Date() });
+  const resolvedProperty = await resolveResidentPropertyForSubmission(req.user, { propertyId }, req);
+  if (!resolvedProperty.ok) return res.status(resolvedProperty.status).json({ error: resolvedProperty.error });
+  const property = resolvedProperty.property;
+  const rec = await Request.create({
+    userId: req.user.id,
+    type: 'cleaning',
+    name,
+    address: property.label,
+    date,
+    cleaningType: type,
+    status: 'open',
+    statusUpdatedAt: new Date()
+  });
   req.user.stats.requests = (req.user.stats.requests || 0) + 1;
   await req.user.save();
   await createNotification(req.user.id, {
     type: 'request_created',
     title: 'Cleaning request submitted',
-    body: `${type} • ${address}`,
-    metadata: { requestId: rec.id, requestType: 'cleaning' }
+    body: `${type} • ${property.label}`,
+    metadata: { requestId: rec.id, requestType: 'cleaning', propertyId: property.id }
   });
   const landlords = await User.findAll({ role: 'landlord' });
   await Promise.all(landlords.map((l) => createNotification(l.id, {
     type: 'request_created',
     title: 'New cleaning request',
-    body: `${name} • ${address}`,
-    metadata: { requestId: rec.id, requestType: 'cleaning' }
+    body: `${name} • ${property.label}`,
+    metadata: { requestId: rec.id, requestType: 'cleaning', propertyId: property.id }
   })));
-  res.status(201).json(rec);
+  res.status(201).json(mapRequestWithProperty(rec));
 }));
-app.post('/api/forms/repairs', authRequired, csrfRequired, asyncHandler(async (req, res) => {
-  const { name = req.user.username, address = '', issue = '', photos = [] } = req.body || {};
-  const err = requireFields({ address, issue }, { address: { min: 3 }, issue: { min: 3 } });
+app.post('/api/forms/repairs', authRequired, requireRole('resident'), csrfRequired, asyncHandler(async (req, res) => {
+  const { name = req.user.username, issue = '', photos = [], propertyId = '' } = req.body || {};
+  const err = requireFields({ issue }, { issue: { min: 3 } });
   if (err) return res.status(400).json({ error: err });
+  const resolvedProperty = await resolveResidentPropertyForSubmission(req.user, { propertyId }, req);
+  if (!resolvedProperty.ok) return res.status(resolvedProperty.status).json({ error: resolvedProperty.error });
+  const property = resolvedProperty.property;
   const savedPhotos = await saveRepairPhotos(Array.isArray(photos) ? photos : []);
-  const rec = await Request.create({ userId: req.user.id, type: 'repair', name, address, issue, status: 'open', statusUpdatedAt: new Date(), photos: savedPhotos });
+  const rec = await Request.create({
+    userId: req.user.id,
+    type: 'repair',
+    name,
+    address: property.label,
+    issue,
+    status: 'open',
+    statusUpdatedAt: new Date(),
+    photos: savedPhotos
+  });
   req.user.stats.requests = (req.user.stats.requests || 0) + 1;
   await req.user.save();
   await createNotification(req.user.id, {
     type: 'request_created',
     title: 'Repair request submitted',
     body: issue.slice(0, 140),
-    metadata: { requestId: rec.id, requestType: 'repair' }
+    metadata: { requestId: rec.id, requestType: 'repair', propertyId: property.id }
   });
   const landlords = await User.findAll({ role: 'landlord' });
   await Promise.all(landlords.map((l) => createNotification(l.id, {
     type: 'request_created',
     title: 'New repair request',
-    body: `${name} • ${address}`,
-    metadata: { requestId: rec.id, requestType: 'repair' }
+    body: `${name} • ${property.label}`,
+    metadata: { requestId: rec.id, requestType: 'repair', propertyId: property.id }
   })));
-  res.status(201).json(rec);
+  res.status(201).json(mapRequestWithProperty(rec));
 }));
 app.post('/api/forms/message', authRequired, csrfRequired, asyncHandler(async (req, res) => {
   const { message = '' } = req.body || {};
@@ -688,7 +770,7 @@ app.get('/api/requests', authRequired, asyncHandler(async (req, res) => {
   if (req.user.role !== 'landlord') {
     await recordAudit('requests.view.self', { userId: req.user.id }, req);
   }
-  res.json(list);
+  res.json(list.map(mapRequestWithProperty));
 }));
 
 app.post('/api/requests/:id/status', authRequired, requireRole('landlord'), csrfRequired, asyncHandler(async (req, res) => {
@@ -706,7 +788,7 @@ app.post('/api/requests/:id/status', authRequired, requireRole('landlord'), csrf
     metadata: { requestId: updated.id, status: normalized }
   });
   await recordAudit('requests.status.updated', { userId: req.user.id, metadata: { requestId: updated.id, status: normalized } }, req);
-  res.json(updated);
+  res.json(mapRequestWithProperty(updated));
 }));
 
 app.get('/api/community', authRequired, asyncHandler(async (req, res) => {

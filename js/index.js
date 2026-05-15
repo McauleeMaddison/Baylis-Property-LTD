@@ -6,6 +6,14 @@
   const API_BASE = body.getAttribute("data-api-base") || window.API_BASE || "/api";
   const els = {
     welcome: document.getElementById("userWelcome"),
+    propertySelect: document.getElementById("residentPropertySelect"),
+    propertySave: document.getElementById("residentPropertySave"),
+    propertyMsg: document.getElementById("residentPropertyMsg"),
+    propertyTag: document.getElementById("residentPropertyTag"),
+    cleaningPropertyId: document.getElementById("cleaningPropertyId"),
+    repairPropertyId: document.getElementById("repairPropertyId"),
+    cleaningSubmit: document.getElementById("cleaningSubmit"),
+    repairSubmit: document.getElementById("repairSubmit"),
     cleaning: document.getElementById("myCleaning"),
     repairs: document.getElementById("myRepairs"),
     posts: document.getElementById("myPosts"),
@@ -20,6 +28,8 @@
 
   const state = {
     user: null,
+    properties: [],
+    selectedPropertyId: "",
     requests: [],
     posts: [],
     notifications: [],
@@ -45,7 +55,14 @@
       : await fetch(`${API_BASE}${path}`, opts);
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      throw new Error(text || `Request failed: ${res.status}`);
+      let message = text || `Request failed: ${res.status}`;
+      if (text) {
+        try {
+          const parsed = JSON.parse(text);
+          if (parsed?.error) message = parsed.error;
+        } catch (_) {}
+      }
+      throw new Error(message);
     }
     if (res.status === 204) return null;
     return res.json();
@@ -66,6 +83,94 @@
       els.welcome.textContent = display;
     }
     return data.user;
+  }
+
+  function getPropertyById(propertyId) {
+    const id = String(propertyId || "").trim();
+    if (!id) return null;
+    return state.properties.find((p) => p.id === id) || null;
+  }
+
+  function setPropertyStatusMessage(message) {
+    if (!els.propertyMsg) return;
+    els.propertyMsg.textContent = message || "";
+  }
+
+  function updateFormPropertyBindings(propertyId) {
+    const id = String(propertyId || "").trim();
+    [els.cleaningPropertyId, els.repairPropertyId].forEach((input) => {
+      if (input) input.value = id;
+    });
+    const submitDisabled = !id;
+    if (els.cleaningSubmit) els.cleaningSubmit.disabled = submitDisabled;
+    if (els.repairSubmit) els.repairSubmit.disabled = submitDisabled;
+  }
+
+  function applySelectedProperty(propertyId) {
+    const id = String(propertyId || "").trim();
+    const property = getPropertyById(id);
+    state.selectedPropertyId = property ? property.id : "";
+    if (els.propertySelect) els.propertySelect.value = state.selectedPropertyId;
+    updateFormPropertyBindings(state.selectedPropertyId);
+    if (els.propertyTag) {
+      els.propertyTag.textContent = property ? property.label : "Not selected";
+    }
+  }
+
+  function renderPropertyOptions() {
+    if (!els.propertySelect) return;
+    const current = state.selectedPropertyId;
+    const options = ['<option value="">Select property…</option>']
+      .concat(state.properties.map((property) => `<option value="${property.id}">${escapeHtml(property.label)}</option>`));
+    els.propertySelect.innerHTML = options.join("");
+    els.propertySelect.value = current;
+  }
+
+  async function savePropertySelection({ showToast = false } = {}) {
+    const propertyId = String(els.propertySelect?.value || "").trim();
+    if (!propertyId) {
+      applySelectedProperty("");
+      setPropertyStatusMessage("Select your property before submitting requests.");
+      return;
+    }
+    const property = getPropertyById(propertyId);
+    if (!property) {
+      setPropertyStatusMessage("Selected property is invalid.");
+      return;
+    }
+    if (els.propertySave) els.propertySave.disabled = true;
+    try {
+      const data = await fetchJSON("/profile/property", { method: "POST", body: { propertyId } });
+      const savedProperty = data?.property || property;
+      if (data?.user) state.user = data.user;
+      applySelectedProperty(savedProperty.id);
+      setPropertyStatusMessage("Property saved. New requests will use this address.");
+      if (showToast && typeof window.showToast === "function") {
+        window.showToast("✅ Property updated");
+      }
+    } catch (err) {
+      setPropertyStatusMessage(err?.message || "Unable to save property.");
+      applySelectedProperty(state.user?.profile?.propertyId || "");
+      if (showToast && typeof window.showToast === "function") {
+        window.showToast("❌ Unable to save property");
+      }
+    } finally {
+      if (els.propertySave) els.propertySave.disabled = false;
+    }
+  }
+
+  async function loadProperties() {
+    const data = await fetchJSON("/properties");
+    state.properties = Array.isArray(data?.properties) ? data.properties : [];
+    const selectedPropertyId = String(data?.selectedPropertyId || state.user?.profile?.propertyId || "").trim();
+    state.selectedPropertyId = selectedPropertyId;
+    renderPropertyOptions();
+    applySelectedProperty(selectedPropertyId);
+    if (selectedPropertyId) {
+      setPropertyStatusMessage("Requests are locked to your selected property.");
+    } else {
+      setPropertyStatusMessage("Select your property before submitting requests.");
+    }
   }
 
   async function loadActivity() {
@@ -193,6 +298,7 @@
       <div style="display:flex;justify-content:space-between;gap:.75rem;">
         <div>
           <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong><br/>
+          <span class="muted">${escapeHtml(req.propertyLabel || req.address || "Property not set")}</span><br/>
           <span class="muted">${type}</span>
           <div class="muted">${sla}</div>
         </div>
@@ -215,6 +321,7 @@
       <div style="display:flex;justify-content:space-between;gap:.75rem;">
         <div>
           <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong><br/>
+          <span class="muted">${escapeHtml(req.propertyLabel || req.address || "Property not set")}</span><br/>
           <span class="muted">${escapeHtml(issue)}</span>
           <div class="muted">${sla}</div>
           ${photos}
@@ -331,6 +438,25 @@
     }
   }
 
+  function bindPropertyActions() {
+    if (els.propertySelect) {
+      els.propertySelect.addEventListener("change", async () => {
+        applySelectedProperty(els.propertySelect.value);
+        if (!els.propertySelect.value) {
+          setPropertyStatusMessage("Select your property before submitting requests.");
+          return;
+        }
+        setPropertyStatusMessage("Saving property...");
+        await savePropertySelection();
+      });
+    }
+    if (els.propertySave) {
+      els.propertySave.addEventListener("click", async () => {
+        await savePropertySelection({ showToast: true });
+      });
+    }
+  }
+
   function revealFormPanel(hashOrSelector) {
     const selector = String(hashOrSelector || "").trim();
     if (!selector || selector === "#") return;
@@ -365,9 +491,9 @@
         target: ".header"
       },
       {
-        title: "Submit a request",
-        body: "Create cleaning or repair requests with a few quick details.",
-        target: "#cleaningForm"
+        title: "Select your property first",
+        body: "Requests are restricted to your selected property to keep updates accurate.",
+        target: "#residentPropertySelect"
       },
       {
         title: "Stay on top of updates",
@@ -451,8 +577,10 @@
     try {
       if (els.year) els.year.textContent = String(new Date().getFullYear());
       await ensureUser();
+      await loadProperties();
       await loadActivity();
       listenForFormSuccess();
+      bindPropertyActions();
       bindPanelNavigation();
       maybeStartTour();
       bindNotificationActions();

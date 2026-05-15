@@ -42,13 +42,27 @@ describe('Integration: profile, community, requests', () => {
   );
 
   test(
-    'create a cleaning request and fetch requests',
+    'create a cleaning request for selected property and fetch requests',
     async () => {
-      const res = await authedPost(agent, '/api/forms/cleaning', { address: '123 Road', date: '2025-12-02', type: 'regular' });
+      const propertiesRes = await agent.get('/api/properties');
+      expect(propertiesRes.statusCode).toBe(200);
+      expect(Array.isArray(propertiesRes.body.properties)).toBe(true);
+      expect(propertiesRes.body.properties.length).toBeGreaterThan(0);
+      const property = propertiesRes.body.properties.find((p) => p.id === 'crownfield-1-3') || propertiesRes.body.properties[0];
+
+      const profileRes = await authedPost(agent, '/api/profile/property', { propertyId: property.id });
+      expect(profileRes.statusCode).toBe(200);
+      expect(profileRes.body.property.id).toBe(property.id);
+
+      const res = await authedPost(agent, '/api/forms/cleaning', { propertyId: property.id, date: '2025-12-02', type: 'regular' });
       expect(res.statusCode).toBe(201);
+      expect(res.body.propertyId).toBe(property.id);
+      expect(res.body.propertyLabel).toBe(property.label);
+
       const listRes = await agent.get('/api/requests');
       expect(listRes.statusCode).toBe(200);
       expect(Array.isArray(listRes.body)).toBe(true);
+      expect(listRes.body[0].propertyId).toBe(property.id);
     },
     15000,
   );

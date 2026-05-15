@@ -73,7 +73,8 @@
       </div>
       <div class="portal-hero-actions">
         <a class="btn secondary btn-small" href="#reqSearch">Find requests</a>
-        <a class="btn secondary btn-small" href="#allCleaningRequests">Request queue</a>
+        <a class="btn secondary btn-small" href="#allRequests">Request queue</a>
+        <a class="btn secondary btn-small" href="#propertySummary">Properties</a>
         <a class="btn btn-small" href="#auditTableBody">Audit log</a>
       </div>
     </header>
@@ -129,6 +130,12 @@
             <option value="done">Done</option>
           </select>
         </label>
+        <label for="filterProperty" class="field">
+          <span>Property</span>
+          <select id="filterProperty" title="Filter by property">
+            <option value="all" selected>All properties</option>
+          </select>
+        </label>
       </div>
       <div class="form-actions">
         <button type="button" id="btnRefresh" class="btn btn-ghost">Refresh</button>
@@ -140,25 +147,21 @@
       <div class="portal-column portal-column--primary">
         <article class="dashboard-card portal-card">
           <h2 class="h3">Request Queue</h2>
-          <p class="muted">Review cleaning and repair items, then update statuses directly from each request.</p>
-          <div class="portal-list-grid portal-list-grid--requests">
-            <section>
-              <h3 class="h4">Cleaning Requests</h3>
-              <ul id="allCleaningRequests" class="submission-log portal-scroll" aria-live="polite">
-                <li class="muted">Loading…</li>
-              </ul>
-            </section>
-            <section>
-              <h3 class="h4">Repair Requests</h3>
-              <ul id="allRepairRequests" class="submission-log portal-scroll" aria-live="polite">
-                <li class="muted">Loading…</li>
-              </ul>
-            </section>
-          </div>
+          <p class="muted">All resident requests across your properties. Filter by property, type, or status and update items inline.</p>
+          <ul id="allRequests" class="submission-log portal-scroll" aria-live="polite">
+            <li class="muted">Loading…</li>
+          </ul>
         </article>
       </div>
 
       <aside class="portal-column portal-column--secondary" aria-label="Communications">
+        <article class="dashboard-card portal-card" aria-label="Properties">
+          <h2 class="h3">Properties</h2>
+          <ul id="propertySummary" class="submission-log portal-scroll" aria-live="polite">
+            <li class="muted">Loading…</li>
+          </ul>
+        </article>
+
         <article class="dashboard-card portal-card" aria-label="Community posts">
           <h2 class="h3">Community Posts</h2>
           <ul id="allCommunityPosts" class="post-feed portal-scroll" aria-live="polite">
