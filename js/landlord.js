@@ -219,16 +219,17 @@
       ? `${req.cleaningType || "Cleaning"} • ${fmtDate(req.date || req.createdAt)}`
       : (req.issue || "Repair request");
     const photos = req.type === "repair" ? renderPhotoStrip(req.photos || []) : "";
+    const typeClass = req.type === "cleaning" ? "request-entry--cleaning" : "request-entry--repair";
 
     return `
-      <div>
+      <div class="request-entry request-entry--landlord ${typeClass}">
         <div class="section-row">
           <strong>${escapeHtml(req.name || "Resident")}</strong>
           <span class="chip ${req.type === "cleaning" ? "cleaning" : "repair"}">${escapeHtml(req.type || "request")}</span>
         </div>
-        <div class="muted">${escapeHtml(req.propertyLabel || "Unmapped property")}</div>
-        <div class="muted">${escapeHtml(detail)}</div>
-        <div class="muted">${formatSla(req)}</div>
+        <div class="request-entry-property">${escapeHtml(req.propertyLabel || "Unmapped property")}</div>
+        <div class="request-entry-detail">${escapeHtml(detail)}</div>
+        <div class="request-entry-detail">${formatSla(req)}</div>
         ${photos}
         <div class="request-actions">
           <span class="badge ${badgeClass}">Status: ${escapeHtml(status.replace("_", " "))}</span>

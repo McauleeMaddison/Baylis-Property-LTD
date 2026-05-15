@@ -295,16 +295,18 @@
     const sla = formatSla(req);
     const badgeClass = isOverdue(req) ? "status-overdue" : `status-${status}`;
     return `
-      <div style="display:flex;justify-content:space-between;gap:.75rem;">
-        <div>
-          <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong><br/>
-          <span class="muted">${escapeHtml(req.propertyLabel || req.address || "Property not set")}</span><br/>
-          <span class="muted">${type}</span>
-          <div class="muted">${sla}</div>
-        </div>
-        <div style="text-align:right;">
-          <span class="muted">${fmtDate(date)}</span><br/>
-          <span class="badge ${badgeClass}">[${status.replace("_", " ")}]</span>
+      <div class="request-entry request-entry--cleaning">
+        <div class="request-entry-head">
+          <div class="request-entry-main">
+            <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong>
+            <span class="request-entry-property">${escapeHtml(req.propertyLabel || req.address || "Property not set")}</span>
+            <span class="request-entry-detail">${escapeHtml(type)}</span>
+            <span class="request-entry-detail">${escapeHtml(sla)}</span>
+          </div>
+          <div class="request-entry-status">
+            <span class="request-entry-time">${fmtDate(date)}</span>
+            <span class="badge ${badgeClass}">[${status.replace("_", " ")}]</span>
+          </div>
         </div>
       </div>
     `;
@@ -318,17 +320,19 @@
     const photos = renderPhotoStrip(req.photos || []);
     const badgeClass = isOverdue(req) ? "status-overdue" : `status-${status}`;
     return `
-      <div style="display:flex;justify-content:space-between;gap:.75rem;">
-        <div>
-          <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong><br/>
-          <span class="muted">${escapeHtml(req.propertyLabel || req.address || "Property not set")}</span><br/>
-          <span class="muted">${escapeHtml(issue)}</span>
-          <div class="muted">${sla}</div>
-          ${photos}
-        </div>
-        <div style="text-align:right;">
-          <span class="muted">${fmtDate(when)}</span><br/>
-          <span class="badge ${badgeClass}">[${status.replace("_", " ")}]</span>
+      <div class="request-entry request-entry--repair">
+        <div class="request-entry-head">
+          <div class="request-entry-main">
+            <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong>
+            <span class="request-entry-property">${escapeHtml(req.propertyLabel || req.address || "Property not set")}</span>
+            <span class="request-entry-detail">${escapeHtml(issue)}</span>
+            <span class="request-entry-detail">${escapeHtml(sla)}</span>
+            ${photos}
+          </div>
+          <div class="request-entry-status">
+            <span class="request-entry-time">${fmtDate(when)}</span>
+            <span class="badge ${badgeClass}">[${status.replace("_", " ")}]</span>
+          </div>
         </div>
       </div>
     `;
