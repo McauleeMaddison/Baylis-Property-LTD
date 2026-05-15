@@ -33,7 +33,7 @@
 
 </head>
 
-<body class="page page--register" data-api-base="/api">
+<body class="page page--register auth-body" data-api-base="/api">
   <a class="skip-link" href="#content">Skip to main content</a>
   <!-- Header / Navbar -->
   <header class="site-header" id="mainHeader">
@@ -78,9 +78,9 @@
 
   <!-- Main -->
   <main role="main" id="content" class="container auth-shell" tabindex="-1">
-    <section class="auth-grid" aria-label="Create your account">
+    <section class="auth-grid auth-grid--register" aria-label="Create your account">
       <!-- Brand side -->
-      <aside class="brand-panel">
+      <aside class="brand-panel brand-panel--register">
         <p><img src="assets/logo.svg" alt="Baylis Property LTD" class="brand-logo" /> <strong>Baylis Property LTD</strong></p>
         <h1 class="h2">Create your account</h1>
         <p class="muted brand-tagline">Join Baylis Properties and start managing your home life.</p>
@@ -93,11 +93,11 @@
       </aside>
 
       <!-- Card -->
-      <section class="auth-card">
+      <section class="auth-card auth-card--register">
         <h2>Register</h2>
         <p class="muted">It’s quick and secure.</p>
 
-        <form id="registerForm" method="POST" action="/api/auth/register" novalidate>
+        <form id="registerForm" class="register-form" method="POST" action="/api/auth/register" novalidate>
           <div class="field">
             <label for="regUsername">Username</label>
             <input id="regUsername" name="username" type="text" placeholder="e.g. username" minlength="3" required autocomplete="username" aria-describedby="registerMsg" />

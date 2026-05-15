@@ -60,8 +60,8 @@
   </header>
 
   <main role="main" class="auth-shell container" id="content" tabindex="-1">
-    <section class="auth-grid" aria-label="Sign in">
-      <aside class="brand-panel">
+    <section class="auth-grid auth-grid--login" aria-label="Sign in">
+      <aside class="brand-panel brand-panel--login">
         <img src="assets/logo.svg" alt="" class="brand-logo" />
         <h1 class="h2">Welcome back</h1>
         <p class="muted">Sign in to manage properties, requests, and your community.</p>
@@ -73,53 +73,68 @@
         <img src="assets/IMG_4432.jpg" alt="Baylis Property's wordmark" class="brand-showcase" loading="lazy" />
       </aside>
 
-      <section class="auth-card">
-        <header>
-          <div>
-            <p class="muted">Baylis Property LTD</p>
-            <h2>Sign in</h2>
+      <section class="auth-card auth-card--login">
+        <div class="login-surface">
+          <div class="login-surface__form">
+            <header>
+              <div>
+                <p class="muted">Baylis Property LTD</p>
+                <h2>Sign in</h2>
+              </div>
+            </header>
+
+            <div id="loginMsg" class="form-msg" role="status" aria-live="polite"></div>
+
+            <form id="loginForm" class="login-form" method="POST" action="/api/auth/login" novalidate>
+              <div class="login-form__stack">
+                <label class="field" for="username">
+                  <span>Username or Email</span>
+                  <input id="username" name="username" type="text" placeholder="e.g. yourname or name@email.com" autocomplete="username" required aria-describedby="loginMsg" />
+                </label>
+                <label class="field" for="roleSelect">
+                  <span>Role</span>
+                  <select id="roleSelect" name="role" required>
+                    <option value="resident">Resident</option>
+                    <option value="landlord">Landlord</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="field field--password">
+                <span>Password <small id="capsWarning" class="caps-warning">Caps lock is on</small></span>
+                <div class="input-group">
+                  <input id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required aria-describedby="loginMsg" />
+                  <button type="button" id="showPasswordBtn" class="btn secondary" aria-pressed="false">Show</button>
+                </div>
+              </label>
+
+              <div class="login-form__meta">
+                <label class="checkbox">
+                  <input id="rememberMe" type="checkbox" />
+                  <span>Remember me</span>
+                </label>
+                <button id="forgotPassword" class="btn btn-ghost" type="button">Forgot password?</button>
+              </div>
+
+              <div class="login-form__actions">
+                <button id="submitBtn" type="submit" class="btn">Sign in</button>
+                <a class="btn btn-ghost" href="register.html">Create account</a>
+              </div>
+            </form>
           </div>
-        </header>
 
-        <div id="loginMsg" class="form-msg" role="status" aria-live="polite"></div>
-
-        <form id="loginForm" method="POST" action="/api/auth/login" novalidate>
-          <div>
-            <label class="field" for="username">
-              <span>Username</span>
-              <input id="username" name="username" type="text" placeholder="e.g. username" autocomplete="username" required aria-describedby="loginMsg" />
-            </label>
-            <label class="field" for="roleSelect">
-              <span>Role</span>
-              <select id="roleSelect" name="role" required>
-                <option value="resident">Resident</option>
-                <option value="landlord">Landlord</option>
-              </select>
-            </label>
-          </div>
-
-          <label>
-            <span>Password <small> Caps lock is on </small></span>
-            <div class="input-group">
-              <input id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required aria-describedby="loginMsg" />
-              <button type="button" id="showPasswordBtn" class="btn secondary" aria-pressed="false">Show</button>
+          <aside class="login-surface__promo" aria-label="Create account prompt">
+            <p class="login-promo__eyebrow">Member Access</p>
+            <h3>Start Your Journey</h3>
+            <p>Create your Baylis account to manage requests, updates, and property communications in one place.</p>
+            <div class="login-promo__tags" aria-hidden="true">
+              <span>Resident</span>
+              <span>Landlord</span>
+              <span>Community</span>
             </div>
-          </label>
-
-          <div>
-            <label class="checkbox">
-              <input id="rememberMe" type="checkbox" />
-              <span>Remember me</span>
-            </label>
-            <button id="forgotPassword" class="btn btn-ghost" type="button">Forgot password?</button>
-          </div>
-
-          <div>
-            <button id="submitBtn" type="submit" class="btn">Sign in</button>
-            <a class="btn btn-ghost" href="register.html">Create account</a>
-          </div>
-        </form>
-
+            <a class="btn login-promo__cta" href="register.html">Sign up</a>
+          </aside>
+        </div>
       </section>
     </section>
   </main>
