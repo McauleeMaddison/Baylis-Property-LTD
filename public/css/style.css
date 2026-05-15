@@ -1273,6 +1273,58 @@ body.page--register.dark {
   box-shadow: 0 7px 20px rgba(15, 23, 42, 0.06);
   backdrop-filter: blur(8px) saturate(120%);
 }
+.page--login .nav,
+.page--register .nav {
+  padding-block: .45rem;
+}
+.page--login .nav-inner,
+.page--register .nav-inner {
+  border: 1px solid #d8e1eb;
+  border-radius: 14px;
+  padding: .4rem .62rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(246, 250, 253, 0.86) 100%);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+.page--login .logo,
+.page--register .logo {
+  gap: .56rem;
+}
+.page--login .logo span,
+.page--register .logo span {
+  font-size: .98rem;
+}
+.page--login .nav-links,
+.page--register .nav-links {
+  gap: .4rem;
+}
+.page--login .nav-links a,
+.page--register .nav-links a {
+  padding: .42rem .78rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  color: #334155;
+}
+.page--login .nav-links a:hover,
+.page--register .nav-links a:hover {
+  background: #f0f5fb;
+  border-color: #d2dce8;
+  color: #1e3148;
+  text-decoration: none;
+}
+.page--login .nav-links a[aria-current="page"],
+.page--register .nav-links a[aria-current="page"] {
+  color: #f8fafc;
+  border-color: #0f172a;
+  background: linear-gradient(180deg, #1f2937 0%, #0f172a 100%);
+  box-shadow: 0 7px 14px rgba(15, 23, 42, 0.2);
+}
+.page--login .nav-links a[aria-current="page"]:hover,
+.page--register .nav-links a[aria-current="page"]:hover {
+  color: #f8fafc;
+  border-color: #0f172a;
+  background: linear-gradient(180deg, #243345 0%, #111c2f 100%);
+}
 .page--login .auth-shell,
 .page--register .auth-shell {
   max-width: 1136px;
@@ -1701,6 +1753,19 @@ body.page--register.dark {
   .page--login .brand-panel--login,
   .page--register .brand-panel--register {
     order: 2;
+  }
+}
+@media (max-width: 768px) {
+  .page--login .nav-inner,
+  .page--register .nav-inner {
+    border-radius: 11px;
+    padding: .3rem .4rem;
+  }
+  .page--login .nav-links,
+  .page--register .nav-links {
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid #dbe4ef;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.09);
   }
 }
 @media (max-width: 760px) {
