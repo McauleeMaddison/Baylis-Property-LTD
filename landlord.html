@@ -64,52 +64,56 @@
     </nav>
   </header>
 
-  <main role="main" id="content" class="container page-main" tabindex="-1">
-    <header class="header">
-      <h1 class="h1">Landlord Portal</h1>
-      <p class="muted">Welcome, <strong id="userWelcome">Landlord</strong>. Manage resident requests, update statuses, and oversee building communications.</p>
+  <main role="main" id="content" class="container page-main portal-shell portal-shell--landlord" tabindex="-1">
+    <header class="header portal-hero">
+      <div>
+        <p class="eyebrow">Property Operations</p>
+        <h1 class="h1">Landlord Portal</h1>
+        <p class="muted">Welcome, <strong id="userWelcome">Landlord</strong>. Manage resident requests, update statuses, and oversee building communications.</p>
+      </div>
+      <div class="portal-hero-actions">
+        <a class="btn secondary btn-small" href="#reqSearch">Find requests</a>
+        <a class="btn secondary btn-small" href="#allCleaningRequests">Request queue</a>
+        <a class="btn btn-small" href="#auditTableBody">Audit log</a>
+      </div>
     </header>
 
-    <section class="dashboard-cards" aria-label="Overview metrics">
-      <article class="dashboard-card" aria-labelledby="mOpen">
-        <h3 id="mOpen">Open Requests</h3>
+    <section class="portal-kpis" aria-label="Overview metrics">
+      <article class="portal-kpi">
+        <h2>Open</h2>
         <div class="metric" id="metricOpen">—</div>
-        <p class="muted">Requests not yet started</p>
+        <p class="muted">Not started</p>
       </article>
-
-      <article class="dashboard-card" aria-labelledby="mProg">
-        <h3 id="mProg">In Progress</h3>
+      <article class="portal-kpi">
+        <h2>In Progress</h2>
         <div class="metric" id="metricInProgress">—</div>
-        <p class="muted">Work currently underway</p>
+        <p class="muted">Currently active</p>
       </article>
-
-      <article class="dashboard-card" aria-labelledby="mDone">
-        <h3 id="mDone">Completed</h3>
+      <article class="portal-kpi">
+        <h2>Completed</h2>
         <div class="metric" id="metricDone">—</div>
-        <p class="muted">Resolved and closed</p>
+        <p class="muted">Resolved work</p>
       </article>
-
-      <article class="dashboard-card" aria-labelledby="mOverdue">
-        <h3 id="mOverdue">Overdue</h3>
+      <article class="portal-kpi">
+        <h2>Overdue</h2>
         <div class="metric" id="metricOverdue">—</div>
-        <p class="muted">Past SLA window</p>
+        <p class="muted">Past SLA</p>
       </article>
-
-      <article class="dashboard-card" aria-labelledby="mPosts">
-        <h3 id="mPosts">Community Posts (7d)</h3>
+      <article class="portal-kpi">
+        <h2>Posts (7d)</h2>
         <div class="metric" id="metricPosts">—</div>
-        <p class="muted">Recent resident updates</p>
+        <p class="muted">Resident activity</p>
       </article>
     </section>
 
-    <section class="dashboard-card panel-grid" aria-label="Tools">
+    <section class="dashboard-card panel-grid portal-card portal-tools" aria-label="Tools">
       <div class="form-grid form-grid--align-end grid-3">
         <label for="reqSearch" class="field">
           <span>Search requests</span>
-          <input id="reqSearch" type="search" placeholder="Search by name, issue or type…" inputmode="search" />
+          <input id="reqSearch" type="search" placeholder="Search by name, issue or type" inputmode="search" />
         </label>
         <label for="filterType" class="field">
-          <span>Filter by type</span>
+          <span>Type</span>
           <select id="filterType" title="Filter by type">
             <option value="all" selected>All types</option>
             <option value="cleaning">Cleaning</option>
@@ -117,7 +121,7 @@
           </select>
         </label>
         <label for="filterStatus" class="field">
-          <span>Filter by status</span>
+          <span>Status</span>
           <select id="filterStatus" title="Filter by status">
             <option value="all" selected>All status</option>
             <option value="open">Open</option>
@@ -132,44 +136,53 @@
       </div>
     </section>
 
-    <section class="dashboard-cards" aria-label="Requests">
-      <article class="dashboard-card">
-        <h3>Cleaning Requests</h3>
-        <ul id="allCleaningRequests" class="submission-log" aria-live="polite">
-          <li class="muted">Loading…</li>
-        </ul>
-      </article>
-
-      <article class="dashboard-card">
-        <h3>Repair Requests</h3>
-        <ul id="allRepairRequests" class="submission-log" aria-live="polite">
-          <li class="muted">Loading…</li>
-        </ul>
-      </article>
-    </section>
-
-    <section class="dashboard-card" aria-label="Community posts">
-      <h3>Community Posts</h3>
-      <ul id="allCommunityPosts" class="post-feed" aria-live="polite">
-        <li class="muted">Loading…</li>
-      </ul>
-    </section>
-
-    <section class="dashboard-card" aria-label="Notifications">
-      <div class="section-row">
-        <h3>Notifications</h3>
-        <button type="button" class="btn btn-ghost btn-small" id="landlordNotifMarkAll">Mark all read</button>
+    <section class="portal-grid portal-grid--landlord" aria-label="Landlord workspace">
+      <div class="portal-column portal-column--primary">
+        <article class="dashboard-card portal-card">
+          <h2 class="h3">Request Queue</h2>
+          <p class="muted">Review cleaning and repair items, then update statuses directly from each request.</p>
+          <div class="portal-list-grid portal-list-grid--requests">
+            <section>
+              <h3 class="h4">Cleaning Requests</h3>
+              <ul id="allCleaningRequests" class="submission-log portal-scroll" aria-live="polite">
+                <li class="muted">Loading…</li>
+              </ul>
+            </section>
+            <section>
+              <h3 class="h4">Repair Requests</h3>
+              <ul id="allRepairRequests" class="submission-log portal-scroll" aria-live="polite">
+                <li class="muted">Loading…</li>
+              </ul>
+            </section>
+          </div>
+        </article>
       </div>
-      <ul id="landlordNotifications" class="submission-log" aria-live="polite">
-        <li class="muted">Loading…</li>
-      </ul>
+
+      <aside class="portal-column portal-column--secondary" aria-label="Communications">
+        <article class="dashboard-card portal-card" aria-label="Community posts">
+          <h2 class="h3">Community Posts</h2>
+          <ul id="allCommunityPosts" class="post-feed portal-scroll" aria-live="polite">
+            <li class="muted">Loading…</li>
+          </ul>
+        </article>
+
+        <article class="dashboard-card portal-card" aria-label="Notifications">
+          <div class="section-row">
+            <h2 class="h3">Notifications</h2>
+            <button type="button" class="btn btn-ghost btn-small" id="landlordNotifMarkAll">Mark all read</button>
+          </div>
+          <ul id="landlordNotifications" class="submission-log portal-scroll" aria-live="polite">
+            <li class="muted">Loading…</li>
+          </ul>
+        </article>
+      </aside>
     </section>
 
-    <section class="dashboard-card" aria-label="Security audit log">
+    <section class="dashboard-card portal-card" aria-label="Security audit log">
       <div class="section-header">
         <p class="eyebrow">Security events</p>
         <div class="section-row">
-          <h3>Audit log</h3>
+          <h2 class="h3">Audit Log</h2>
           <button type="button" id="auditRefreshBtn" class="btn btn-ghost btn-small">Refresh</button>
         </div>
         <p class="muted">Latest authentication and security events across the workspace.</p>

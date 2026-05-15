@@ -331,6 +331,27 @@
     }
   }
 
+  function revealFormPanel(hashOrSelector) {
+    const selector = String(hashOrSelector || "").trim();
+    if (!selector || selector === "#") return;
+    const target = document.querySelector(selector);
+    if (!target) return;
+    const panel = target.closest("details");
+    if (panel) panel.open = true;
+  }
+
+  function bindPanelNavigation() {
+    revealFormPanel(window.location.hash);
+    window.addEventListener("hashchange", () => revealFormPanel(window.location.hash));
+    document.addEventListener("click", (event) => {
+      const anchor = event.target?.closest('a[href^="#"]');
+      if (!anchor) return;
+      const href = anchor.getAttribute("href");
+      if (!href || href === "#") return;
+      requestAnimationFrame(() => revealFormPanel(href));
+    });
+  }
+
   function maybeStartTour() {
     try {
       if (localStorage.getItem(TOUR_KEY) === "done") return;
@@ -399,6 +420,7 @@
       nextBtn.textContent = index === steps.length - 1 ? "Finish" : "Next";
       clearHighlight();
       if (step.target) {
+        revealFormPanel(step.target);
         const target = document.querySelector(step.target);
         if (target) {
           target.classList.add("tour-highlight");
@@ -431,6 +453,7 @@
       await ensureUser();
       await loadActivity();
       listenForFormSuccess();
+      bindPanelNavigation();
       maybeStartTour();
       bindNotificationActions();
     } catch {
