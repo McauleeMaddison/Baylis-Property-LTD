@@ -525,16 +525,32 @@ const loginRateKey = (req) => {
 };
 
 app.post('/api/auth/login', rateLimit(60, 60_000, loginRateKey), asyncHandler(async (req, res) => {
-  const { username = '', password = '' } = req.body || {};
-  const normalizedUsername = username.toLowerCase();
-  const user = await User.findOne({ username: normalizedUsername });
+  const { username = '', password = '', role = '' } = req.body || {};
+  const identifier = String(username || '').trim().toLowerCase();
+  const requestedRole = String(role || '').trim().toLowerCase();
+  const allowedRoles = new Set(['resident', 'landlord']);
+  if (requestedRole && !allowedRoles.has(requestedRole)) {
+    return res.status(400).json({ error: 'Invalid role' });
+  }
+  const byEmail = identifier.includes('@');
+  const user = byEmail
+    ? await User.findOne({ email: identifier })
+    : await User.findOne({ username: identifier });
   if (!user) {
-    await recordAudit('auth.login.invalid', { metadata: { username: normalizedUsername, reason: 'unknown_user' }, severity: 'warn' }, req);
+    await recordAudit('auth.login.invalid', { metadata: { username: identifier, reason: 'unknown_user' }, severity: 'warn' }, req);
     return res.status(401).json({ error: 'Invalid credentials' });
   }
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) {
-    await recordAudit('auth.login.invalid', { userId: user.id, metadata: { username: normalizedUsername, reason: 'bad_password' }, severity: 'warn' }, req);
+    await recordAudit('auth.login.invalid', { userId: user.id, metadata: { username: identifier, reason: 'bad_password' }, severity: 'warn' }, req);
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+  if (requestedRole && user.role !== requestedRole) {
+    await recordAudit('auth.login.invalid', {
+      userId: user.id,
+      metadata: { username: identifier, reason: 'role_mismatch', requestedRole, actualRole: user.role },
+      severity: 'warn'
+    }, req);
     return res.status(401).json({ error: 'Invalid credentials' });
   }
   await setSession(req, res, user.id);

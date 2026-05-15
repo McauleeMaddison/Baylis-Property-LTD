@@ -37,6 +37,16 @@ describe('Auth endpoints', () => {
     20000,
   );
 
+  test(
+    'rejects login when role does not match account role',
+    async () => {
+      const res = await agent.post('/api/auth/login').send({ username, password, role: 'landlord' });
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toHaveProperty('error', 'Invalid credentials');
+    },
+    20000,
+  );
+
   afterAll(async () => {
     if (closeServer) {
       await closeServer();

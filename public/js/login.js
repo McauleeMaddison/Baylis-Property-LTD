@@ -251,10 +251,57 @@
 
     toast('✅ Signed in');
 
-    const defaultLanding = getDefaultLanding();
-    const fallback = resolveRoleRedirect(role) || appConfig.defaultLanding || 'resident.html';
-    const to = defaultLanding || fallback;
+    const to = pickLanding(role);
     setTimeout(() => { window.location.href = to; }, 300);
+  }
+
+  function pickLanding(role) {
+    const roleHome = resolveRoleRedirect(role) || appConfig.defaultLanding || 'resident.html';
+    const pendingRedirect = getPostLoginRedirect();
+    if (isAllowedLandingForRole(role, pendingRedirect)) {
+      localStorage.removeItem('postLoginRedirect');
+      return toHtmlPath(pendingRedirect);
+    }
+    const defaultLanding = getDefaultLanding();
+    if (isAllowedLandingForRole(role, defaultLanding)) {
+      return toHtmlPath(defaultLanding);
+    }
+    return toHtmlPath(roleHome);
+  }
+
+  function toHtmlPath(pathValue) {
+    const value = String(pathValue || '').trim();
+    if (!value) return 'resident.html';
+    if (value.startsWith('/')) return value;
+    return value;
+  }
+
+  function getPostLoginRedirect() {
+    try {
+      return localStorage.getItem('postLoginRedirect') || '';
+    } catch {
+      return '';
+    }
+  }
+
+  function isAllowedLandingForRole(role, pathValue) {
+    const path = String(pathValue || '').trim().toLowerCase();
+    if (!path) return false;
+    if (path.startsWith('javascript:')) return false;
+    const cleaned = path.replace(/^https?:\/\/[^/]+/i, '').replace(/^\//, '').split(/[?#]/)[0];
+    if (!cleaned) return false;
+
+    const shared = new Set(['community', 'community.html', 'profile', 'profile.html', 'settings', 'settings.html']);
+    if (shared.has(cleaned)) return true;
+
+    const roleKey = (role || '').toLowerCase();
+    if (roleKey === 'landlord') {
+      return cleaned === 'landlord' || cleaned === 'landlord.html';
+    }
+    if (roleKey === 'resident') {
+      return cleaned === 'resident' || cleaned === 'resident.html';
+    }
+    return false;
   }
 
   function resolveRoleRedirect(role) {
