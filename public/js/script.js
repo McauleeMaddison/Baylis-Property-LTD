@@ -168,6 +168,71 @@
     on(window, "resize", syncNavForViewport);
     syncNavForViewport();
 
+    var KPI_CAROUSEL_BREAKPOINT = 980;
+    var initKpiCarousel = function (track) {
+      if (!track || !track.children || track.children.length < 2 || prefersReduced) return;
+      var timer = null;
+      var interactionTimeout = null;
+      var userInteracting = false;
+
+      var carouselEnabled = function () {
+        return window.matchMedia("(max-width: " + KPI_CAROUSEL_BREAKPOINT + "px)").matches;
+      };
+      var getStep = function () {
+        var first = track.children[0];
+        if (!first) return track.clientWidth || 220;
+        var styles = window.getComputedStyle(track);
+        var gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
+        return first.getBoundingClientRect().width + gap;
+      };
+      var stop = function () {
+        if (timer) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      };
+      var noteUserInteraction = function () {
+        userInteracting = true;
+        window.clearTimeout(interactionTimeout);
+        interactionTimeout = window.setTimeout(function () {
+          userInteracting = false;
+        }, 2600);
+      };
+      var nextSlide = function () {
+        if (!carouselEnabled() || userInteracting || document.hidden) return;
+        var step = getStep();
+        var total = track.children.length;
+        if (step <= 0 || total < 2) return;
+        var index = Math.round(track.scrollLeft / step);
+        var nextIndex = index >= total - 1 ? 0 : index + 1;
+        track.scrollTo({ left: step * nextIndex, behavior: "smooth" });
+      };
+      var start = function () {
+        stop();
+        if (!carouselEnabled()) {
+          track.scrollLeft = 0;
+          return;
+        }
+        timer = window.setInterval(nextSlide, 3600);
+      };
+
+      on(track, "pointerdown", noteUserInteraction);
+      on(track, "touchstart", noteUserInteraction, { passive: true });
+      on(track, "wheel", noteUserInteraction, { passive: true });
+      on(track, "mouseenter", function () { userInteracting = true; });
+      on(track, "mouseleave", function () { userInteracting = false; });
+      on(track, "focusin", function () { userInteracting = true; });
+      on(track, "focusout", function () { userInteracting = false; });
+      on(window, "resize", start);
+      on(window, "orientationchange", start);
+      on(document, "visibilitychange", function () {
+        if (!document.hidden) start();
+      });
+
+      start();
+    };
+    $$(".portal-kpis").forEach(initKpiCarousel);
+
     var updateDarkMode = function (enabled) {
       document.body.classList.toggle("dark", !!enabled);
       if (darkIcon) darkIcon.textContent = enabled ? "🌙" : "🌞";
