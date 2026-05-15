@@ -83,73 +83,88 @@
       <aside class="brand-panel brand-panel--register">
         <p><img src="assets/logo.svg" alt="Baylis Property LTD" class="brand-logo" /> <strong>Baylis Property LTD</strong></p>
         <h1 class="h2">Create your account</h1>
-        <p class="muted brand-tagline">Join Baylis Properties and start managing your home life.</p>
+        <p class="muted brand-tagline">Join Baylis Property and start managing requests, updates, and communication from one place.</p>
         <ul class="brand-points">
           <li>Resident or Landlord roles</li>
-          <li>Requests &amp; community posts</li>
-          <li>Dark mode, profile &amp; settings</li>
+          <li>Requests, repairs, and community posts</li>
+          <li>Secure account and profile controls</li>
         </ul>
-        <img src="assets/IMG_4432.jpg" alt="Baylis Property's wordmark" class="brand-showcase" loading="lazy" />
       </aside>
 
       <!-- Card -->
       <section class="auth-card auth-card--register">
-        <h2>Register</h2>
-        <p class="muted">It’s quick and secure.</p>
+        <div class="auth-surface auth-surface--register">
+          <div class="auth-surface__form">
+            <h2>Register</h2>
+            <p class="muted">It’s quick and secure.</p>
 
-        <form id="registerForm" class="register-form" method="POST" action="/api/auth/register" novalidate>
-          <div class="field">
-            <label for="regUsername">Username</label>
-            <input id="regUsername" name="username" type="text" placeholder="e.g. username" minlength="3" required autocomplete="username" aria-describedby="registerMsg" />
+            <form id="registerForm" class="register-form" method="POST" action="/api/auth/register" novalidate>
+              <div class="field">
+                <label for="regUsername">Username</label>
+                <input id="regUsername" name="username" type="text" placeholder="e.g. username" minlength="3" required autocomplete="username" aria-describedby="registerMsg" />
+              </div>
+
+              <div class="field">
+                <label for="regEmail">Email</label>
+                <input id="regEmail" name="email" type="email" placeholder="you@example.com" required autocomplete="email" aria-describedby="registerMsg" />
+              </div>
+
+              <div class="field">
+                <label for="regRole">Role</label>
+                <select id="regRole" name="role" required aria-describedby="registerMsg">
+                  <option value="">Select role…</option>
+                  <option value="resident">Resident</option>
+                  <option value="landlord">Landlord</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="regPassword">Password</label>
+                <div class="input-group">
+                  <input id="regPassword" name="password" type="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password" aria-describedby="registerMsg" />
+                  <button type="button" id="togglePw" class="icon-btn" aria-label="Show password" aria-pressed="false">Show</button>
+                </div>
+                <div class="pw-meter" aria-hidden="true">
+                  <div class="pw-bar" id="pwBar"></div>
+                  <small id="pwLabel" class="pw-label">Strength: —</small>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="regConfirm">Confirm Password</label>
+                <input id="regConfirm" type="password" placeholder="Repeat your password" required autocomplete="new-password" aria-describedby="registerMsg" />
+              </div>
+
+              <label class="checkbox">
+                <input type="checkbox" id="acceptTos" required aria-describedby="registerMsg" />
+                <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> &amp; <a href="/privacy" target="_blank" rel="noopener">Privacy</a></span>
+              </label>
+
+              <button type="submit" id="registerBtn" class="btn">
+                <span class="btn-label">Create account</span>
+                <span class="btn-spinner" aria-hidden="true"></span>
+              </button>
+
+              <div id="registerMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
+
+              <p class="muted">
+                Already have an account? <a href="/login">Sign in</a>
+              </p>
+            </form>
           </div>
 
-          <div class="field">
-            <label for="regEmail">Email</label>
-            <input id="regEmail" name="email" type="email" placeholder="you@example.com" required autocomplete="email" aria-describedby="registerMsg" />
-          </div>
-
-          <div class="field">
-            <label for="regRole">Role</label>
-            <select id="regRole" name="role" required aria-describedby="registerMsg">
-              <option value="">Select role…</option>
-              <option value="resident">Resident</option>
-              <option value="landlord">Landlord</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="regPassword">Password</label>
-            <div class="input-group">
-              <input id="regPassword" name="password" type="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password" aria-describedby="registerMsg" />
-              <button type="button" id="togglePw" class="icon-btn" aria-label="Show password" aria-pressed="false">Show</button>
+          <aside class="auth-surface__side auth-surface__side--signin" aria-label="Existing account">
+            <p class="auth-surface__eyebrow">Already Registered?</p>
+            <h3>Welcome Back</h3>
+            <p>Sign in to continue managing service requests, announcements, and your day-to-day property operations.</p>
+            <div class="auth-surface__chips" aria-hidden="true">
+              <span>Requests</span>
+              <span>Updates</span>
+              <span>Profiles</span>
             </div>
-            <div class="pw-meter" aria-hidden="true">
-              <div class="pw-bar" id="pwBar"></div>
-              <small id="pwLabel" class="pw-label">Strength: —</small>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="regConfirm">Confirm Password</label>
-            <input id="regConfirm" type="password" placeholder="Repeat your password" required autocomplete="new-password" aria-describedby="registerMsg" />
-          </div>
-
-          <label class="checkbox">
-            <input type="checkbox" id="acceptTos" required aria-describedby="registerMsg" />
-            <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> &amp; <a href="/privacy" target="_blank" rel="noopener">Privacy</a></span>
-          </label>
-
-          <button type="submit" id="registerBtn" class="btn">
-            <span class="btn-label">Create account</span>
-            <span class="btn-spinner" aria-hidden="true"></span>
-          </button>
-
-          <div id="registerMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
-
-          <p class="muted">
-            Already have an account? <a href="/login">Sign in</a>
-          </p>
-        </form>
+            <a class="btn auth-surface__cta" href="login.html">Sign in</a>
+          </aside>
+        </div>
       </section>
     </section>
   </main>
