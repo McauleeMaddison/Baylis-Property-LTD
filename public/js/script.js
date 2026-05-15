@@ -203,8 +203,13 @@
         var step = getStep();
         var total = track.children.length;
         if (step <= 0 || total < 2) return;
+        var maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+        if (track.scrollLeft >= maxScroll - 6) {
+          track.scrollTo({ left: 0, behavior: "auto" });
+          return;
+        }
         var index = Math.round(track.scrollLeft / step);
-        var nextIndex = index >= total - 1 ? 0 : index + 1;
+        var nextIndex = Math.min(total - 1, index + 1);
         track.scrollTo({ left: step * nextIndex, behavior: "smooth" });
       };
       var start = function () {
