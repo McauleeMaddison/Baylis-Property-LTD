@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sign In • Baylis Property LTD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Sign in to Baylis Property LTD to manage properties, requests, and your community." />
+  <meta name="keywords" content="Baylis Property, property management, resident portal, landlord portal, maintenance requests" />
+  <meta name="author" content="Baylis Property LTD" />
+  <meta property="og:title" content="Sign In • Baylis Property LTD" />
+  <meta property="og:description" content="Sign in to Baylis Property LTD to manage properties, requests, and your community." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://baylisproperty.co.uk/login.html" />
+  <meta property="og:image" content="https://baylisproperty.co.uk/assets/logo.svg" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="canonical" href="https://baylisproperty.co.uk/login.html" />
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="prefetch" href="register.html" />
+  <link rel="prefetch" href="index.html" />
+  <script defer src="js/script.js"></script>
+</head>
+<body class="page page--login auth-body">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" id="mainHeader">
+    <nav class="nav" aria-label="Main">
+      <div class="nav-inner container">
+        <a class="logo" href="index.html" aria-label="Baylis Property LTD Home">
+          <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="32" height="32">
+            <circle cx="100" cy="100" r="95" fill="#1a2332" stroke="#d4af37" stroke-width="2"/>
+            <rect x="60" y="70" width="80" height="90" fill="none" stroke="#d4af37" stroke-width="2"/>
+            <rect x="70" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="70" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="70" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="92" y="140" width="16" height="20" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <line x1="100" y1="140" x2="100" y2="160" stroke="#d4af37" stroke-width="1"/>
+            <polygon points="60,70 100,40 140,70" fill="none" stroke="#d4af37" stroke-width="2"/>
+          </svg>
+          <span>Baylis Property LTD</span>
+        </a>
+        <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
+        <div class="nav-links" id="navLinks" data-links data-open="false">
+          <a href="resident.html">Resident Portal</a>
+          <a href="landlord.html">Landlord Portal</a>
+          <a href="community.html">Community</a>
+          <a href="login.html" aria-current="page">Login</a>
+          <a href="register.html">Register</a>
+</div>
+      </div>
+    </nav>
+  </header>
+
+  <main role="main" class="auth-shell container" id="content" tabindex="-1">
+    <section class="auth-grid auth-grid--login" aria-label="Sign in">
+      <section class="auth-card auth-card--login">
+        <div class="auth-surface auth-surface--login">
+          <div class="auth-surface__form">
+            <header>
+              <div>
+                <p class="muted">Baylis Property LTD</p>
+                <h2>Sign in</h2>
+              </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            <div id="loginMsg" class="form-msg" role="status" aria-live="polite"></div>
+
+            <form id="loginForm" class="login-form" method="POST" action="/login" novalidate>
+              <div class="login-form__stack">
+                <label class="field" for="username">
+                  <span>Username or Email</span>
+                  <input id="username" name="username" type="text" placeholder="e.g. yourname or name@email.com" autocomplete="username" required aria-describedby="loginMsg" />
+                </label>
+                <label class="field" for="roleSelect">
+                  <span>Role</span>
+                  <select id="roleSelect" name="role" required>
+                    <option value="resident">Resident</option>
+                    <option value="landlord">Landlord</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="field field--password">
+                <span>Password <small id="capsWarning" class="caps-warning">Caps lock is on</small></span>
+                <div class="input-group">
+                  <input id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required aria-describedby="loginMsg" />
+                  <button type="button" id="showPasswordBtn" class="btn secondary" aria-pressed="false">Show</button>
+                </div>
+              </label>
+
+              <div class="login-form__meta">
+                <label class="checkbox">
+                  <input id="rememberMe" type="checkbox" />
+                  <span>Remember me</span>
+                </label>
+                <button id="forgotPassword" class="btn btn-ghost" type="button">Forgot password?</button>
+              </div>
+
+              <div class="login-form__actions">
+                <button id="submitBtn" type="submit" class="btn">Sign in</button>
+                <a class="btn btn-ghost" href="register.html">Create account</a>
+              </div>
+            </form>
+          </div>
+
+          <aside class="auth-surface__side auth-surface__side--signup" aria-label="New account">
+            <p class="auth-surface__eyebrow">New Here?</p>
+            <h3>Start with Baylis</h3>
+            <p>Create your account to track requests, updates, and community activity in one clean workspace.</p>
+            <div class="auth-surface__chips" aria-hidden="true">
+              <span>Resident</span>
+              <span>Landlord</span>
+              <span>Community</span>
+            </div>
+            <a class="btn auth-surface__cta" href="register.html">Create account</a>
+          </aside>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>&copy; <span id="year"></span> Baylis Property LTD</small>
+      <span class="dot">&middot;</span>
+      <a href="register.html">Create account</a>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+  </body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Settings for Baylis Property LTD — appearance, notifications, privacy." />
+  <title>Settings • Baylis Property LTD</title>
+
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/script.js"></script>
+  <link rel="prefetch" href="index.html" />
+  <link rel="prefetch" href="profile.html" />
+</head>
+<body class="page page--settings" data-required-role="resident,landlord">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" id="mainHeader">
+    <nav class="nav" aria-label="Main">
+      <div class="nav-inner container">
+        <a class="logo" href="index.html" aria-label="Baylis Property LTD Home">
+          <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="32" height="32" aria-hidden="true" focusable="false">
+            <circle cx="100" cy="100" r="95" fill="#1a2332" stroke="#d4af37" stroke-width="2"/>
+            <rect x="60" y="70" width="80" height="90" fill="none" stroke="#d4af37" stroke-width="2"/>
+            <rect x="70" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="80" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="70" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="100" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="70" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="90" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="110" y="120" width="12" height="12" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="92" y="140" width="16" height="20" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <line x1="100" y1="140" x2="100" y2="160" stroke="#d4af37" stroke-width="1"/>
+            <polygon points="60,70 100,40 140,70" fill="none" stroke="#d4af37" stroke-width="2"/>
+          </svg>
+          <span>Baylis Property LTD</span>
+        </a>
+
+        <button class="btn secondary hamb" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu" data-hamb>☰</button>
+
+        <div class="nav-links" id="navLinks" data-links data-open="false">
+          <a href="resident.html">Resident Portal</a>
+          <a href="landlord.html">Landlord Portal</a>
+          <a href="community.html">Community</a>
+          <a href="login.html">Login</a>
+          <a href="register.html">Register</a>
+        
+          <a href="login.html" id="logoutBtn" data-role="resident,landlord">Logout</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main role="main" id="content" class="container page-main" tabindex="-1">
+    <header class="header">
+      <h1 class="h1">Settings</h1>
+      <p class="muted">Tune your experience. Changes to appearance are previewed live.</p>
+    </header>
+
+    <div class="chip-row">
+      <a class="btn-chip" href="#general">General</a>
+      <a class="btn-chip" href="#appearance">Appearance</a>
+      <a class="btn-chip" href="#notifications">Notifications</a>
+      <a class="btn-chip" href="#security">Security &amp; Privacy</a>
+    </div>
+
+    <section class="dashboard-card" id="previewCard">
+      <p class="muted">Buttons and surfaces reflect your appearance choices below.</p>
+      <div class="form-actions">
+        <button class="btn" id="previewBtnPrimary">Primary</button>
+        <button class="btn btn-ghost" id="previewBtnGhost">Ghost</button>
+      </div>
+    </section>
+
+    <form id="settingsForm">
+      <div class="settings-grid">
+        <section id="general" class="dashboard-card">
+          <h2 class="h3">General</h2>
+          <p class="muted">Basic preferences for your account on this device.</p>
+
+          <label class="checkbox label-spaced">
+            <input type="checkbox" id="showTips" />
+            <span>Show onboarding tips</span>
+          </label>
+
+          <label class="field label-spaced" for="defaultLanding">
+            <span>Default landing page</span>
+            <select id="defaultLanding" aria-describedby="settingsMsg">
+              <option value="resident.html">Resident Dashboard</option>
+              <option value="landlord.html">Landlord Dashboard</option>
+              <option value="profile.html">Profile</option>
+              <option value="settings.html" selected>Settings</option>
+            </select>
+            <small class="muted">Used after you sign in.</small>
+          </label>
+
+          <label class="field label-spaced" for="timeFormat">
+            <span>Time format</span>
+            <select id="timeFormat" aria-describedby="settingsMsg">
+              <option value="24h" selected>24-hour</option>
+              <option value="12h">12-hour (AM/PM)</option>
+            </select>
+          </label>
+        </section>
+
+        <section id="appearance" class="dashboard-card">
+          <h2 class="h3">Appearance</h2>
+          <p class="muted">Theme and layout preferences.</p>
+
+          <label class="checkbox label-spaced">
+            <input type="checkbox" id="darkModeSetting" aria-describedby="settingsMsg" />
+            <span>Enable dark mode by default</span>
+          </label>
+
+          <label class="field label-spaced" for="uiDensity">
+            <span>UI density</span>
+            <select id="uiDensity" aria-describedby="settingsMsg">
+              <option value="comfortable" selected>Comfortable</option>
+              <option value="compact">Compact</option>
+              <option value="spacious">Spacious</option>
+            </select>
+          </label>
+
+          <label class="field label-spaced" for="baseFontSize">
+            <span>Base font size (px)</span>
+            <input type="number" id="baseFontSize" value="16" min="12" max="22" aria-describedby="settingsMsg" />
+          </label>
+
+          <label class="field label-spaced" for="cornerRadius">
+            <span>Corner radius (px)</span>
+            <input type="number" id="cornerRadius" value="12" min="6" max="24" aria-describedby="settingsMsg" />
+          </label>
+        </section>
+
+        <section id="notifications" class="dashboard-card">
+          <h2 class="h3">Notifications</h2>
+          <p class="muted">Choose what we should ping you about.</p>
+
+          <div class="stack">
+            <label class="checkbox"><input type="checkbox" id="notifRequests" aria-describedby="settingsMsg" /> <span>Requests</span></label>
+            <label class="checkbox"><input type="checkbox" id="notifCommunity" aria-describedby="settingsMsg" /> <span>Community posts</span></label>
+            <label class="checkbox"><input type="checkbox" id="notifDigest" aria-describedby="settingsMsg" /> <span>Weekly digest</span></label>
+          </div>
+
+          <label class="field label-spaced" for="digestDay">
+            <span>Digest day</span>
+            <select id="digestDay" aria-describedby="settingsMsg">
+              <option>Monday</option>
+              <option>Tuesday</option>
+              <option>Wednesday</option>
+              <option>Thursday</option>
+              <option>Friday</option>
+              <option>Saturday</option>
+              <option>Sunday</option>
+            </select>
+          </label>
+        </section>
+
+        <section id="security" class="dashboard-card">
+          <h2 class="h3">Security &amp; Privacy</h2>
+          <p class="muted">Passwords, devices, and your data.</p>
+
+          <div class="form-grid grid-3 label-spaced">
+            <label class="field" for="currentPassword">
+              <span>Current password</span>
+              <input id="currentPassword" type="password" autocomplete="current-password" aria-describedby="settingsMsg" />
+            </label>
+            <label class="field" for="newPassword">
+              <span>New password</span>
+              <input id="newPassword" type="password" autocomplete="new-password" aria-describedby="settingsMsg" />
+            </label>
+            <label class="field" for="confirmNewPassword">
+              <span>Confirm new password</span>
+              <input id="confirmNewPassword" type="password" autocomplete="new-password" aria-describedby="settingsMsg" />
+            </label>
+          </div>
+
+          <div class="form-actions label-spaced">
+            <button type="button" class="btn" id="changePasswordBtn">Change password</button>
+            <button type="button" class="btn btn-ghost" id="signOutAllBtn">Sign out of all devices</button>
+          </div>
+
+          <div class="label-spaced">
+            <div class="section-row">
+              <p class="muted">Active sessions</p>
+              <button type="button" class="btn btn-ghost btn-small" id="sessionRefreshBtn">Refresh</button>
+            </div>
+            <ul id="sessionList" class="submission-log" aria-live="polite">
+              <li class="muted">Loading…</li>
+            </ul>
+          </div>
+
+          <div class="form-actions label-spaced">
+            <button type="button" class="btn secondary" id="exportDataBtn">Export my data</button>
+            <button type="button" class="btn secondary" id="clearLocalBtn">Clear local data</button>
+            <button type="button" class="btn btn-ghost" id="resetDefaults">Reset defaults</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn">Save settings</button>
+      </div>
+      <div id="settingsMsg" class="form-msg" role="alert" aria-live="assertive" tabindex="-1"></div>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>&copy; <span id="year"></span> Baylis Property LTD</small>
+      <span class="dot">&middot;</span>
+      <a href="community.html">Community</a>
+      <span class="dot">&middot;</span>
+      <a href="settings.html" aria-current="page">Settings</a>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      const y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
+      const hamb = document.querySelector('[data-hamb]');
+      const links = document.querySelector('[data-links]');
+      if (hamb && links) {
+        const setOpen = (open) => {
+          hamb.setAttribute('aria-expanded', String(open));
+          links.dataset.open = String(open);
+          document.body.classList.toggle('nav-open', open);
+        };
+        hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
+        links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+        document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
+      }
+    })();
+  </script>
+</body>
+</html>

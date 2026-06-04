@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block title %}Dashboard - Baylis Property LTD{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Welcome, {{ user.username }}!</h1>
+  <p>Your role is <strong>{{ user.role }}</strong>.</p>
+  <div class="hero-actions">
+    <a class="btn btn-secondary" href="{{ url_for('logout') }}">Sign out</a>
+  </div>
+</section>
+
+<section class="features">
+  <h2>Dashboard</h2>
+  <p>This dashboard is served by the Python Flask backend and demonstrates active session handling.</p>
+  <ul>
+    <li>Secure login with hashed passwords</li>
+    <li>Session storage for user state</li>
+    <li>Template rendering with Flask</li>
+  </ul>
+</section>
+{% endblock %}
