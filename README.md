@@ -7,7 +7,10 @@ A property management application demonstrating a **Python/Flask backend** with 
 > **Architecture**: REST API with session-based authentication  
 > **Status**: ✅ Level 5 Unit 3 Diploma Compliant
 
-**Live Demo**: Clone repo → `pip install -r requirements.txt` → `python app.py` → Visit `http://localhost:5000`
+### 🔗 Quick Links
+- **Repository**: [GitHub - Baylis-Property-LTD](https://github.com/McauleeMaddison/Baylis-Property-LTD)
+- **Live Demo**: [https://baylis-property-ltd.onrender.com](https://baylis-property-ltd.onrender.com/index.html)
+- **Local Dev**: Clone repo → `pip install -r requirements.txt` → `python app.py` → Visit `http://localhost:5000`
 
 ---
 
