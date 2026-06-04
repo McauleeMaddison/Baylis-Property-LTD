@@ -1,16 +1,31 @@
+import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, static_folder="static", static_url_path="", template_folder="templates")
-app.secret_key = "change-this-secret-key"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-for-production")
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = False
 
 
+VALID_ROLES = {"resident", "landlord"}
 requests_data = []
 messages_data = []
+
+
+def build_user(username, email, role, password, display_name=None):
+    return {
+        "username": username,
+        "email": email,
+        "role": role,
+        "password": generate_password_hash(password, method="pbkdf2:sha256"),
+        "profile": {"displayName": display_name or username},
+        "contact": {"email": email, "preferred": "email"},
+        "prefs": {"emailUpdates": True, "communityVisible": True},
+        "stats": {"requests": 0, "posts": 0},
+    }
 
 
 def make_user_response(user):
@@ -33,32 +48,18 @@ def inject_context():
     }
 
 users = {
-    "resident123": {
-        "username": "resident123",
-        "email": "resident@example.com",
-        "role": "resident",
-        "password": generate_password_hash("resident123"),
-        "profile": {"displayName": "Resident User"},
-        "contact": {"email": "resident@example.com"},
-        "prefs": {"emailUpdates": True, "communityVisible": True},
-        "stats": {"requests": 0, "posts": 0},
-    },
-    "landlord123": {
-        "username": "landlord123",
-        "email": "landlord@example.com",
-        "role": "landlord",
-        "password": generate_password_hash("landlord123"),
-        "profile": {"displayName": "Landlord User"},
-        "contact": {"email": "landlord@example.com"},
-        "prefs": {"emailUpdates": False, "communityVisible": False},
-        "stats": {"requests": 0, "posts": 0},
-    },
+    "resident123": build_user("resident123", "resident@example.com", "resident", "resident123", "Resident User"),
+    "landlord123": build_user("landlord123", "landlord@example.com", "landlord", "landlord123", "Landlord User"),
 }
 
 
 def get_current_user():
     username = session.get("username")
     return users.get(username)
+
+
+def find_user(identifier):
+    return users.get(identifier) or next((u for u in users.values() if u["email"] == identifier), None)
 
 
 def require_current_user():
@@ -74,6 +75,49 @@ def auth_me():
     if not user:
         return jsonify({"user": None}), 401
     return jsonify({"user": make_user_response(user)})
+
+
+@app.route("/api/auth/login", methods=("POST",))
+def api_login():
+    data = request.get_json(silent=True) or request.form
+    identifier = data.get("username", "").strip()
+    password = data.get("password", "")
+    selected_role = data.get("role", "").strip().lower()
+
+    user = find_user(identifier)
+    if not user or not check_password_hash(user["password"], password):
+        return jsonify({"error": "Invalid username or password."}), 401
+
+    if selected_role and selected_role != user["role"]:
+        return jsonify({"error": "The selected role does not match your account role."}), 403
+
+    session["username"] = user["username"]
+    return jsonify({"status": "ok", "user": make_user_response(user)})
+
+
+@app.route("/api/auth/register", methods=("POST",))
+def api_register():
+    data = request.get_json(silent=True) or request.form
+    username = data.get("username", "").strip()
+    email = data.get("email", "").strip()
+    role = data.get("role", "").strip().lower()
+    password = data.get("password", "")
+
+    if not username or not email or role not in VALID_ROLES or not password:
+        return jsonify({"error": "Username, email, valid role and password are required."}), 400
+
+    if username in users or any(user["email"] == email for user in users.values()):
+        return jsonify({"error": "That username or email is already registered."}), 409
+
+    users[username] = build_user(username, email, role, password)
+    session["username"] = username
+    return jsonify({"status": "created", "user": make_user_response(users[username])}), 201
+
+
+@app.route("/api/auth/logout", methods=("POST",))
+def api_logout():
+    session.pop("username", None)
+    return jsonify({"status": "ok"})
 
 
 @app.route("/api/forms/<form_type>", methods=("POST",))
@@ -205,9 +249,7 @@ def login():
             flash("Please enter both username and password.", "error")
             return redirect(url_for("login"))
 
-        user = users.get(identifier)
-        if not user:
-            user = next((u for u in users.values() if u["email"] == identifier), None)
+        user = find_user(identifier)
 
         if not user or not check_password_hash(user["password"], password):
             flash("Invalid username or password.", "error")
@@ -233,7 +275,7 @@ def register():
         password = request.form.get("password", "")
         confirm_password = request.form.get("confirm_password", "")
 
-        if not username or not email or not role or not password:
+        if not username or not email or role not in VALID_ROLES or not password:
             flash("All fields are required.", "error")
             return redirect(url_for("register"))
 
@@ -245,12 +287,7 @@ def register():
             flash("That username or email is already registered.", "error")
             return redirect(url_for("register"))
 
-        users[username] = {
-            "username": username,
-            "email": email,
-            "role": role,
-            "password": generate_password_hash(password),
-        }
+        users[username] = build_user(username, email, role, password)
         session["username"] = username
         flash("Your account has been created. Welcome to Baylis Property LTD!", "success")
         return redirect(url_for("dashboard"))
