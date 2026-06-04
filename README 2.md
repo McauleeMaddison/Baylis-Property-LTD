@@ -1,0 +1,182 @@
+Baylis Property LTD
+====================
+
+Modern property-management platform for landlords and residents. The application bundles secure authentication, request tracking, community messaging, and profile/settings tools into a single responsive experience.
+
+---
+
+Live Demo
+---------
+- **Frontend & API**: https://baylis-property-ltd.onrender.com (static pages auto-target the Render API at `/api`)
+- **API base**: `https://baylis-property-ltd.onrender.com/api` (overridden to `/api` automatically for local development)
+
+---
+
+Table of Contents
+-----------------
+1. [Features](#features)
+2. [Technology Stack](#technology-stack)
+3. [Getting Started](#getting-started)
+4. [Environment Variables](#environment-variables)
+5. [Database Setup](#database-setup)
+6. [Running the Server](#running-the-server)
+7. [Testing](#testing)
+8. [Deployment Guidance](#deployment-guidance)
+9. [Project Structure](#project-structure)
+
+---
+
+Features
+--------
+- **Role-based portals** – dedicated dashboards for residents and landlords, including request summaries and contextual navigation.
+- **Secure auth** – password hashing, CSRF protection, session management, and rate limiting.
+- **Request workflows** – submit and monitor cleaning/repair/community forms with toast notifications and local persistence.
+- **Profile & settings** – update contact details, communication preferences, dark mode preferences, and logout-all functionality.
+- **Community hub** – post announcements, comment, like, and filter/paginate threads.
+- **Responsive UI** – mobile-friendly layout with dark/light modes and accessible focus states.
+
+Technology Stack
+----------------
+- **Frontend**: Vanilla HTML/CSS/JS, modular scripts per page, global helpers in `public/js/script.js`.
+- **Backend**: Node.js (ES modules), Express, Helmet, Morgan, `mysql2` for persistence, bcrypt for hashing.
+- **Database**: MySQL 8 (schema managed in `migrations/*.sql`).
+- **Tooling**: Nodemon for dev, Jest/Supertest scaffolding for API tests, Cypress placeholder for e2e, Docker Compose for local MySQL.
+
+Getting Started
+---------------
+```bash
+git clone https://github.com/<your-org>/Baylis-Property-LTD.git
+cd Baylis-Property-LTD
+npm install             # root dev tooling
+cd server
+npm install             # backend dependencies
+cp .env.example .env    # fill values as described below
+```
+
+Environment Variables
+---------------------
+Set the following keys in `server/.env` (local) and in your hosting environment:
+
+| Key | Description |
+| --- | ----------- |
+| `NODE_ENV` | `development` or `production`. |
+| `PORT` | HTTP port for Express (default 5000). |
+| `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE` | MySQL connection details. |
+| `USE_INMEMORY_DB` | Set to `true` to run against an in-memory datastore (skips MySQL migrations; data resets on restart). |
+| `SESSION_SECRET` | Long random string for cookies/CSRF HMAC. |
+| `SESSION_COOKIE_NAME`, `CSRF_COOKIE_NAME`, `SESSION_TTL_MS` | Session/cookie tuning (defaults provided). |
+| `TRUST_PROXY`, `FORCE_HTTPS` | Reverse proxy settings. |
+| `RESET_WINDOW_MS` | Password reset expiry (milliseconds). |
+| `APP_BASE_URL` | Public site URL (used in password reset links). |
+| Optional: `GOOGLE_API_KEY`, `GOOGLE_SHEET_ID` | For sheet integrations if enabled. |
+
+The backend loads env files from both the repo root (`.env`, `.env.production`) and `server/.env*`, so you can choose the location that suits your deployment.
+
+Database Setup
+--------------
+### Docker (local)
+```bash
+docker compose up -d db
+# or manually:
+# docker run --name baylis-mysql \
+#   -e MYSQL_ROOT_PASSWORD=root_pw_temp \
+#   -e MYSQL_DATABASE=baylis_db \
+#   -e MYSQL_USER=baylis_user \
+#   -e MYSQL_PASSWORD=baylis_pass \
+#   -p 3306:3306 -d mysql:8
+```
+
+### Initialize schema & demo users
+```bash
+cd server
+node scripts/mysql-init.js
+```
+The script creates/verifies tables (`users`, `requests`, `properties`, `community_posts`, `sessions`, `password_resets`, `notifications`, `audit_logs`) and seeds demo accounts (`resident123` / `resident123`, `landlord123` / `landlord123`).
+
+### Manual migration / quick reset
+If you prefer to run all SQL migrations directly, run:
+```bash
+# assumes docker compose db service is already healthy
+MYSQL_HOST=127.0.0.1 \
+MYSQL_USER=baylis_user \
+MYSQL_PASSWORD=baylis_pass \
+MYSQL_DATABASE=baylis_db \
+npm --prefix server run migrate
+```
+
+### Local test workflow (repeatable)
+1. `docker compose up -d db` – start MySQL 8 with credentials from `docker-compose.yml`.
+2. Run `npm --prefix server run migrate` (or `server/scripts/mysql-init.js`) after exporting the same credentials:
+   ```bash
+   MYSQL_HOST=127.0.0.1 \
+   MYSQL_USER=baylis_user \
+   MYSQL_PASSWORD=baylis_pass \
+   MYSQL_DATABASE=baylis_db \
+   npm --prefix server run migrate
+   ```
+3. Run API tests or start the server with those variables available.
+4. Stop MySQL with `docker compose down` when you’re done.
+
+Running the Server
+------------------
+```bash
+cd server
+npm run dev   # nodemon index.js
+# or
+npm start     # node index.js
+```
+Visit `http://localhost:5000`. OTP/reset codes appear in the server logs (look for 📧/📱 lines).
+- `npm start` runs a lightweight prestart check: if `USE_INMEMORY_DB=true`, migrations are skipped; otherwise migrations run automatically when MySQL env vars are present.
+
+Testing
+-------
+```bash
+cd server
+npm test      # runs Jest/Supertest API suite (add tests under server/tests/)
+```
+E2E scaffolding exists in the root package (`npm run cypress:open`) if Cypress is installed; failures won’t block CI by default.
+
+- Tests default to the in-memory datastore (`USE_INMEMORY_DB=true`) so they run without MySQL; set `USE_INMEMORY_DB=false` if you want to exercise a real database.
+- To run migrations against MySQL directly, export `SERVER_ENV_FILE` to point at your env file (or copy your env into `server/.env`) before running `npm --prefix server run migrate`.
+
+- For a full Render walkthrough (GitHub integration, managed MySQL, migrations, custom domains) see [`RENDER-DEPLOYMENT.md`](RENDER-DEPLOYMENT.md).
+
+Deployment Guidance
+-------------------
+- **Render (recommended)**: build command `npm install && cd server && npm install`, start command `cd server && npm start`, then follow `RENDER-DEPLOYMENT.md` to provision hosting, and [`RAILWAY-MYSQL.md`](RAILWAY-MYSQL.md) if you want to plug in Railway’s free MySQL.
+- **Database note**: Render cannot reach private hosts such as `mysql.railway.internal`. Always supply the public hostname/port shown by your provider (Railway “Public Networking” endpoint, Render managed MySQL, etc.) in the `MYSQL_*` variables.
+- **Fly / other PaaS**: configure build command `npm install && cd server && npm install`, start command `npm --prefix server start`, add env vars via the platform UI, and run `node scripts/mysql-init.js` once via the shell.
+- **Traditional VPS**: clone repo, install Node + MySQL, set env vars in `/etc/environment` or process manager (PM2/systemd), `npm --prefix server install`, `node scripts/mysql-init.js`, then `pm2 start npm --name baylis -- start --prefix server`.
+- Ensure HTTPS termination (Cloudflare, Nginx, or platform-provided certs) and set `FORCE_HTTPS=true` plus `TRUST_PROXY=1` behind reverse proxies.
+
+Google Sheets Integration
+-------------------------
+1. Create a Google service account (IAM & Admin → Service Accounts) and generate a JSON key. Keep it private.
+2. Share the target Google Sheet with the service account email so it can read/write rows.
+3. Add the following env vars (see `server/.env.example`):  
+   - `GOOGLE_API_KEY` – REST key restricted to the Sheets API and your Render domain.  
+   - `GOOGLE_SHEET_ID` – the ID segment from the sheet URL (`/d/<ID>/edit`).  
+   - `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` – parsed from the JSON key (escape newlines).  
+4. Redeploy after updating Render’s Environment tab so the backend can authenticate with Google.
+
+Project Structure
+-----------------
+```
+├── public/
+│   ├── *.html                  # Landing + dashboards
+│   ├── css/, js/               # Frontend assets
+│   └── assets/                 # Images, logos, favicon
+├── server/
+│   ├── index.js                # Express entry point
+│   ├── mysql.js                # DB connection
+│   ├── models/, middleware/, scripts/, tests/
+│   ├── package.json
+│   └── .env.example / .env
+├── migrations/*.sql            # Schema migrations
+├── docker-compose.yml          # Local MySQL helper
+└── README.md                   # You are here
+```
+
+---
+
+For questions or deployment support, open an issue or reach out via the project’s maintainer channel. Happy building! 🚀
