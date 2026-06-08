@@ -17,7 +17,8 @@
           "scrollbar-width",
           "scrollbar-width: none",
           "scrollbar-gutter",
-          "scrollbar-gutter: stable"
+          "scrollbar-gutter: stable",
+          "mask-image"
         ]
       }
     ]

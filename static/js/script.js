@@ -1,992 +1,164 @@
-(() => {
-  if (typeof document === "undefined") return;
-
-  const body = document.body;
-  if (!body || !body.classList.contains("page--resident")) return;
-
-  const API_BASE = body.getAttribute("data-api-base") || window.API_BASE || "/api";
-
-  const els = {
-    welcome: document.getElementById("userWelcome"),
-    propertySelect: document.getElementById("residentPropertySelect"),
-    propertySave: document.getElementById("residentPropertySave"),
-    propertyMsg: document.getElementById("residentPropertyMsg"),
-    propertyTag: document.getElementById("residentPropertyTag"),
-    cleaningPropertyId: document.getElementById("cleaningPropertyId"),
-    repairPropertyId: document.getElementById("repairPropertyId"),
-    cleaningSubmit: document.getElementById("cleaningSubmit"),
-    repairSubmit: document.getElementById("repairSubmit"),
-    cleaning: document.getElementById("myCleaning"),
-    repairs: document.getElementById("myRepairs"),
-    posts: document.getElementById("myPosts"),
-    kpiOpen: document.getElementById("kpiOpen"),
-    kpiProgress: document.getElementById("kpiInProgress"),
-    kpiDone: document.getElementById("kpiDone"),
-    kpiPosts: document.getElementById("kpiPosts"),
-    rollingUpdates: document.getElementById("rollingUpdates"),
-    year: document.getElementById("year"),
-  };
-
-  const formEndpoints = new Set(["/forms/cleaning", "/forms/repairs", "/forms/message"]);
-  const TOUR_KEY = "tour:resident:v1";
-
-  const state = {
-    user: null,
-    properties: [],
-    selectedPropertyId: "",
-    requests: [],
-    posts: [],
-    notifications: [],
-    loading: false,
-  };
-
-  const fmtDate = (value, withTime = false) => {
-    if (!value) return "";
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "";
-
-    return withTime ? date.toLocaleString() : date.toLocaleDateString();
-  };
-
-  async function fetchJSON(path, { method = "GET", body = null, headers = {} } = {}) {
-    const opts = {
-      method,
-      credentials: "include",
-      headers: Object.assign({ "Content-Type": "application/json" }, headers),
-      body: body ? JSON.stringify(body) : null,
-    };
-
-    const res = typeof window.fetchWithCsrf === "function"
-      ? await window.fetchWithCsrf(`${API_BASE}${path}`, { apiBase: API_BASE, ...opts })
-      : await fetch(`${API_BASE}${path}`, opts);
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      let message = text || `Request failed: ${res.status}`;
-
-      if (text) {
-        try {
-          const parsed = JSON.parse(text);
-          if (parsed?.error) message = parsed.error;
-        } catch (_) {}
-      }
-
-      throw new Error(message);
-    }
-
-    if (res.status === 204) return null;
-
-    return res.json();
-  }
-
-  async function ensureUser() {
-    const data = await fetchJSON("/auth/me");
-
-    if (!data?.user) throw new Error("unauthorized");
-
-    const allow = (body.getAttribute("data-required-role") || "")
-      .split(",")
-      .map((r) => r.trim().toLowerCase())
-      .filter(Boolean);
-
-    const role = (data.user.role || "").toLowerCase();
-
-    if (allow.length && !allow.includes(role)) {
-      throw new Error("unauthorized");
-    }
-
-    state.user = data.user;
-
-    if (els.welcome) {
-      const display =
-        data.user.profile?.displayName ||
-        data.user.email?.split("@")[0] ||
-        data.user.username ||
-        "Resident";
-
-      els.welcome.textContent = display;
-    }
-
-    return data.user;
-  }
-
-  function getPropertyById(propertyId) {
-    const id = String(propertyId || "").trim();
-
-    if (!id) return null;
-
-    return state.properties.find((p) => p.id === id) || null;
-  }
-
-  function setPropertyStatusMessage(message) {
-    if (!els.propertyMsg) return;
-
-    els.propertyMsg.textContent = message || "";
-  }
-
-  function updateFormPropertyBindings(propertyId) {
-    const id = String(propertyId || "").trim();
-
-    [els.cleaningPropertyId, els.repairPropertyId].forEach((input) => {
-      if (input) input.value = id;
-    });
-
-    const submitDisabled = !id;
-
-    if (els.cleaningSubmit) els.cleaningSubmit.disabled = submitDisabled;
-    if (els.repairSubmit) els.repairSubmit.disabled = submitDisabled;
-  }
-
-  function applySelectedProperty(propertyId) {
-    const id = String(propertyId || "").trim();
-    const property = getPropertyById(id);
-
-    state.selectedPropertyId = property ? property.id : "";
-
-    if (els.propertySelect) {
-      els.propertySelect.value = state.selectedPropertyId;
-    }
-
-    updateFormPropertyBindings(state.selectedPropertyId);
-
-    if (els.propertyTag) {
-      els.propertyTag.textContent = property ? property.label : "Not selected";
-    }
-
-    renderRollingUpdates();
-  }
-
-  function renderPropertyOptions() {
-    if (!els.propertySelect) return;
-
-    const current = state.selectedPropertyId;
-
-    const options = ['<option value="">Select property…</option>']
-      .concat(
-        state.properties.map((property) => (
-          `<option value="${property.id}">${escapeHtml(property.label)}</option>`
-        ))
-      );
-
-    els.propertySelect.innerHTML = options.join("");
-    els.propertySelect.value = current;
-  }
-
-  async function savePropertySelection({ showToast = false } = {}) {
-    const propertyId = String(els.propertySelect?.value || "").trim();
-
-    if (!propertyId) {
-      applySelectedProperty("");
-      setPropertyStatusMessage("Select your property before submitting requests.");
-      return;
-    }
-
-    const property = getPropertyById(propertyId);
-
-    if (!property) {
-      setPropertyStatusMessage("Selected property is invalid.");
-      return;
-    }
-
-    if (els.propertySave) els.propertySave.disabled = true;
-
-    try {
-      const data = await fetchJSON("/profile/property", {
-        method: "POST",
-        body: { propertyId },
-      });
-
-      const savedProperty = data?.property || property;
-
-      if (data?.user) {
-        state.user = data.user;
-      }
-
-      applySelectedProperty(savedProperty.id);
-      setPropertyStatusMessage("Property saved. New requests will use this address.");
-      renderRollingUpdates();
-
-      if (showToast && typeof window.showToast === "function") {
-        window.showToast("✅ Property updated");
-      }
-    } catch (err) {
-      setPropertyStatusMessage(err?.message || "Unable to save property.");
-      applySelectedProperty(state.user?.profile?.propertyId || "");
-
-      if (showToast && typeof window.showToast === "function") {
-        window.showToast("❌ Unable to save property");
-      }
-    } finally {
-      if (els.propertySave) els.propertySave.disabled = false;
-    }
-  }
-
-  async function loadProperties() {
-    const data = await fetchJSON("/properties");
-
-    state.properties = Array.isArray(data?.properties) ? data.properties : [];
-
-    const selectedPropertyId = String(
-      data?.selectedPropertyId ||
-      state.user?.profile?.propertyId ||
-      ""
-    ).trim();
-
-    state.selectedPropertyId = selectedPropertyId;
-
-    renderPropertyOptions();
-    applySelectedProperty(selectedPropertyId);
-
-    if (selectedPropertyId) {
-      setPropertyStatusMessage("Requests are locked to your selected property.");
-    } else {
-      setPropertyStatusMessage("Select your property before submitting requests.");
-    }
-
-    renderRollingUpdates();
-  }
-
-  async function loadActivity() {
-    if (state.loading) return;
-
-    state.loading = true;
-
-    try {
-      const data = await fetchJSON("/profile/activity");
-
-      state.requests = Array.isArray(data?.requests) ? data.requests : [];
-      state.posts = Array.isArray(data?.posts) ? data.posts : [];
-      state.notifications = Array.isArray(data?.notifications) ? data.notifications : [];
-
-      renderAll();
-    } catch (err) {
-      showError(err.message || "Unable to load activity");
-    } finally {
-      state.loading = false;
-    }
-  }
-
-  function showError(message) {
-    [els.cleaning, els.repairs, els.posts].forEach((list) => {
-      if (!list) return;
-      list.innerHTML = `<li class="muted">${escapeHtml(message)}</li>`;
-    });
-
-    if (els.rollingUpdates) {
-      els.rollingUpdates.innerHTML = `
-        <li class="rolling-update-card">
-          <span>Error</span>
-          <strong>Unable to load</strong>
-          <small>${escapeHtml(message)}</small>
-        </li>
-      `;
-    }
-  }
-
-  function renderAll() {
-    renderRequests();
-    renderPosts();
-    renderKpis();
-    renderNotifications();
-    renderRollingUpdates();
-  }
-
-  function renderRequests() {
-    if (!els.cleaning || !els.repairs) return;
-
-    const cleaning = state.requests.filter((r) => r.type === "cleaning");
-    const repairs = state.requests.filter((r) => r.type === "repair");
-
-    hydrateList(els.cleaning, cleaning, renderCleaningItem, () => emptyStateHtml({
-      title: "No cleaning requests yet.",
-      body: "Schedule your first clean and we will take it from there.",
-      action: { label: "New cleaning request", href: "#cleaningForm" },
-    }));
-
-    hydrateList(els.repairs, repairs, renderRepairItem, () => emptyStateHtml({
-      title: "No repair requests yet.",
-      body: "Report an issue and track progress from this dashboard.",
-      action: { label: "New repair request", href: "#repairForm" },
-    }));
-  }
-
-  function renderPosts() {
-    if (!els.posts) return;
-
-    hydrateList(els.posts, state.posts, renderPostItem, () => emptyStateHtml({
-      title: "No community posts yet.",
-      body: "Introduce yourself or ask a question to get the conversation started.",
-      action: { label: "Post to community", href: "#communityForm" },
-    }));
-  }
-
-  function getRequestCounts() {
-    return state.requests.reduce(
-      (acc, req) => {
-        const status = String(req.status || "open").toLowerCase();
-
-        if (status.includes("in")) {
-          acc.inProgress += 1;
-        } else if (status.includes("done") || status.includes("closed")) {
-          acc.done += 1;
-        } else {
-          acc.open += 1;
-        }
-
-        if (isOverdue(req)) {
-          acc.overdue += 1;
-        }
-
-        return acc;
-      },
-      {
-        open: 0,
-        inProgress: 0,
-        done: 0,
-        overdue: 0,
-      }
-    );
-  }
-
-  function renderKpis() {
-    const counts = getRequestCounts();
-
-    if (els.kpiOpen) els.kpiOpen.textContent = counts.open;
-    if (els.kpiProgress) els.kpiProgress.textContent = counts.inProgress;
-    if (els.kpiDone) els.kpiDone.textContent = counts.done;
-    if (els.kpiPosts) els.kpiPosts.textContent = state.posts.length;
-  }
-
-  function renderRollingUpdates() {
-    if (!els.rollingUpdates) return;
-
-    const counts = getRequestCounts();
-    const unread = state.notifications.filter((notif) => !notif.readAt).length;
-    const selectedProperty = getPropertyById(state.selectedPropertyId);
-
-    const updateCards = [
-      {
-        label: "Open Requests",
-        value: counts.open,
-        detail: "Awaiting landlord review",
-      },
-      {
-        label: "In Progress",
-        value: counts.inProgress,
-        detail: "Currently being handled",
-      },
-      {
-        label: "Completed",
-        value: counts.done,
-        detail: "Closed resident requests",
-      },
-      {
-        label: "Overdue",
-        value: counts.overdue,
-        detail: "Needs attention",
-      },
-      {
-        label: "Notifications",
-        value: unread,
-        detail: unread === 1 ? "Unread update" : "Unread updates",
-      },
-      {
-        label: "Community Posts",
-        value: state.posts.length,
-        detail: "Resident community activity",
-      },
-      {
-        label: "My Property",
-        value: selectedProperty ? selectedProperty.label : "Not selected",
-        detail: "Current request address",
-      },
-    ];
-
-    const notificationCards = state.notifications.slice(0, 4).map((notif) => ({
-      label: notif.readAt ? "Read Notification" : "New Notification",
-      value: notif.title || "Update",
-      detail: notif.body || "You have a dashboard update",
-    }));
-
-    const latestRequestCards = state.requests.slice(0, 3).map((req) => {
-      const status = String(req.status || "open").replace("_", " ");
-      const label = req.type === "cleaning" ? "Cleaning Request" : "Repair Request";
-      const value = req.type === "cleaning"
-        ? req.cleaningType || "Cleaning"
-        : req.issue || "Repair";
-
-      return {
-        label,
-        value,
-        detail: `Status: ${status}`,
-      };
-    });
-
-    const allCards = updateCards.concat(notificationCards, latestRequestCards);
-    const rollingCards = allCards.length ? allCards.concat(allCards) : updateCards.concat(updateCards);
-
-    els.rollingUpdates.innerHTML = rollingCards.map((card) => `
-      <li class="rolling-update-card">
-        <span>${escapeHtml(card.label)}</span>
-        <strong>${escapeHtml(card.value)}</strong>
-        <small>${escapeHtml(card.detail)}</small>
-      </li>
-    `).join("");
-  }
-
-  function renderNotifications() {
-    const list = document.getElementById("myNotifications");
-    const markAll = document.getElementById("notifMarkAll");
-
-    if (!list) return;
-
-    list.innerHTML = "";
-
-    if (!state.notifications.length) {
-      list.innerHTML = emptyStateHtml({
-        title: "No notifications yet.",
-        body: "We will show updates here when requests or posts change.",
-      });
-
-      if (markAll) markAll.disabled = true;
-      return;
-    }
-
-    if (markAll) markAll.disabled = false;
-
-    state.notifications.forEach((notif) => {
-      const li = document.createElement("li");
-      const isRead = Boolean(notif.readAt);
-
-      li.className = `notification-item${isRead ? " is-read" : ""}`;
-
-      li.innerHTML = `
-        <div class="notification-title">${escapeHtml(notif.title || "Update")}</div>
-        <div class="muted">${escapeHtml(notif.body || "")}</div>
-        <div class="notification-meta">${formatWhen(notif.createdAt)}${isRead ? " • Read" : ""}</div>
-      `;
-
-      li.dataset.id = notif.id;
-      list.appendChild(li);
-    });
-  }
-
-  function hydrateList(host, items, renderFn, emptyText) {
-    host.innerHTML = "";
-
-    if (!items.length) {
-      host.innerHTML = typeof emptyText === "function"
-        ? emptyText()
-        : `<li class="muted">${escapeHtml(emptyText)}</li>`;
-
-      return;
-    }
-
-    items.forEach((item) => {
-      const li = document.createElement("li");
-      li.innerHTML = renderFn(item);
-      host.appendChild(li);
-    });
-  }
-
-  function renderCleaningItem(req) {
-    const date = req.date || req.createdAt;
-    const type = req.cleaningType || req.type || "Cleaning";
-    const status = String(req.status || "open").toLowerCase();
-    const sla = formatSla(req);
-    const badgeClass = isOverdue(req) ? "status-overdue" : `status-${status}`;
-
-    return `
-      <div class="request-entry request-entry--cleaning">
-        <div class="request-entry-head">
-          <div class="request-entry-main">
-            <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong>
-            <span class="request-entry-property">${escapeHtml(req.propertyLabel || req.address || "Property not set")}</span>
-            <span class="request-entry-detail">${escapeHtml(type)}</span>
-            <span class="request-entry-detail">${escapeHtml(sla)}</span>
-          </div>
-          <div class="request-entry-status">
-            <span class="request-entry-time">${fmtDate(date)}</span>
-            <span class="badge ${badgeClass}">[${escapeHtml(status.replace("_", " "))}]</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderRepairItem(req) {
-    const when = req.createdAt || Date.now();
-    const status = String(req.status || "open").toLowerCase();
-    const issue = req.issue || "Repair request";
-    const sla = formatSla(req);
-    const photos = renderPhotoStrip(req.photos || []);
-    const badgeClass = isOverdue(req) ? "status-overdue" : `status-${status}`;
-
-    return `
-      <div class="request-entry request-entry--repair">
-        <div class="request-entry-head">
-          <div class="request-entry-main">
-            <strong>${escapeHtml(req.name || state.user?.username || "Resident")}</strong>
-            <span class="request-entry-property">${escapeHtml(req.propertyLabel || req.address || "Property not set")}</span>
-            <span class="request-entry-detail">${escapeHtml(issue)}</span>
-            <span class="request-entry-detail">${escapeHtml(sla)}</span>
-            ${photos}
-          </div>
-          <div class="request-entry-status">
-            <span class="request-entry-time">${fmtDate(when)}</span>
-            <span class="badge ${badgeClass}">[${escapeHtml(status.replace("_", " "))}]</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderPostItem(post) {
-    const when = fmtDate(post.createdAt || Date.now(), true);
-    const title = post.title || "Post";
-    const message = (post.message || "").slice(0, 240);
-
-    return `
-      <strong>${escapeHtml(title)}</strong><br/>
-      <span class="muted">${escapeHtml(when)}</span>
-      <p>${escapeHtml(message)}</p>
-    `;
-  }
-
-  function escapeHtml(value) {
-    const div = document.createElement("div");
-    div.textContent = value ?? "";
-    return div.innerHTML;
-  }
-
-  function formatWhen(value) {
-    if (!value) return "";
-
-    const date = new Date(value);
-
-    return Number.isNaN(date.getTime()) ? "" : date.toLocaleString();
-  }
-
-  function renderPhotoStrip(photos) {
-    if (!Array.isArray(photos) || !photos.length) return "";
-
-    const thumbs = photos.slice(0, 3).map((src) => {
-      const safe = encodeURI(src);
-      return `<img src="${safe}" alt="Repair photo" loading="lazy" />`;
-    }).join("");
-
-    return `<div class="photo-strip">${thumbs}</div>`;
-  }
-
-  function formatSla(req) {
-    const type = String(req.type || "").toLowerCase();
-    const hours = type === "repair" ? 72 : 48;
-    const created = new Date(req.createdAt || Date.now());
-
-    if (Number.isNaN(created.getTime())) return "";
-
-    const due = new Date(created.getTime() + hours * 60 * 60 * 1000);
-    const diffMs = due.getTime() - Date.now();
-    const abs = Math.abs(diffMs);
-    const days = Math.floor(abs / (24 * 60 * 60 * 1000));
-    const hoursLeft = Math.floor((abs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-    const parts = [];
-
-    if (days) parts.push(`${days}d`);
-
-    parts.push(`${hoursLeft}h`);
-
-    const label = parts.join(" ");
-
-    return diffMs >= 0 ? `SLA: ${label} left` : `SLA: ${label} overdue`;
-  }
-
-  function isOverdue(req) {
-    const status = String(req.status || "open").toLowerCase();
-
-    if (status.includes("done") || status.includes("closed")) {
-      return false;
-    }
-
-    const type = String(req.type || "").toLowerCase();
-    const hours = type === "repair" ? 72 : 48;
-    const created = new Date(req.createdAt || Date.now());
-
-    if (Number.isNaN(created.getTime())) return false;
-
-    return Date.now() > created.getTime() + hours * 60 * 60 * 1000;
-  }
-
-  function emptyStateHtml({ title, body, action }) {
-    const actionHtml = action?.href
-      ? `<a class="btn btn-ghost btn-small" href="${action.href}">${escapeHtml(action.label)}</a>`
-      : "";
-
-    return `
-      <li class="empty-state">
-        <div class="empty-title">${escapeHtml(title || "Nothing here yet.")}</div>
-        <p class="muted">${escapeHtml(body || "")}</p>
-        ${actionHtml}
-      </li>
-    `;
-  }
-
-  function listenForFormSuccess() {
-    window.addEventListener("baylis:form-success", (evt) => {
-      const endpoint = evt?.detail?.endpoint;
-
-      if (!endpoint || !formEndpoints.has(endpoint)) return;
-
-      loadActivity();
-    });
-  }
-
-  function setFormMessage(form, text, ok = false) {
-    const msg = form?.querySelector(".form-msg");
-
-    if (!msg) return;
-
-    msg.textContent = text || "";
-    msg.className = `form-msg ${ok ? "success" : "error"}`;
-
-    if (text) msg.focus?.();
-  }
-
-  async function submitServerForm(form) {
-    const action = form.getAttribute("action") || "";
-    const endpoint = action.replace(/^\/api/, "");
-
-    if (!formEndpoints.has(endpoint)) return;
-
-    const submitter = form.querySelector('button[type="submit"]');
-    const original = submitter?.textContent || "";
-
-    if (submitter) {
-      submitter.disabled = true;
-      submitter.textContent = "Saving...";
-    }
-
-    setFormMessage(form, "Saving...", true);
-
-    try {
-      const opts = {
-        method: form.method || "POST",
-        credentials: "include",
-        body: new FormData(form),
-      };
-
-      const res = typeof window.fetchWithCsrf === "function"
-        ? await window.fetchWithCsrf(endpoint, { apiBase: API_BASE, ...opts })
-        : await fetch(`${API_BASE}${endpoint}`, opts);
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        throw new Error(data?.error || `Request failed: ${res.status}`);
-      }
-
-      form.reset();
-      updateFormPropertyBindings(state.selectedPropertyId);
-      setFormMessage(form, "Saved successfully.", true);
-
-      window.dispatchEvent(new CustomEvent("baylis:form-success", {
-        detail: { endpoint, data },
-      }));
-
-      window.showToast?.("Saved successfully");
-    } catch (err) {
-      setFormMessage(form, err.message || "Unable to save.", false);
-      window.showToast?.("Unable to save");
-    } finally {
-      if (submitter) {
-        submitter.disabled = false;
-        submitter.textContent = original;
-      }
-    }
-  }
-
-  function bindServiceForms() {
-    ["cleaningForm", "repairForm", "communityForm"].forEach((id) => {
-      const form = document.getElementById(id);
-
-      form?.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        if ((id === "cleaningForm" || id === "repairForm") && !state.selectedPropertyId) {
-          setFormMessage(form, "Select your property before submitting requests.");
-          setPropertyStatusMessage("Select your property before submitting requests.");
-          return;
-        }
-
-        await submitServerForm(form);
-      });
-    });
-  }
-
-  function bindNotificationActions() {
-    const list = document.getElementById("myNotifications");
-    const markAll = document.getElementById("notifMarkAll");
-
-    if (list) {
-      list.addEventListener("click", async (event) => {
-        const li = event.target?.closest("li.notification-item");
-
-        if (!li || li.classList.contains("is-read")) return;
-
-        const id = Number(li.dataset.id);
-
-        if (!Number.isFinite(id)) return;
-
-        try {
-          await fetchJSON("/notifications/read", {
-            method: "POST",
-            body: { ids: [id] },
-          });
-
-          li.classList.add("is-read");
-
-          state.notifications = state.notifications.map((notif) => {
-            if (Number(notif.id) !== id) return notif;
-            return { ...notif, readAt: new Date().toISOString() };
-          });
-
-          renderRollingUpdates();
-        } catch (_) {}
-      });
-    }
-
-    if (markAll) {
-      markAll.addEventListener("click", async () => {
-        try {
-          await fetchJSON("/notifications/read-all", { method: "POST" });
-
-          state.notifications = state.notifications.map((n) => ({
-            ...n,
-            readAt: n.readAt || new Date().toISOString(),
-          }));
-
-          renderNotifications();
-          renderRollingUpdates();
-        } catch (_) {}
-      });
-    }
-  }
-
-  function bindPropertyActions() {
-    if (els.propertySelect) {
-      els.propertySelect.addEventListener("change", async () => {
-        applySelectedProperty(els.propertySelect.value);
-
-        if (!els.propertySelect.value) {
-          setPropertyStatusMessage("Select your property before submitting requests.");
-          return;
-        }
-
-        setPropertyStatusMessage("Saving property...");
-        await savePropertySelection();
-      });
-    }
-
-    if (els.propertySave) {
-      els.propertySave.addEventListener("click", async () => {
-        await savePropertySelection({ showToast: true });
-      });
-    }
-  }
-
-  function revealFormPanel(hashOrSelector) {
-    const selector = String(hashOrSelector || "").trim();
-
-    if (!selector || selector === "#") return;
-
-    const target = document.querySelector(selector);
-
-    if (!target) return;
-
-    const panel = target.closest("details");
-
-    if (panel) {
-      panel.open = true;
-    }
-  }
-
-  function bindPanelNavigation() {
-    revealFormPanel(window.location.hash);
-
-    window.addEventListener("hashchange", () => revealFormPanel(window.location.hash));
-
-    document.addEventListener("click", (event) => {
-      const anchor = event.target?.closest('a[href^="#"]');
-
-      if (!anchor) return;
-
-      const href = anchor.getAttribute("href");
-
-      if (!href || href === "#") return;
-
-      requestAnimationFrame(() => revealFormPanel(href));
-    });
-  }
-
-  function maybeStartTour() {
-    try {
-      if (localStorage.getItem(TOUR_KEY) === "done") return;
-    } catch {
-      return;
-    }
-
-    const steps = [
-      {
-        title: "Welcome to your resident dashboard",
-        body: "Track requests, post to the community, and manage everything in one place.",
-        target: ".header",
-      },
-      {
-        title: "Select your property first",
-        body: "Requests are restricted to your selected property to keep updates accurate.",
-        target: "#residentPropertySelect",
-      },
-      {
-        title: "Watch live updates",
-        body: "The rolling update strip keeps request counts, notifications, and property details visible.",
-        target: ".rolling-updates",
-      },
-      {
-        title: "Stay on top of requests",
-        body: "Your request history and community posts show up here.",
-        target: "#myCleaning",
-      },
-    ];
-
-    startTour(steps, TOUR_KEY);
-  }
-
-  function startTour(steps, storageKey) {
-    if (!steps.length) return;
-
-    let index = 0;
-
-    const overlay = document.createElement("div");
-    overlay.className = "tour-overlay";
-    overlay.innerHTML = `
-      <div class="tour-panel" role="dialog" aria-live="polite">
-        <div class="tour-kicker">Quick tour</div>
-        <div class="tour-title"></div>
-        <p class="tour-body muted"></p>
-        <div class="tour-controls">
-          <button type="button" class="btn btn-ghost btn-small" data-action="back">Back</button>
-          <button type="button" class="btn btn-ghost btn-small" data-action="skip">Skip</button>
-          <button type="button" class="btn btn-small" data-action="next">Next</button>
-        </div>
-        <div class="tour-progress"></div>
-      </div>
-    `;
-
-    const titleEl = overlay.querySelector(".tour-title");
-    const bodyEl = overlay.querySelector(".tour-body");
-    const progressEl = overlay.querySelector(".tour-progress");
-    const backBtn = overlay.querySelector('[data-action="back"]');
-    const nextBtn = overlay.querySelector('[data-action="next"]');
-
-    const clearHighlight = () => {
-      document.querySelectorAll(".tour-highlight").forEach((el) => {
-        el.classList.remove("tour-highlight");
-      });
-    };
-
-    const finish = () => {
-      clearHighlight();
-      overlay.remove();
-
-      try {
-        localStorage.setItem(storageKey, "done");
-      } catch {}
-    };
-
-    const renderStep = () => {
-      const step = steps[index];
-
-      if (!step) {
-        finish();
-        return;
-      }
-
-      titleEl.textContent = step.title || "";
-      bodyEl.textContent = step.body || "";
-      progressEl.textContent = `Step ${index + 1} of ${steps.length}`;
-      backBtn.disabled = index === 0;
-      nextBtn.textContent = index === steps.length - 1 ? "Finish" : "Next";
-
-      clearHighlight();
-
-      if (step.target) {
-        revealFormPanel(step.target);
-
-        const target = document.querySelector(step.target);
-
-        if (target) {
-          target.classList.add("tour-highlight");
-          target.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-    };
-
-    overlay.addEventListener("click", (event) => {
-      const action = event.target?.getAttribute("data-action");
-
-      if (!action) return;
-
-      if (action === "skip") {
-        finish();
-        return;
-      }
-
-      if (action === "back" && index > 0) {
-        index -= 1;
-        renderStep();
-        return;
-      }
-
-      if (action === "next") {
-        if (index >= steps.length - 1) {
-          finish();
-          return;
-        }
-
-        index += 1;
-        renderStep();
-      }
-    });
-
-    document.body.appendChild(overlay);
-    renderStep();
-  }
-
-  async function boot() {
-    try {
-      if (els.year) {
-        els.year.textContent = String(new Date().getFullYear());
-      }
-
-      await ensureUser();
-      await loadProperties();
-      await loadActivity();
-
-      listenForFormSuccess();
-      bindServiceForms();
-      bindPropertyActions();
-      bindPanelNavigation();
-      maybeStartTour();
-      bindNotificationActions();
-    } catch {
-      window.location.replace("/login");
-    }
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
-  }
+(function () {
+  function ready(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn, { once: true });
+    } else {
+      fn();
+    }
+  }
+
+  ready(() => {
+    const body = document.body;
+    if (!body) return;
+
+    const hamburgerBtn = document.querySelector("[data-hamb]");
+    const navLinks = document.querySelector("[data-links]");
+
+    function getApiBase() {
+      return window.API_BASE || body.getAttribute("data-api-base") || "/api";
+    }
+
+    function updateNavHeight() {
+      if (!navLinks) return;
+
+      if (navLinks.dataset.open === "true") {
+        navLinks.style.maxHeight = `${navLinks.scrollHeight}px`;
+      }
+    }
+
+    function setNavOpen(open) {
+      if (!hamburgerBtn || !navLinks) return;
+
+      navLinks.classList.toggle("show", Boolean(open));
+      navLinks.dataset.open = String(Boolean(open));
+      hamburgerBtn.setAttribute("aria-expanded", String(Boolean(open)));
+      navLinks.style.maxHeight = open ? `${navLinks.scrollHeight}px` : "0px";
+    }
+
+    function closeNav() {
+      setNavOpen(false);
+    }
+
+    function toggleNav() {
+      const isOpen = navLinks?.dataset.open === "true";
+      setNavOpen(!isOpen);
+    }
+
+    function setHidden(selector, hidden) {
+      document.querySelectorAll(selector).forEach((el) => {
+        el.hidden = Boolean(hidden);
+        el.classList.toggle("nav-hidden", Boolean(hidden));
+      });
+    }
+
+    function setLogoutLink() {
+      document.querySelectorAll("#logoutBtn").forEach((link) => {
+        link.href = "/logout";
+        link.textContent = "Logout";
+      });
+    }
+
+    async function getCurrentUser() {
+      try {
+        const response = await fetch(`${getApiBase()}/auth/me`, {
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) return null;
+
+        const data = await response.json().catch(() => null);
+        return data?.user || null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function applyAuthAwareNavigation() {
+      setLogoutLink();
+
+      const user = await getCurrentUser();
+
+      const loginSelector = '[data-test="nav-login"]';
+      const registerSelector = '[data-test="nav-register"]';
+      const logoutSelector = "#logoutBtn";
+      const residentSelector = '[data-test="nav-resident"]';
+      const landlordSelector = '[data-test="nav-landlord"]';
+
+      if (!user) {
+        body.classList.remove("is-authenticated");
+        body.removeAttribute("data-current-role");
+
+        setHidden(loginSelector, false);
+        setHidden(registerSelector, false);
+        setHidden(logoutSelector, true);
+        setHidden(residentSelector, false);
+        setHidden(landlordSelector, false);
+
+        updateNavHeight();
+        return;
+      }
+
+      const role = String(user.role || "").toLowerCase();
+
+      body.classList.add("is-authenticated");
+      body.dataset.currentRole = role;
+
+      setHidden(loginSelector, true);
+      setHidden(registerSelector, true);
+      setHidden(logoutSelector, false);
+
+      if (role === "resident") {
+        setHidden(residentSelector, false);
+        setHidden(landlordSelector, true);
+      } else if (role === "landlord") {
+        setHidden(residentSelector, true);
+        setHidden(landlordSelector, false);
+      }
+
+      updateNavHeight();
+    }
+
+    hamburgerBtn?.addEventListener("click", (event) => {
+      event.preventDefault();
+      toggleNav();
+    });
+
+    navLinks?.addEventListener("click", (event) => {
+      const link = event.target.closest("a");
+      if (!link) return;
+
+      if (window.matchMedia("(max-width: 1024px)").matches) {
+        closeNav();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (!navLinks) return;
+
+      if (window.matchMedia("(min-width: 1025px)").matches) {
+        navLinks.classList.remove("show");
+        navLinks.dataset.open = "false";
+        navLinks.style.maxHeight = "";
+        hamburgerBtn?.setAttribute("aria-expanded", "false");
+      } else {
+        updateNavHeight();
+      }
+    });
+
+    document.addEventListener("keyup", (event) => {
+      if (event.key === "Escape") {
+        closeNav();
+      }
+    });
+
+    const yearEl = document.getElementById("year");
+    if (yearEl) {
+      yearEl.textContent = String(new Date().getFullYear());
+    }
+
+    applyAuthAwareNavigation();
+  });
 })();
