@@ -1,3 +1,4 @@
+# pyright: reportMissingImports=false
 import json
 import os
 import re
@@ -17,9 +18,9 @@ from flask import (
     session,
     flash,
     url_for,
-)
-from werkzeug.middleware.proxy_fix import ProxyFix
-from werkzeug.security import check_password_hash, generate_password_hash
+)  # type: ignore[reportMissingImports]
+from werkzeug.middleware.proxy_fix import ProxyFix  # type: ignore[reportMissingImports]
+from werkzeug.security import check_password_hash, generate_password_hash  # type: ignore[reportMissingImports]
 
 
 BASE_DIR = Path(__file__).resolve().parent

@@ -109,6 +109,26 @@
       </article>
     </section>
 
+    <section class="rolling-updates" aria-label="Live resident updates">
+  <div class="rolling-updates__header">
+    <div>
+      <p class="eyebrow">Live Updates</p>
+      <h2 class="h3">Resident Snapshot</h2>
+    </div>
+    <span class="badge">Auto rolling</span>
+  </div>
+
+  <div class="rolling-updates__viewport">
+    <ul id="rollingUpdates" class="rolling-updates__track" aria-live="polite">
+      <li class="rolling-update-card">
+        <span>Loading</span>
+        <strong>Live updates</strong>
+        <small>Your dashboard summary is loading…</small>
+      </li>
+    </ul>
+  </div>
+</section>
+
     <section class="portal-grid portal-grid--resident" aria-label="Resident workspace">
       <div class="portal-column portal-column--primary">
         <article class="dashboard-card portal-card" aria-label="Property selection">
