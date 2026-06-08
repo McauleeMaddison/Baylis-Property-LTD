@@ -1,0 +1,15 @@
+.git
+.github
+.DS_Store
+.env
+.env.*
+.pycache
+__pycache__
+*.pyc
+.venv
+venv
+node_modules
+dist
+build
+coverage
+*.log
