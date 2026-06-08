@@ -223,19 +223,6 @@
   <script>
     (function() {
       const y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
-      const hamb = document.querySelector('[data-hamb]');
-      const links = document.querySelector('[data-links]');
-      if (hamb && links) {
-        const setOpen = (open) => {
-          hamb.setAttribute('aria-expanded', String(open));
-          links.dataset.open = String(open);
-          document.body.classList.toggle('nav-open', open);
-        };
-        hamb.addEventListener('click', () => setOpen(links.dataset.open !== 'true'));
-        links.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
-        document.addEventListener('click', e => { if (!links.contains(e.target) && !hamb.contains(e.target)) setOpen(false); });
-      }
     })();
   </script>
 </body>

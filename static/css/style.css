@@ -2270,11 +2270,11 @@ color: rgba(255, 255, 255, 0.78);
 }
 
 @media (max-width: 1100px) {
-  .dashboard-kpi-grid {
+  .dashboard-kpi-grid {
 grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-  .dashboard-main-grid {
+  .dashboard-main-grid {
 grid-template-columns: 1fr;
 }
 
@@ -2601,5 +2601,224 @@ grid-template-columns: 1fr;
 
   .rolling-updates__track {
     animation: none;
+  }
+}
+
+/* Final shared app polish: navigation, logged-in user state, and portal assets. */
+[hidden],
+.nav-hidden {
+  display: none !important;
+}
+
+.nav-inner {
+  position: relative;
+}
+
+.nav-user-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  max-width: 220px;
+  padding: .44rem .72rem;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #1f3349;
+  font-size: .86rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.dark .nav-user-pill {
+  background: rgba(15, 23, 34, 0.78);
+  border-color: rgba(148, 163, 184, 0.24);
+  color: #e5edf6;
+}
+
+.hamb {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.portal-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 300px);
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.portal-hero-copy {
+  min-width: 0;
+  align-self: center;
+}
+
+.portal-visual {
+  position: relative;
+  min-height: 172px;
+  margin: 0;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.portal-visual img {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  object-fit: cover;
+}
+
+.portal-visual::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 52%;
+  background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.72));
+}
+
+.portal-visual figcaption {
+  position: absolute;
+  left: .78rem;
+  right: .78rem;
+  bottom: .72rem;
+  z-index: 1;
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.portal-hero-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-start;
+}
+
+.portal-hero-actions .btn {
+  min-width: 0;
+}
+
+.portal-tools {
+  align-items: end;
+}
+
+.portal-shell .submission-log li,
+.portal-shell .post-feed li {
+  position: relative;
+  border-radius: 12px;
+  border-color: #dbe5ef;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.035);
+}
+
+.portal-shell .submission-log li::before,
+.portal-shell .post-feed li::before {
+  content: "";
+  position: absolute;
+  inset: .7rem auto .7rem 0;
+  width: 3px;
+  border-radius: 999px;
+  background: #2f6d8f;
+}
+
+.portal-shell .submission-log li.muted::before,
+.portal-shell .post-feed li.muted::before {
+  background: #cbd5e1;
+}
+
+.portal-shell .request-entry--cleaning,
+.portal-shell .request-entry--repair {
+  border-left: 0;
+  padding-left: 0;
+}
+
+@media (min-width: 960px) {
+  .portal-tools {
+    position: sticky;
+    top: calc(var(--header-height) + .7rem);
+    z-index: 5;
+  }
+}
+
+@media (max-width: 1024px) {
+  body.is-nav-open {
+    overflow: hidden;
+  }
+
+  .nav-links {
+    position: fixed;
+    top: calc(var(--header-height) + .45rem);
+    left: .75rem;
+    right: .75rem;
+    width: auto;
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .nav-links.show {
+    max-height: min(72vh, 560px);
+    opacity: 1;
+    pointer-events: auto;
+    overflow-y: auto;
+  }
+
+  .nav-links a,
+  .nav-links button,
+  .nav-links .nav-user-pill {
+    width: 100%;
+    justify-content: flex-start;
+    opacity: 1;
+    transform: none;
+    animation: none !important;
+  }
+
+  .nav-links .nav-user-pill {
+    max-width: none;
+    border-radius: 10px;
+    background: #eef5fb;
+  }
+}
+
+@media (max-width: 760px) {
+  .portal-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-visual {
+    min-height: 190px;
+  }
+
+  .portal-hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .portal-hero-actions .btn {
+    width: 100%;
+  }
+
+  .portal-tools {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .nav-links {
+    left: .5rem;
+    right: .5rem;
+  }
+
+  .portal-visual {
+    min-height: 168px;
   }
 }

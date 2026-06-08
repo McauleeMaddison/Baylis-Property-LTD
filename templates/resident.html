@@ -66,7 +66,7 @@
           <a href="login.html" data-test="nav-login">Login</a>
           <a href="register.html" data-test="nav-register">Register</a>
         
-          <a href="login.html" id="logoutBtn" data-role="resident,landlord">Logout</a>
+          <a href="/logout" id="logoutBtn" data-role="resident,landlord">Logout</a>
         </div>
       </div>
     </nav>
@@ -74,11 +74,15 @@
 
   <main role="main" id="content" class="container page-main portal-shell portal-shell--resident" tabindex="-1">
     <header class="header portal-hero">
-      <div>
+      <div class="portal-hero-copy">
         <p class="eyebrow">Resident Operations</p>
         <h1 class="h1">Resident Portal</h1>
         <p class="muted">Welcome, <strong id="userWelcome">Resident</strong>. Submit service requests, track progress, and share updates with your building team.</p>
       </div>
+      <figure class="portal-visual portal-visual--resident">
+        <img src="assets/IMG_4434.PNG" alt="Baylis Property resident portal brand artwork" loading="lazy" />
+        <figcaption>Resident workspace</figcaption>
+      </figure>
       <div class="portal-hero-actions">
         <a class="btn secondary btn-small" href="#cleaningForm">Cleaning request</a>
         <a class="btn secondary btn-small" href="#repairForm">Repair request</a>
