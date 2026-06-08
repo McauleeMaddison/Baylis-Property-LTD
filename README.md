@@ -18,6 +18,7 @@ The aim of the project is to provide a modern, professional property management 
 
 - Residents can register, sign in, select their property, create maintenance requests, track status updates, and post community messages.
 - Landlords can sign in, manage properties, view all resident requests, update request statuses, review notifications, and inspect an audit log.
+- Landlord registration is invitation-code protected so public users cannot create landlord accounts without approval.
 - The application demonstrates full-stack behaviour with persistent storage, server-side routing, role-based access, CRUD operations, tests, deployment configuration, and security notes.
 
 ## Project Structure
@@ -53,7 +54,8 @@ Baylis-Property/
 
 ## Key Features
 
-- Resident and landlord login/registration
+- Resident self-registration
+- Invitation-code protected landlord registration
 - Role-based page and API access
 - Persistent SQLite data storage
 - Resident property selection
@@ -68,6 +70,7 @@ Baylis-Property/
 - Security audit log for landlord review
 - Mobile-friendly responsive interface
 - Docker and Gunicorn production deployment support
+- Demo accounts are opt-in through `SEED_DEMO_USERS=true` and should not be enabled for public production use
 
 ## User Requirements
 
@@ -85,7 +88,7 @@ Baylis-Property/
 
 | ID | Requirement | Evidence |
 | --- | --- | --- |
-| FR1 | Users can register and log in with resident or landlord roles. | `app.py` auth routes and `tests/test_app.py`. |
+| FR1 | Residents can self-register; landlord accounts require a private invitation code. | `app.py` auth routes and `tests/test_app.py`. |
 | FR2 | Passwords are stored securely using hashing. | Werkzeug password hashing in `app.py`. |
 | FR3 | Residents can select their property. | `/api/profile/property` and resident portal. |
 | FR4 | Residents can create cleaning requests. | `/api/forms/cleaning` and SQLite `service_requests`. |
@@ -233,6 +236,8 @@ http://127.0.0.1:5000
 
 ## Test Accounts
 
+These accounts are seeded for automated tests and can be enabled for local demonstration by setting `SEED_DEMO_USERS=true`. Do not enable demo accounts on a public production deployment.
+
 | Username | Password | Role |
 | --- | --- | --- |
 | `resident123` | `resident123` | Resident |
@@ -249,7 +254,7 @@ PYTHONPYCACHEPREFIX=.pycache python3 -m unittest discover -s tests -v
 Latest local result:
 
 ```text
-Ran 6 tests in 12.738s
+Ran 8 tests in 17.477s
 OK
 ```
 
@@ -277,6 +282,9 @@ Latest local result: passed.
 | Property admin | Add, rename, and delete a property. | Property list updates. |
 | Community | Create a post and add a comment. | Feed shows post and comment. |
 | Protected routes | Visit `/resident.html` while logged out. | User is redirected to login. |
+| Landlord page security | Log in as `resident123` and visit `/landlord.html`. | User is redirected away from the landlord portal. |
+| Landlord API security | Log in as `resident123` and call landlord-only APIs. | API returns `403 Forbidden`. |
+| Landlord registration security | Try to register a landlord without the private code. | Registration is refused. |
 
 ## Render Deployment
 
@@ -299,7 +307,12 @@ Recommended Render environment variables:
 ```text
 FORCE_HTTPS=true
 TRUST_PROXY=true
+LANDLORD_REGISTRATION_CODE=<private landlord invitation code>
+SEED_DEMO_USERS=false
 ```
+
+If `LANDLORD_REGISTRATION_CODE` is not set, public landlord self-registration is disabled. Existing landlord accounts can still sign in.
+If the app was previously deployed with demo accounts, change those passwords, remove those accounts, or reset the database before public use.
 
 If a Render persistent disk is attached, set:
 
@@ -327,6 +340,8 @@ Deployment steps:
 | Session security | Flask session cookie uses `HTTPOnly` and `SameSite=Lax`. |
 | HTTPS cookies | Enabled when `FORCE_HTTPS=true`. |
 | Role-based access | Landlord-only routes check user role server-side. |
+| Landlord registration | New landlord accounts require `LANDLORD_REGISTRATION_CODE`; residents cannot create landlord accounts publicly. |
+| Demo account safety | Demo users are not seeded unless `SEED_DEMO_USERS=true` or the automated test suite is running. |
 | Protected pages | Resident, landlord, community, profile, and settings pages redirect unauthenticated users. |
 | Audit trail | Login, profile, request, property, and community workflow events are logged. |
 | CSRF support | `/api/security/csrf` issues a CSRF token cookie used by the front-end helper. |
@@ -350,6 +365,8 @@ This project now includes stronger evidence for a Level 5 web application submis
 - Role-based resident and landlord workflows
 - CRUD behaviour
 - Automated tests
+- Tests proving residents cannot access landlord pages/APIs
+- Invitation-code protected landlord registration
 - Deployment configuration
 - Security notes
 - User requirements

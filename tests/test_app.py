@@ -17,6 +17,7 @@ class BaylisAppTestCase(unittest.TestCase):
             TESTING=True,
             DATABASE=self.db_path,
             SECRET_KEY="test-secret-key",
+            LANDLORD_REGISTRATION_CODE="",
             WTF_CSRF_ENABLED=False,
         )
         with baylis_app.app.app_context():
@@ -43,6 +44,58 @@ class BaylisAppTestCase(unittest.TestCase):
             json={"username": "resident123", "password": "resident123", "role": "landlord"},
         )
         self.assertEqual(wrong_role.status_code, 403)
+
+    def test_resident_cannot_access_landlord_page_or_apis(self):
+        self.login()
+
+        landlord_page = self.client.get("/landlord.html")
+        self.assertEqual(landlord_page.status_code, 302)
+        self.assertIn("/dashboard", landlord_page.headers["Location"])
+
+        audit_res = self.client.get("/api/security/audit")
+        self.assertEqual(audit_res.status_code, 403)
+
+        property_create = self.client.post("/api/properties", json={"label": "Blocked Property"})
+        self.assertEqual(property_create.status_code, 403)
+
+    def test_landlord_registration_requires_invitation_code(self):
+        blocked = self.client.post(
+            "/api/auth/register",
+            json={
+                "username": "public-landlord",
+                "email": "public-landlord@example.com",
+                "password": "securepass123",
+                "role": "landlord",
+            },
+        )
+        self.assertEqual(blocked.status_code, 403)
+
+        baylis_app.app.config["LANDLORD_REGISTRATION_CODE"] = "invite-123"
+
+        wrong_code = self.client.post(
+            "/api/auth/register",
+            json={
+                "username": "wrong-code-landlord",
+                "email": "wrong-code-landlord@example.com",
+                "password": "securepass123",
+                "role": "landlord",
+                "landlordCode": "bad-code",
+            },
+        )
+        self.assertEqual(wrong_code.status_code, 403)
+
+        created = self.client.post(
+            "/api/auth/register",
+            json={
+                "username": "approved-landlord",
+                "email": "approved-landlord@example.com",
+                "password": "securepass123",
+                "role": "landlord",
+                "landlordCode": "invite-123",
+            },
+        )
+        self.assertEqual(created.status_code, 201)
+        self.assertEqual(created.get_json()["user"]["role"], "landlord")
 
     def test_resident_request_persists_in_sqlite(self):
         self.login()

@@ -20,6 +20,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const usernameEl = document.getElementById('regUsername');
   const emailEl    = document.getElementById('regEmail');
   const roleEl     = document.getElementById('regRole');
+  const landlordCodeField = document.getElementById('landlordCodeField');
+  const landlordCodeEl = document.getElementById('landlordCode');
   const pwEl       = document.getElementById('regPassword');
   const confirmEl  = document.getElementById('regConfirm');
   const acceptTos  = document.getElementById('acceptTos');
@@ -42,6 +44,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
   bindToggle(togglePw, [pwEl, confirmEl]);
 
+  const syncLandlordCodeField = () => {
+    const needsCode = roleEl?.value === 'landlord';
+    if (landlordCodeField) landlordCodeField.hidden = !needsCode;
+    if (landlordCodeEl) {
+      landlordCodeEl.required = needsCode;
+      if (!needsCode) {
+        landlordCodeEl.value = '';
+        setInvalid(landlordCodeEl, false);
+      }
+    }
+  };
+
+  roleEl?.addEventListener('change', syncLandlordCodeField);
+  syncLandlordCodeField();
+
   pwEl?.addEventListener('input', () => {
     const score = scorePassword(pwEl.value);
     const { width, label, color } = meter(score);
@@ -59,6 +76,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const username = (usernameEl?.value || '').trim();
     const email    = (emailEl?.value || '').trim();
     const role     = roleEl?.value || '';
+    const landlordCode = (landlordCodeEl?.value || '').trim();
     const password = pwEl?.value || '';
     const confirmed   = confirmEl?.value || '';
     const agreed   = !!acceptTos?.checked;
@@ -67,12 +85,14 @@ window.addEventListener('DOMContentLoaded', () => {
     setInvalid(usernameEl, !username || username.length < 3);
     setInvalid(emailEl, !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
     setInvalid(roleEl, !role);
+    setInvalid(landlordCodeEl, role === 'landlord' && !landlordCode);
     setInvalid(pwEl, !password || password.length < 8);
     setInvalid(confirmEl, password !== confirmed);
 
     if (!username || username.length < 3) bad = true;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) bad = true;
     if (!role) bad = true;
+    if (role === 'landlord' && !landlordCode) bad = true;
     if (!password || password.length < 8) bad = true;
     if (password !== confirmed) bad = true;
     if (!agreed) return setMsg('Please accept the Terms & Privacy.');
@@ -82,6 +102,7 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
       const headers = { 'Content-Type':'application/json' };
       const payload = { username, email, password, role };
+      if (role === 'landlord') payload.landlordCode = landlordCode;
       const fetcher = typeof window.fetchWithCsrf === 'function'
         ? window.fetchWithCsrf
         : (url, opts) => {

@@ -42,6 +42,8 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-for-product
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = env_flag("FORCE_HTTPS", False)
+app.config["LANDLORD_REGISTRATION_CODE"] = os.environ.get("LANDLORD_REGISTRATION_CODE", "").strip()
+app.config["SEED_DEMO_USERS"] = env_flag("SEED_DEMO_USERS", False)
 
 if env_flag("TRUST_PROXY", False):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
@@ -211,25 +213,27 @@ def init_database():
             """,
             (property_id, label, now, now),
         )
-    for username, email, role, password, display_name, property_id in DEFAULT_USERS:
-        db.execute(
-            """
-            INSERT OR IGNORE INTO users (
-                username, email, role, password_hash, display_name, property_id, created_at, updated_at
+
+    if app.config.get("TESTING") or app.config.get("SEED_DEMO_USERS"):
+        for username, email, role, password, display_name, property_id in DEFAULT_USERS:
+            db.execute(
+                """
+                INSERT OR IGNORE INTO users (
+                    username, email, role, password_hash, display_name, property_id, created_at, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    username,
+                    email,
+                    role,
+                    generate_password_hash(password, method="pbkdf2:sha256"),
+                    display_name,
+                    property_id,
+                    now,
+                    now,
+                ),
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                username,
-                email,
-                role,
-                generate_password_hash(password, method="pbkdf2:sha256"),
-                display_name,
-                property_id,
-                now,
-                now,
-            ),
-        )
     db.commit()
 
 
@@ -335,6 +339,21 @@ def require_role(*roles):
     if not user or user["role"] not in roles:
         return None
     return user
+
+
+def validate_landlord_registration(role, provided_code):
+    if role != "landlord":
+        return None
+
+    expected_code = str(app.config.get("LANDLORD_REGISTRATION_CODE") or "").strip()
+    if not expected_code:
+        return "Landlord registration is invitation-only. Please contact Baylis Property LTD."
+
+    candidate = str(provided_code or "").strip()
+    if not candidate or not secrets.compare_digest(candidate, expected_code):
+        return "Invalid landlord registration code."
+
+    return None
 
 
 def log_event(event, severity="info", user=None, metadata=None):
@@ -658,9 +677,16 @@ def api_register():
     email = data.get("email", "").strip()
     role = data.get("role", "").strip().lower()
     password = data.get("password", "")
+    landlord_code = data.get("landlordCode") or data.get("landlord_code") or ""
 
     if not username or not email or role not in VALID_ROLES or not password:
         return jsonify({"error": "Username, email, valid role and password are required."}), 400
+
+    landlord_error = validate_landlord_registration(role, landlord_code)
+    if landlord_error:
+        log_event("landlord_registration_blocked", "warning", metadata={"username": username, "email": email})
+        get_db().commit()
+        return jsonify({"error": landlord_error}), 403
 
     if find_user_row(username) or find_user_row(email):
         return jsonify({"error": "That username or email is already registered."}), 409
@@ -1338,9 +1364,17 @@ def register():
         role = request.form.get("role", "").strip().lower()
         password = request.form.get("password", "")
         confirm_password = request.form.get("confirm_password", "")
+        landlord_code = request.form.get("landlordCode", "")
 
         if not username or not email or role not in VALID_ROLES or not password:
             flash("All fields are required.", "error")
+            return redirect(url_for("register"))
+
+        landlord_error = validate_landlord_registration(role, landlord_code)
+        if landlord_error:
+            flash(landlord_error, "error")
+            log_event("landlord_registration_blocked", "warning", metadata={"username": username, "email": email})
+            get_db().commit()
             return redirect(url_for("register"))
 
         if password != confirm_password:
