@@ -2,6 +2,14 @@
 
 Baylis Property LTD is a mobile-friendly property management web application for residents and landlords. It uses Python, Flask, SQLite, HTML templates, CSS, and JavaScript to support resident service requests, landlord request management, property administration, community posts, notifications, profile settings, and audit evidence.
 
+## Live Deployment
+
+Live site: <https://baylis-property-ltd.onrender.com>
+
+## Repository
+
+GitHub repository: <https://github.com/McauleeMaddison/Baylis-Property-LTD>
+
 This README is the single project documentation file for assessment and deployment evidence.
 
 ## Project Aim
@@ -205,19 +213,19 @@ The landlord portal is an operational dashboard for managing resident requests a
 ## How To Run Locally
 
 1. Open a terminal in the project folder.
-2. Install dependencies:
+1. Install dependencies:
 
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-3. Start the Flask backend:
+1. Start the Flask backend:
 
 ```bash
 python3 app.py
 ```
 
-4. Open the application:
+1. Open the application:
 
 ```text
 http://127.0.0.1:5000

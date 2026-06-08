@@ -1,21 +1,152 @@
 {% extends 'layout.html' %}
+
 {% block title %}Dashboard - Baylis Property LTD{% endblock %}
+
 {% block content %}
-<section class="hero">
-  <h1>Welcome, {{ user.username }}!</h1>
-  <p>Your role is <strong>{{ user.role }}</strong>.</p>
-  <div class="hero-actions">
-    <a class="btn btn-secondary" href="{{ url_for('logout') }}">Sign out</a>
-  </div>
+<section
+  class="dashboard-upgrade"
+  data-dashboard-page
+  data-user-role="{{ user.role }}"
+  data-username="{{ user.username }}"
+>
+  <section class="dashboard-hero-card">
+    <div class="dashboard-hero-copy">
+      <p class="dashboard-eyebrow">Baylis Property LTD Control Centre</p>
+      <h1>
+        Welcome back,
+        <span id="dashDisplayName">{{ user.profile.displayName if user.profile else user.username }}</span>
+      </h1>
+      <p id="dashboardSubtitle">
+        Loading your workspace summary…
+      </p>
+
+      <div class="dashboard-role-row">
+        <span class="dashboard-role-pill" id="dashRole">{{ user.role|capitalize }}</span>
+        <span class="dashboard-small-note">Python Flask backend • SQLite database • Role-based access</span>
+      </div>
+    </div>
+
+    <div class="dashboard-hero-actions">
+      {% if user.role == 'landlord' %}
+        <a class="btn" id="primaryPortalBtn" href="{{ url_for('render_static_page', page='landlord') }}">
+          Open Landlord Portal
+        </a>
+      {% else %}
+        <a class="btn" id="primaryPortalBtn" href="{{ url_for('render_static_page', page='resident') }}">
+          Open Resident Portal
+        </a>
+      {% endif %}
+
+      <a class="btn btn-ghost" href="{{ url_for('render_static_page', page='community') }}">
+        Community
+      </a>
+
+      <a class="btn btn-ghost" href="{{ url_for('render_static_page', page='settings') }}">
+        Settings
+      </a>
+    </div>
+  </section>
+
+  <section class="dashboard-kpi-grid" aria-label="Dashboard summary metrics">
+    <article class="dashboard-kpi-card">
+      <span class="dashboard-kpi-label">Open</span>
+      <strong id="dashOpen">—</strong>
+      <small>Awaiting action</small>
+    </article>
+
+    <article class="dashboard-kpi-card">
+      <span class="dashboard-kpi-label">In progress</span>
+      <strong id="dashProgress">—</strong>
+      <small>Currently active</small>
+    </article>
+
+    <article class="dashboard-kpi-card">
+      <span class="dashboard-kpi-label">Completed</span>
+      <strong id="dashDone">—</strong>
+      <small>Resolved requests</small>
+    </article>
+
+    <article class="dashboard-kpi-card">
+      <span class="dashboard-kpi-label">Overdue</span>
+      <strong id="dashOverdue">—</strong>
+      <small>Needs attention</small>
+    </article>
+
+    <article class="dashboard-kpi-card">
+      <span class="dashboard-kpi-label">Unread</span>
+      <strong id="dashUnread">—</strong>
+      <small>Notifications</small>
+    </article>
+
+    <article class="dashboard-kpi-card">
+      <span class="dashboard-kpi-label">Properties</span>
+      <strong id="dashProperties">—</strong>
+      <small>Linked records</small>
+    </article>
+  </section>
+
+  <section class="dashboard-main-grid">
+    <article class="dashboard-panel dashboard-panel-large">
+      <div class="dashboard-section-header">
+        <div>
+          <p class="dashboard-eyebrow">Live workspace</p>
+          <h2 id="dashListTitle">Recent activity</h2>
+        </div>
+        <p id="dashListHint">Latest records from the Flask API.</p>
+      </div>
+
+      <ul class="dashboard-activity-list" id="dashList" aria-live="polite">
+        <li class="dashboard-empty">Loading dashboard activity…</li>
+      </ul>
+    </article>
+
+    <aside class="dashboard-side-stack">
+      <article class="dashboard-panel">
+        <div class="dashboard-section-header">
+          <div>
+            <p class="dashboard-eyebrow">Quick actions</p>
+            <h2 id="dashActionsTitle">What would you like to do?</h2>
+          </div>
+        </div>
+
+        <div class="dashboard-action-grid" id="dashActions">
+          <a class="dashboard-action-card" href="{{ url_for('dashboard') }}">
+            Loading actions…
+          </a>
+        </div>
+      </article>
+
+      <article class="dashboard-panel">
+        <div class="dashboard-section-header">
+          <div>
+            <p class="dashboard-eyebrow">Operational insight</p>
+            <h2 id="dashInsightTitle">Summary</h2>
+          </div>
+        </div>
+
+        <div class="dashboard-insight-box" id="dashInsight">
+          Loading live summary…
+        </div>
+      </article>
+
+      <article class="dashboard-panel">
+        <div class="dashboard-section-header">
+          <div>
+            <p class="dashboard-eyebrow">Assessment evidence</p>
+            <h2>Unit 3 evidence</h2>
+          </div>
+        </div>
+
+        <ul class="dashboard-evidence-list" id="dashEvidence">
+          <li>Python Flask backend</li>
+          <li>SQLite persistent database</li>
+          <li>Role-based dashboard behaviour</li>
+          <li>CRUD workflow evidence</li>
+        </ul>
+      </article>
+    </aside>
+  </section>
 </section>
 
-<section class="features">
-  <h2>Dashboard</h2>
-  <p>This dashboard is served by the Python Flask backend and demonstrates active session handling.</p>
-  <ul>
-    <li>Secure login with hashed passwords</li>
-    <li>Session storage for user state</li>
-    <li>Template rendering with Flask</li>
-  </ul>
-</section>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
 {% endblock %}
