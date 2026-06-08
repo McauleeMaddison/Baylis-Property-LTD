@@ -20,40 +20,13 @@
       return window.API_BASE || body.getAttribute("data-api-base") || "/api";
     }
 
-    function ensureUserPill() {
-      if (!navLinks) return null;
-
-      let pill = navLinks.querySelector(".nav-user-pill");
-      if (pill) return pill;
-
-      pill = document.createElement("span");
-      pill.className = "nav-user-pill";
-      pill.hidden = true;
-      pill.setAttribute("aria-live", "polite");
-
-      const logoutLink = navLinks.querySelector("#logoutBtn");
-      navLinks.insertBefore(pill, logoutLink || null);
-      return pill;
-    }
-
-    function setUserPill(user) {
-      const pill = ensureUserPill();
-      if (!pill) return;
-
+    function setCurrentUser(user) {
       if (!user) {
-        pill.hidden = true;
-        pill.textContent = "";
         body.removeAttribute("data-current-user");
         return;
       }
 
-      const displayName = user.profile?.displayName || user.username || user.email?.split("@")[0] || "User";
-      const role = String(user.role || "member").toLowerCase();
-      const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
-
-      pill.hidden = false;
-      pill.textContent = `${displayName} · ${roleLabel}`;
-      body.dataset.currentUser = displayName;
+      body.dataset.currentUser = user.profile?.displayName || user.username || user.email?.split("@")[0] || "User";
     }
 
     function updateNavHeight() {
@@ -139,7 +112,7 @@
       if (!user) {
         body.classList.remove("is-authenticated");
         body.removeAttribute("data-current-role");
-        setUserPill(null);
+        setCurrentUser(null);
 
         setHidden(loginSelector, false);
         setHidden(registerSelector, false);
@@ -155,7 +128,7 @@
 
       body.classList.add("is-authenticated");
       body.dataset.currentRole = role;
-      setUserPill(user);
+      setCurrentUser(user);
 
       setHidden(loginSelector, true);
       setHidden(registerSelector, true);
@@ -236,7 +209,7 @@
       };
     }
 
-    setUserPill(null);
+    setCurrentUser(null);
     setNavOpen(false);
     applyAuthAwareNavigation();
   });
