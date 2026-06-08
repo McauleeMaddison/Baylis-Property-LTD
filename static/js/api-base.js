@@ -20,7 +20,7 @@
     return match ? decodeURIComponent(match[1]) : '';
   };
 
-  const resolveBase = () => (window.API_BASE || '/api').replace(/\\/$/, '');
+  const resolveBase = () => (window.API_BASE || '/api').replace(/\/$/, '');
 
   const refreshCsrf = async (base) => {
     try {
@@ -31,8 +31,12 @@
 
   const fetchWithCsrf = async (path, options = {}) => {
     const { apiBase, retry = true, ...rest } = options;
-    const base = (apiBase || resolveBase()).replace(/\\/$/, '');
-    const url = path.startsWith('http') ? path : `${base}${path.startsWith('/') ? path : `/${path}`}`;
+    const base = (apiBase || resolveBase()).replace(/\/$/, '');
+    const url = path.startsWith('http')
+      ? path
+      : (path === base || path.startsWith(`${base}/`))
+        ? path
+        : `${base}${path.startsWith('/') ? path : `/${path}`}`;
     const csrf = readCookie(CSRF_COOKIE_NAME);
     const headers = Object.assign({}, rest.headers || {}, csrf ? { 'X-CSRF-Token': csrf } : {});
     const request = Object.assign({ credentials: 'include' }, rest, { headers });

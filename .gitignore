@@ -18,3 +18,7 @@ coverage/
 server/.env
 server/.env.production
 uploads/
+instance/
+*.sqlite3
+*.sqlite
+*.db

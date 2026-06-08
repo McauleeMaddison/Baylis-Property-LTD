@@ -1,33 +1,32 @@
 # Baylis Property LTD
 
-This project uses Python and Flask for the backend.
+Baylis Property LTD is a mobile-friendly property management web application for residents and landlords. It uses Python, Flask, SQLite, HTML templates, CSS, and JavaScript to support resident service requests, landlord request management, community posts, notifications, profile settings, and audit evidence.
 
-Baylis Property LTD is a small property management web application for residents and landlords. It demonstrates a Python Flask server, HTML templates, static CSS and JavaScript assets, session-based login, registration, profile updates, and simple in-memory request/message data.
+## Level 5 Evidence Pack
 
-## Unit 3 Requirement Evidence
+The project now includes assessment evidence in `docs/`:
 
-The Unit 3 resubmission requires a Python backend. This repository now contains the required Flask project structure:
+| File | Evidence |
+| --- | --- |
+| `docs/user-requirements.md` | User groups, functional requirements, non-functional requirements, and acceptance criteria. |
+| `docs/database-schema.md` | Persistent database tables, relationships, and CRUD coverage. |
+| `docs/testing-evidence.md` | Automated test evidence, syntax checks, and manual testing checklist. |
+| `docs/deployment-and-security.md` | Render deployment settings, environment variables, and security notes. |
+| `docs/landlord-workflow.md` | Landlord operational workflow evidence. |
+
+## Project Structure
 
 ```text
 Baylis-Property/
 ├── app.py
+├── Dockerfile
 ├── requirements.txt
+├── docs/
+├── tests/
 ├── templates/
 ├── static/
 └── README.md
 ```
-
-## What Each Part Does
-
-`app.py` is the Python backend. It creates the Flask application, defines the website routes, handles login and registration, stores the current user in the Flask session, protects API routes, and returns HTML or JSON responses.
-
-`requirements.txt` lists the Python package needed to run the backend. At the moment the project only needs Flask.
-
-`templates/` contains the HTML pages rendered or served by Flask. Examples include `index.html`, `login.html`, `register.html`, `dashboard.html`, `resident.html`, `landlord.html`, `profile.html`, `privacy.html`, and `terms.html`.
-
-`static/` contains frontend assets used by the templates. This includes CSS, JavaScript, images, logos, and the favicon.
-
-`README.md` explains how to install, run, and evidence the Python/Flask backend for assessment.
 
 ## Technology Used
 
@@ -35,15 +34,34 @@ Baylis-Property/
 | --- | --- |
 | Backend language | Python |
 | Backend framework | Flask |
+| Production server | Gunicorn |
+| Database | SQLite |
 | Templates | HTML with Jinja2 support |
 | Frontend assets | CSS and JavaScript |
 | Authentication | Flask sessions and Werkzeug password hashing |
-| Data storage | In-memory Python dictionaries and lists |
+| Deployment | Docker-ready for Render |
+| Tests | Python `unittest` |
 
-## How To Run The Project
+## Key Features
+
+- Resident and landlord login/registration
+- Role-based page and API access
+- Persistent SQLite database
+- Resident property selection
+- Cleaning and repair request creation
+- Landlord request queue, filters, and status updates
+- Property create, read, update, and delete workflow
+- Community posts and comments
+- Notifications and mark-read actions
+- Profile/contact/preference updates
+- Session list/revoke support
+- Security audit log for landlord review
+- Mobile-friendly responsive interface
+
+## How To Run Locally
 
 1. Open a terminal in the project folder.
-2. Install the Python dependency:
+2. Install dependencies:
 
 ```bash
 python3 -m pip install -r requirements.txt
@@ -55,10 +73,16 @@ python3 -m pip install -r requirements.txt
 python3 app.py
 ```
 
-4. Open the application in a browser:
+4. Open the application:
 
 ```text
 http://127.0.0.1:5000
+```
+
+The app creates a local SQLite database at:
+
+```text
+instance/baylis.sqlite3
 ```
 
 ## Test Accounts
@@ -68,56 +92,81 @@ http://127.0.0.1:5000
 | `resident123` | `resident123` | Resident |
 | `landlord123` | `landlord123` | Landlord |
 
-## Main Flask Routes
+## Main Routes
 
 | Route | Purpose |
 | --- | --- |
 | `/` | Home page |
 | `/login` | Login page and form handler |
 | `/register` | Registration page and form handler |
-| `/logout` | Clears the current Flask session |
 | `/dashboard` | Protected dashboard page |
-| `/resident.html` | Resident portal page |
-| `/landlord.html` | Landlord portal page |
-| `/community.html` | Community page |
-| `/profile.html` | Profile page |
-| `/api/auth/me` | Returns the logged-in user as JSON |
+| `/resident.html` | Protected resident portal |
+| `/landlord.html` | Protected landlord portal |
+| `/community.html` | Protected community page |
+| `/profile.html` | Protected profile page |
+| `/settings.html` | Protected settings page |
+| `/api/auth/me` | Current user JSON |
 | `/api/auth/login` | JSON login endpoint |
 | `/api/auth/register` | JSON registration endpoint |
-| `/api/auth/logout` | JSON logout endpoint |
-| `/api/forms/cleaning` | Stores a cleaning request |
-| `/api/forms/repairs` | Stores a repair request |
-| `/api/forms/message` | Stores a community message |
-| `/profile/about` | Updates profile information |
-| `/profile/contact` | Updates contact information |
-| `/profile/prefs` | Updates user preferences |
-| `/profile/avatar` | Handles avatar upload requests |
-| `/profile/activity` | Returns the current user's requests and posts |
+| `/api/properties` | Property list/create endpoint |
+| `/api/requests` | Request list endpoint |
+| `/api/forms/cleaning` | Cleaning request endpoint |
+| `/api/forms/repairs` | Repair request endpoint |
+| `/api/community` | Community post endpoint |
+| `/api/notifications` | Notification endpoint |
+| `/api/security/audit` | Landlord audit log endpoint |
 
-## How The Backend Works
+## Testing
 
-1. Flask starts in `app.py`.
-2. The user visits a route such as `/login`.
-3. Flask renders the matching template from `templates/`.
-4. When the user submits a form, Flask reads the request data.
-5. Passwords are checked with Werkzeug password hashing.
-6. A successful login stores the username in the Flask session.
-7. Protected routes check the session before returning private data.
-8. Static files are loaded from `static/`.
-
-## Assessment Notes
-
-The active backend for this resubmission is Python and Flask. Run `python3 app.py` and visit `http://127.0.0.1:5000` to review the Flask version.
-
-The data is stored in memory for this diploma submission, so newly registered users, requests, and messages reset when the Flask server restarts. This keeps the repair simple and makes the Python backend clear for Unit 3.
-
-## Quick Verification
-
-Use these commands to check the backend:
+Run automated tests:
 
 ```bash
-python3 -m py_compile app.py
-python3 app.py
+PYTHONPYCACHEPREFIX=.pycache python3 -m unittest discover -s tests -v
 ```
 
-If the server starts and the login/register pages load, the required Python Flask backend is present.
+Run syntax checks:
+
+```bash
+PYTHONPYCACHEPREFIX=.pycache python3 -m py_compile app.py tests/test_app.py
+for f in static/js/*.js; do node --check "$f" || exit 1; done
+```
+
+Latest local result:
+
+```text
+Ran 6 tests in 12.817s
+OK
+```
+
+## Render Deployment
+
+The repository includes a `Dockerfile` for Render.
+
+Required Render environment variable:
+
+```text
+SECRET_KEY=<long random secret>
+```
+
+Recommended Render environment variables:
+
+```text
+FORCE_HTTPS=true
+TRUST_PROXY=true
+```
+
+If a Render persistent disk is attached, set:
+
+```text
+DATABASE_PATH=/data/baylis.sqlite3
+```
+
+Then deploy with:
+
+```text
+Manual Deploy -> Clear build cache & deploy
+```
+
+## Assessment Note
+
+This is now stronger than a static MVP because it includes persistent data storage, role-based workflows, CRUD behaviour, automated tests, deployment configuration, security notes, and assessment documentation. It should still be reviewed against the exact marking rubric before final submission.

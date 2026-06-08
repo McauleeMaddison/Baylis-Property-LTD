@@ -416,6 +416,67 @@
     });
   }
 
+  function setFormMessage(form, text, ok = false) {
+    const msg = form?.querySelector(".form-msg");
+    if (!msg) return;
+    msg.textContent = text || "";
+    msg.className = `form-msg ${ok ? "success" : "error"}`;
+    if (text) msg.focus?.();
+  }
+
+  async function submitServerForm(form) {
+    const action = form.getAttribute("action") || "";
+    const endpoint = action.replace(/^\/api/, "");
+    if (!formEndpoints.has(endpoint)) return;
+    const submitter = form.querySelector('button[type="submit"]');
+    const original = submitter?.textContent || "";
+    if (submitter) {
+      submitter.disabled = true;
+      submitter.textContent = "Saving...";
+    }
+    setFormMessage(form, "Saving...", true);
+    try {
+      const opts = {
+        method: form.method || "POST",
+        credentials: "include",
+        body: new FormData(form),
+      };
+      const res = typeof window.fetchWithCsrf === "function"
+        ? await window.fetchWithCsrf(endpoint, { apiBase: API_BASE, ...opts })
+        : await fetch(`${API_BASE}${endpoint}`, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `Request failed: ${res.status}`);
+      form.reset();
+      updateFormPropertyBindings(state.selectedPropertyId);
+      setFormMessage(form, "Saved successfully.", true);
+      window.dispatchEvent(new CustomEvent("baylis:form-success", { detail: { endpoint, data } }));
+      window.showToast?.("Saved successfully");
+    } catch (err) {
+      setFormMessage(form, err.message || "Unable to save.", false);
+      window.showToast?.("Unable to save");
+    } finally {
+      if (submitter) {
+        submitter.disabled = false;
+        submitter.textContent = original;
+      }
+    }
+  }
+
+  function bindServiceForms() {
+    ["cleaningForm", "repairForm", "communityForm"].forEach((id) => {
+      const form = document.getElementById(id);
+      form?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if ((id === "cleaningForm" || id === "repairForm") && !state.selectedPropertyId) {
+          setFormMessage(form, "Select your property before submitting requests.");
+          setPropertyStatusMessage("Select your property before submitting requests.");
+          return;
+        }
+        await submitServerForm(form);
+      });
+    });
+  }
+
   function bindNotificationActions() {
     const list = document.getElementById("myNotifications");
     const markAll = document.getElementById("notifMarkAll");
@@ -584,6 +645,7 @@
       await loadProperties();
       await loadActivity();
       listenForFormSuccess();
+      bindServiceForms();
       bindPropertyActions();
       bindPanelNavigation();
       maybeStartTour();
